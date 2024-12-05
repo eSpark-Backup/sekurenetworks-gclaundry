@@ -1,0 +1,78 @@
+### Send GET request
+GET {{base_url}}/kiosk
+Authorization: Bearer {{auth_token}}
+
+### Send GET One request
+GET {{base_url}}/kiosk/63b5c4b2e8af15d6c32f715f
+Authorization: Bearer {{auth_token}}
+
+### Send GET request
+GET {{base_url}}/kiosk/byKioskIds?kioskIds=63b5c4b2e8af15d6c32f715f
+Authorization: Bearer {{auth_token}}
+
+### Send POST request
+POST {{base_url}}/kiosk
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "kioskName": "Test Kiosk",
+  "customerId": "637fd95f396ed3590bd12576",
+  "email": "tebvohjer@gmail.com",
+  "macId": "944db18ab4fe16e",
+  "communicationStatus": true,
+  "errorStatus": true,
+  "deployedLocation": "Full Sail University",
+  "address": {
+    "address": "Krushi Sarathi Colony",
+    "city": "Parbhani",
+    "state": "MH",
+    "country": "IN",
+    "zip": "431401"
+  },
+  "locationTag":  "Parbhani",
+  "onSiteContact": {
+    "firstName": "Leila",
+    "lastName": "Lanini",
+    "phone": "(575) 693-8457",
+    "email": "redcica@gmail.com"
+  },
+  "onSiteContactSecondary": {
+    "firstName": "Leila",
+    "lastName": "Lanini",
+    "phone": "(575) 693-8457",
+    "email": "redcica@gmail.com"
+  },
+  "inventoryScented": 1,
+  "inventoryUnscented": 30,
+  "screenSize": "1440x2560",
+  "sbcHWVersion": "51ce1",
+  "sbcSWVersion": "ff6da",
+  "motorHWVersion": "f94b4",
+  "motorSWVersion": "10052",
+  "checkInTime": "2022-08-27T19:17:38.547Z",
+  "time": [
+    "1 week ago"
+  ]
+}
+
+
+### Send PUT request
+PATCH {{base_url}}/kiosk/6390fb8f489578d0ed0fadbd
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{"kioskName":"a3af70a1","kioskId":"bdb05a564b","customerId":"6390fb8f489578d0ed0fad4e","communicationStatus":true,"deployedLocation":"The University of North Florida Coggin College of Business","locationTag":"46c773","address":{"address":"1134 Toupu Avenue","city":"Lijaznoj","state":"WY","country":"MU","zip":"26376"},"inventoryScented":41,"inventoryUnscented":77,"owner":"Ethan Parri","email":"hilka@gmail.com","macId":"a3008ae07599c54","screenSize":"1440x2560","sbcHWVersion":"36968","sbcSWVersion":"44cc0","motorHWVersion":"ade8f","motorSWVersion":"c0872","onSiteContact":{"firstName":"Katie","lastName":"Magherini","phone":"(905) 555-5555","email":"omoevfi@gmail.com"},"onSiteContactSecondary":{"firstName":"Katie 2","lastName":"Magherini 2","phone":"(721) 857-7897","email":"omoevfi@gmail.com"},"isActive":true}
+
+### Send PUT request
+DELETE {{base_url}}/kiosk/637e5d650e4828d4332b187b
+Authorization: Bearer {{auth_token}}
+
+### Activate / DeActivate Kiosk
+PATCH {{base_url}}/kiosk/6387b0d50cc49a15b5783fad/activate
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "isActive": false
+}
