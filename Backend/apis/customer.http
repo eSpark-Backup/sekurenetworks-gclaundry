@@ -1,0 +1,40 @@
+### Send GET request
+GET {{base_url}}/customers
+Authorization: Bearer {{auth_token}}
+
+### Send GET request
+GET {{base_url}}/customers/637fd95f396ed3590bd12576
+Authorization: Bearer {{auth_token}}
+
+### Send POST request
+POST {{base_url}}/customers
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "schoolName": "Modern English School",
+    "customerFirstName": "Amol",
+    "customerLastName": "Badhe",
+    "customerEmail": "amol@gmail.com",
+    "customerPhone": "(722) 856-7587",
+    "customerAddress": "1751 Pisdut Manor",
+    "customerCity": "Wiuzkuv",
+    "customerState": "AZ",
+    "customerCountry": "NG",
+    "customerZip": "19282",
+    "kioskIds": []
+}
+
+### Send PUT request
+PATCH {{base_url}}/customers/637fd95f396ed3590bd12576
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+  "customerFirstName": "Amol 2",
+  "customerLastName": "Badhe 2"
+}
+
+### Send PUT request
+DELETE {{base_url}}/customers/637fe961e44df4510263e872
+Authorization: Bearer {{auth_token}}
