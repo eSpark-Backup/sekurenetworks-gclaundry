@@ -27,7 +27,7 @@ export class CustomersService {
     const [data, count] = await this.prisma.$transaction([
       this.prisma.customer.findMany({
         where: { schoolName: { contains: name, mode: "insensitive" } },
-        include: { kiosks: {where: { isDeleted: false}, include: { customer: { select: { firstName: true, id: true } }, onSiteContact: true }, } },
+        include: { kiosks: {where: { isDeleted: false}, include: { customer: { select: { firstName: true, phone: true , id: true } }, onSiteContact: true }, } },
         skip,
         take
       }),
