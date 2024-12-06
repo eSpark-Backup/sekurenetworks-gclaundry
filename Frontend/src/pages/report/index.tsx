@@ -2,6 +2,8 @@ import apiService from "@/api/apiService";
 import DatePickerField from "@/components/DatePicker";
 import MainCard from "@/components/MainCard";
 import ScrollX from "@/components/ScrollX";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 import GencoTable from "@/components/Table";
 import { Customer } from "@/types/customer";
 import { IReport } from "@/types/IReports";
@@ -18,12 +20,12 @@ import { useRequest } from "ahooks";
 import { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
 import { columns, reportRow } from "./dto/columns";
-import { log } from "console";
+import { error, log } from "console";
 
 const ClientsList = () => {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [kiosks, setKiosks] = useState<KIOSK[]>([]);
-  const [reports, setReports] = useState<IReport[]>([]);
+  const [reports, setReports] = useState<{ count: number; data: IReport[] }>({ count: 0, data: [] });
   const [loadingKiskos, setLoadingKiosks] = useState(false);
   const [filters, setFilters] = useState<{
     kiosks: KIOSK[];
@@ -50,7 +52,7 @@ const ClientsList = () => {
       debounceWait: 1000,
       onSuccess: ({ data }) => {
         setKiosks(data.data);
-        setLoadingKiosks(false); 
+        setLoadingKiosks(false);
       },
       onError: () => {
         setLoadingKiosks(false);
@@ -70,30 +72,83 @@ const ClientsList = () => {
   useEffect(() => {
     (async () => {
       await getCustomers({});
-      await getReports({});
+      await getReports({
+        from: filters.from?.toISOString(),
+        to: filters.to?.toISOString(),
+        customerId: filters.customer?.id,
+        kiosks: filters.kiosks.map((e) => e.macId),
+        skip: filters.pageIndex,
+        take: filters.pageSize,
+      });
     })();
   }, []);
 
 
   useEffect(() => {
-      // i want to refetch the reports when the filters change
-      const fetchReports = async () => {
-        let kiosks = filters.kiosks.map((e) => e.macId);
-        await getReports({
-          from: filters.from?.toISOString(),
-          to: filters.to?.toISOString(),
-          customerId: filters.customer?.id,
-          kiosks,
-          like: filters.pageIndex,
-          skip: filters.pageSize,
-        });
-      };
+    // i want to refetch the reports when the filters change
+    const fetchReports = async () => {
+      let kiosks = filters.kiosks.map((e) => e.macId);
+      await getReports({
+        from: filters.from?.toISOString(),
+        to: filters.to?.toISOString(),
+        customerId: filters.customer?.id,
+        kiosks,
+        skip: filters.pageIndex,
+        take: filters.pageSize,
+      });
+    };
 
 
-      fetchReports();
-      
-      
+    fetchReports();
+
+
   }, [filters.pageIndex, filters.pageSize]);
+
+
+  const ApplyFilers = async () => {
+    let kiosks = filters.kiosks.map((e) => e.macId);
+
+    await getReports({
+      from: filters.from?.toISOString(),
+      to: filters.to?.toISOString(),
+      customerId: filters.customer?.id,
+      kiosks,
+      skip: filters.pageIndex,
+      take: filters.pageSize,
+    });
+  }
+
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+
+    // Add title
+    doc.setFontSize(18);
+    doc.text("Reports", 14, 20);
+
+    // Format the data for the table
+    const tableData = reports.data.map((report, index) => [
+      index + 1,
+      report.name,
+      report.scented,
+      report.unscented,
+      report.surveys.reduce((sum, item) => sum + item.count, 0),
+      report.env.reduce((sum, item) => sum + item.count, 0),
+      report.success,
+      report.failed,
+    ]);
+
+    // Add table
+    autoTable(doc, {
+      startY: 30,
+      head: [["#", "Kiosk Name", "Scented Dispensed", "Scented Dispensed", "Total Questions Asked", "Total Enviromental Message Displayed", "Total Succesfull Transactions", "Total Failed Transactions"]], // Replace with actual column headers
+      body: tableData,
+    });
+
+    // Save the PDF
+    doc.save("reports.pdf");
+  };
+
 
 
   return (
@@ -101,7 +156,7 @@ const ClientsList = () => {
       <Box sx={{ p: 2, borderRadius: 2 }}>
         <Grid container spacing={2} display={"flex"} alignItems={"center"}>
           {/* First Grid Item (Filter Inputs - Responsive 12 columns on mobile, 9 on larger screens) */}
-          <Grid item xs={12} md={9}>
+          <Grid item xs={12} md={8}>
             <Grid container spacing={2}>
               {/* First Row: 2 Input Boxes */}
               <Grid item xs={12} sm={6}>
@@ -140,9 +195,10 @@ const ClientsList = () => {
                   onInputChange={async (e: any) =>
                     await getKiosks({ name: e.target.value })
                   }
-                  disabled={kiosks.length == 0  || loadingKiskos}
+                  disabled={kiosks.length == 0 || loadingKiskos || !filters.customer}
                   options={kiosks}
                   getOptionLabel={(option) => option.name}
+
                   onChange={(_: any, kiosks) =>
                     setFilters({ ...filters, kiosks })
                   }
@@ -150,7 +206,10 @@ const ClientsList = () => {
                   limitTags={1}
                   multiple
                   renderInput={(params) => (
-                    <TextField {...params} placeholder={"Kiosks"} />
+                    <TextField {...params} placeholder={
+                      loadingKiskos ? "Loading Kiosks..." : "Select Kiosks"
+                    }
+                    />
                   )}
                   renderTags={(value, getTagProps) =>
                     value
@@ -159,9 +218,9 @@ const ClientsList = () => {
                         <Chip
                           {...getTagProps({ index })}
                           label={`${option.name}${value.length > 1
-                              ? ` & ${value.length - 1 ? `+${value.length - 1}` : ""
-                              }`
-                              : ""
+                            ? ` & ${value.length - 1 ? `+${value.length - 1}` : ""
+                            }`
+                            : ""
                             }`}
                         />
                       ))
@@ -187,39 +246,63 @@ const ClientsList = () => {
           </Grid>
 
           {/* Second Grid Item (Filter Options - Responsive 12 columns on mobile, 3 on larger screens) */}
-          <Grid item xs={12} md={3}>
-            <Box display="flex" gap={2}>
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  let kiosks = filters.kiosks.map((e) => e.macId);
-                  await getReports({
-                    from: filters.from?.toISOString(),
-                    to: filters.to?.toISOString(),
-                    customerId: filters.customer?.id,
-                    kiosks,
-                  });
-                }}
-              >
-                Generate Report
-              </Button>
-              <Button
-                variant="contained"
-                onClick={async () => {
-                  setFilters({
-                    kiosks: [],
-                    customer: null,
-                    from: null,
-                    to: null,
-                    pageIndex: 0,
-                    pageSize: 10,
-                  });
-                  setKiosks([]);
-                  setReports([]);
-                }}
-              >
-                Clear Filter
-              </Button>
+          <Grid item xs={12} md={4}>
+
+            <Box
+              sx={{
+                display: "flex",
+                gap: 2,
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
+              <Box display="flex"
+                gap={2}>
+
+                <Button
+                  variant="contained"
+                  onClick={ApplyFilers}
+                >
+                  Apply
+                </Button>
+                <Button
+                  variant="contained"
+                  disabled={filters.kiosks.length == 0 && !filters.customer && !filters.from && !filters.to}
+                  onClick={async () => {
+                    setFilters({
+                      kiosks: [],
+                      customer: null,
+                      from: null,
+                      to: null,
+                      pageIndex: 0,
+                      pageSize: 10,
+                    });
+                    setKiosks([]);
+                    getReports({
+                      from: null,
+                      to: null,
+                      customerId: null,
+                      kiosks: [],
+                      take: 10,
+                      skip: 0,
+                    });
+                  }}
+                >
+                  Clear
+                </Button>
+
+
+              </Box>
+
+              <Box>
+                <Button
+                  variant="contained"
+                  disabled={reports.data.length == 0  || loading}
+                  onClick={exportToPDF}
+                >
+                  Export PDF
+                </Button>
+              </Box>
             </Box>
           </Grid>
         </Grid>
@@ -233,12 +316,12 @@ const ClientsList = () => {
             pageIndex: filters.pageIndex || 0,
             pageSize: filters.pageSize || 10,
           }}
-          onPageChange={async (e) => setFilters({ ...filters,  ...e })}
-          count={reports.length}
+          onPageChange={async (e) => setFilters({ ...filters, ...e })}
+          count={reports.count}
           isLoading={loading}
           enableExpand={true}
           expandComponent={reportRow}
-          data={reports}
+          data={reports.data}
         />
       </ScrollX>
     </MainCard>

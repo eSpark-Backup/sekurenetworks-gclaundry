@@ -16,6 +16,7 @@ interface Msg {
 
 
 export interface IReport {
+    column2: any;
     name: string;
     scented: number;
     unscented: number;
