@@ -68,7 +68,7 @@ const ClientsList = () => {
     }
   );
 
-  // only used to refresh kiosks list
+
   useEffect(() => {
     (async () => {
       await getCustomers({});
@@ -120,33 +120,75 @@ const ClientsList = () => {
 
 
   const exportToPDF = () => {
-    const doc = new jsPDF();
+    const doc = new jsPDF({ orientation: "landscape" });
 
     // Add title
     doc.setFontSize(18);
     doc.text("Reports", 14, 20);
 
+    const tableHeaders = [
+      "Kiosk Name",
+      "Scented Dispensed",
+      "Unscented Dispensed",
+      "Total Questions Asked",
+      "Total Environmental Message Displayed",
+      "Total Successful Transactions",
+      "Total Failed Transactions",
+    ];
+
+
+    if (filters.from || filters.to) {
+      if (filters.to) tableHeaders.unshift("To");
+      if (filters.from) tableHeaders.unshift("From");
+    }
+
+    tableHeaders.unshift("#");
+
     // Format the data for the table
-    const tableData = reports.data.map((report, index) => [
-      index + 1,
-      report.name,
-      report.scented,
-      report.unscented,
-      report.surveys.reduce((sum, item) => sum + item.count, 0),
-      report.env.reduce((sum, item) => sum + item.count, 0),
-      report.success,
-      report.failed,
-    ]);
+    const tableData = reports.data.map((report, index) => {
+      const rowData = [
+        report.name,
+        report.scented,
+        report.unscented,
+        report.surveys.reduce((sum, item) => sum + item.count, 0),
+        report.env.reduce((sum, item) => sum + item.count, 0),
+        report.success,
+        report.failed,
+      ];
+
+      if (filters.from || filters.to) {
+        if (filters.to) rowData.unshift(filters.to?.toDate().toLocaleDateString());
+        if (filters.from) rowData.unshift(filters.from?.toDate().toLocaleDateString());
+      }
+
+      rowData.unshift(index + 1);
+
+      return rowData;
+    });
+
 
     // Add table
     autoTable(doc, {
       startY: 30,
-      head: [["#", "Kiosk Name", "Scented Dispensed", "Scented Dispensed", "Total Questions Asked", "Total Enviromental Message Displayed", "Total Succesfull Transactions", "Total Failed Transactions"]], // Replace with actual column headers
+      head: [tableHeaders],
       body: tableData,
+      headStyles: { fillColor: [255, 7, 25] },
     });
 
     // Save the PDF
-    doc.save("reports.pdf");
+    // Genetrating name 
+    // const fileNameParts = [
+    //   "Reports", // Base name
+    //   filters.customer?.schoolName, // Add customer name if it exists
+    //   filters.kiosks.length > 0 ? filters.kiosks.map(e => e.name).join("_") : null, // Add kiosk names if they exist
+    //   filters.from ? filters.from.toDate().toLocaleDateString() : null, // Add "from" date if it exists
+    //   filters.to ? filters.to.toDate().toLocaleDateString() : null, // Add "to" date if it exists
+    // ];
+
+    // const fileName = fileNameParts.filter(Boolean).join("_") + ".pdf";
+
+    // Save the PDF with the constructed name
+    doc.save('Reports.pdf');
   };
 
 
@@ -297,7 +339,7 @@ const ClientsList = () => {
               <Box>
                 <Button
                   variant="contained"
-                  disabled={reports.data.length == 0  || loading}
+                  disabled={reports.data.length == 0 || loading}
                   onClick={exportToPDF}
                 >
                   Export PDF

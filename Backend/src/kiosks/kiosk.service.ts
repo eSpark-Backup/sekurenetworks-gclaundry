@@ -61,7 +61,7 @@ export class KioskService {
       await this.prisma.log.create({ data: { type: 'INFO', kioskId: macId, detail: log.activate, createdAt: new Date() } })
     }
 
-    const config = { answer_required, type, sheets_per_transaction, screen_sequence,customerId }
+    const config = { answer_required, type, sheets_per_transaction, screen_sequence, customerId }
 
     const [survey, environmental_messages] = await this.prisma.$transaction([
       this.prisma.question.findMany({ where: { kioskId: macId } }),
@@ -88,13 +88,13 @@ export class KioskService {
     return machineInfo
   }
 
-  async findAll(filter: { take: number, skip: number, name: string | null, status: string | null, error: string | null ,customerId: string | null}) {
+  async findAll(filter: { take: number, skip: number, name: string | null, status: string | null, error: string | null, customerId: string | null }) {
 
-    let { take, skip, name, status, error ,customerId} = filter
+    let { take, skip, name, status, error, customerId } = filter
     let filters = {}
     if (take) take = Number(take)
     if (skip) skip = Number(skip)
-    if (customerId) filters = {...filters,customerId}
+    if (customerId) filters = { ...filters, customerId }
     if (status) {
       if (status.toLowerCase() == "online") {
         filters = { ...filters, lastSeen: { gte: subMinutes(new Date(), 6) } }
@@ -120,8 +120,9 @@ export class KioskService {
         },
         include: {
           customer: true,
-          onSiteContact: true
+          onSiteContact: true,
         }
+
       }),
       this.prisma.kiosk.count({
         where: {
@@ -134,6 +135,8 @@ export class KioskService {
 
     const data = kiosks.map((kiosk) => {
       const mins = differenceInMinutes(new Date(), kiosk.lastSeen);
+
+
       return {
         ...kiosk,
         status: mins <= 6 ? "ONLINE" : "OFFLINE",
@@ -255,7 +258,7 @@ export class KioskService {
     for await (let { rules } of conditions) {
       for await (const { condition, error } of rules) {
         if ((condition) && !errors.includes(error)) {
-          await sendEmail({to: process.env.EMAIL_FROM, subject: `Error in Kiosk ${kiosk.name}`, text: error.toUpperCase(),  })
+          await sendEmail({ to: process.env.EMAIL_FROM, subject: `Error in Kiosk ${kiosk.name}`, text: error.toUpperCase(), })
           await this.prisma.log.create({ data: { kioskId: macId, type: "ERROR", detail: error.toUpperCase(), createdAt: new Date() } })
           errors.push(error);
         } else if (!condition && errors.includes(error)) {
