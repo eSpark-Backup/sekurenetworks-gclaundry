@@ -64,6 +64,8 @@ async analytics({
         })
       ).map((e) => e.macId);
 
+     
+
   const count = await this.prisma.kiosk.count({
     where: { customerId, isDeleted: false },
   });

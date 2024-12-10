@@ -18,10 +18,10 @@ export default function AlertDialog({ open, setOpen, title, content, handleConfi
       setOpen(false);
     });
 
-  const handleSetPin = (event) => {
-    setPin(event.target.value);
-    setHasCorrectPin(event.target.value == config.actualPin);
-  };
+  // const handleSetPin = (event) => {
+  //   setPin(event.target.value);
+  //   setHasCorrectPin(event.target.value == config.actualPin);
+  // };
 
   return (
     <div>
@@ -29,7 +29,7 @@ export default function AlertDialog({ open, setOpen, title, content, handleConfi
         <DialogTitle id="alert-dialog-title">{title}</DialogTitle>
         <DialogContent>
           <DialogContentText sx={{ mb: 1.5 }}>{content}</DialogContentText>
-          <TextField
+          {/* <TextField
             id="address.city"
             name="address.city"
             value={pin}
@@ -40,11 +40,15 @@ export default function AlertDialog({ open, setOpen, title, content, handleConfi
             // helperText={formik.touched?.address?.city && formik?.errors?.address?.city}
             fullWidth
             padding={2}
-          />
+          /> */}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
-          <Button variant="contained" sx={{ fontWeight: 600 }} disabled={!hasCorrectPin} onClick={handleConfirm} autoFocus>
+          <Button 
+          variant="contained" 
+          sx={{ fontWeight: 600 }} 
+          // disabled={!hasCorrectPin} 
+          onClick={handleConfirm} autoFocus>
             Yes
           </Button>
         </DialogActions>
