@@ -106,13 +106,17 @@ async analytics({
   // Process data for each kiosk
   const reports = kiosksData.map((kiosk) => {
     const kioskTransactions = transactions.filter((t) => t.kioskId === kiosk.macId);
+ 
+   let SCENTED = "scented";
+   let UNSCENTED = "unscented";
+
 
     // Aggregations
     const scented = kioskTransactions
-      .filter((t) => t.tissueType === "scented")
+      .filter((t) => t.tissueType === SCENTED)
       .reduce((sum, t) => sum + (t.quantity || 0), 0);
     const unscented = kioskTransactions
-      .filter((t) => t.tissueType === "unscented")
+      .filter((t) => t.tissueType === UNSCENTED)
       .reduce((sum, t) => sum + (t.quantity || 0), 0);
     const success = kioskTransactions.filter((t) => t.status === "SUCCESS").length;
     const failed = kioskTransactions.filter((t) => t.status === "FAILED").length;
