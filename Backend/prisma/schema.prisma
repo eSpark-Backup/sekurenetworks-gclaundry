@@ -17,7 +17,7 @@ model Log {
 }
 
 model Transaction {
-  id             String   @id @default(uuid())
+  id             String     @id @default(uuid())
   quantity       Int
   tissueType     TissueType
   status         Status
@@ -60,7 +60,7 @@ model Kiosk {
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
   isDeleted              Boolean        @default(false)
-  customer               Customer?      @relation(fields: [customerId], references: [id] ,onDelete: SetNull)
+  customer               Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
   onSiteContact          OnSiteContact? @relation("Contact")
   Quotes                 Quote[]
   Questions              Question[]
@@ -71,7 +71,7 @@ model Kiosk {
 }
 
 model OnSiteContact {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   firstName String
   lastName  String
   email     String
@@ -99,19 +99,32 @@ model Customer {
 }
 
 model Users {
-  id                 String            @id @default(uuid())
-  email              String            @unique
-  firstName          String
-  lastName           String
-  password           String            @db.Text
-  customerId         String
-  customer           Customer          @relation(fields: [customerId], references: [id])
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  id              String             @id @default(uuid())
+  email           String             @unique
+  firstName       String
+  lastName        String
+  password        String             @db.Text
+  customerId      String
+  customer        Customer           @relation(fields: [customerId], references: [id])
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  studentId       String?            @unique
+  accountDate     String?
+  accountStatus   accountStatus?    @default(Active)
+  DOB             String?
+  phone           String?
+  accountType     SubscriptionTypes? @default(Free)
+  scented         Int?               @default(0)
+  unscented       Int?               @default(0)
+  personalEmail   String?
+  gender          Gender?            @default(Other)
+  sheetPreference TissueType?        @default(unscented)
+  uniquePin       Int?
+  classYear       classYearType?     @default(Freshman)
 }
 
 model Question {
-  id            String   @id @default(uuid())
+  id            String        @id @default(uuid())
   question      String
   options       Json
   isActive      Boolean       @default(true)
@@ -126,14 +139,27 @@ enum TissueType {
 }
 
 enum Gender {
-  M
-  F
+  Male
+  Female
   Other
 }
 
+enum classYearType {
+  Freshman
+  Sophomore
+  Junior
+  Senior
+  Graduate
+}
+
+enum accountStatus {
+  Active
+  Inactive
+}
+
 enum SubscriptionTypes {
-  PAID
-  FREE
+  Paid
+  Free
 }
 
 enum KioskType {

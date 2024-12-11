@@ -86,8 +86,28 @@ const ClientDetail = () => {
               <Grid container spacing={3}>
                 <Grid item sm={5} md={6} lg={6}>
                   <Stack spacing={0.5} paddingBottom={3} alignItems="start">
-                    <Typography variant="h5">{`${client.firstName} ${client.lastName}`}</Typography>
+                    <Typography variant="h2">{`${client.firstName} ${client.lastName}`}</Typography>
                     <Typography variant="h5">{client.email}</Typography>
+                    <Typography variant="h5">Student ID: {client.studentId}</Typography>
+                    <Typography variant="h5">DOB: {client.DOB}</Typography>
+                    <Typography variant="h5">Personal Email: {client.personalEmail}</Typography>
+                    <Typography variant="h5">Gender: {client.gender}</Typography>
+                    <Typography variant="h5">PIN: {client.uniquePin}</Typography>
+                    <Typography variant="h5">Class Year: {client.classYear}</Typography>
+                    <br/>
+                    <Typography variant="h3">Account Details </Typography>
+                    <Typography variant="h5">Account Date: {client.accountDate}</Typography>
+                    <Typography variant="h5">Account Status: {client.accountStatus}</Typography>
+                    <Typography variant="h5">Account Type: {client.accountType}</Typography>
+
+                    <br/>
+                    <Typography variant="h3">Preferences</Typography>
+                    <Typography variant="h5">Scented: {client.scented}</Typography>
+                    <Typography variant="h5">Unscented: {client.unscented}</Typography>
+                    <Typography variant="h5">Sheet Preference: {client.sheetPreference}</Typography>
+                    
+
+
                   </Stack>
                 </Grid>
                 <Grid item sm={5} md={6} lg={6}>

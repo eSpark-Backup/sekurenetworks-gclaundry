@@ -10,7 +10,7 @@ export class ClientsService {
 
   private prisma: PrismaClient;
   constructor(
-    private mqttService:MqttService
+    private mqttService: MqttService
   ) {
     this.prisma = new PrismaClient()
   }
@@ -20,7 +20,7 @@ export class ClientsService {
       data.password = crypto.createHash('sha256').update(data.password).digest('hex')
       const client = await this.prisma.users.create({ data });
       await this.publishUsers(client.customerId)
-      return { message: "Client created successfully",data:client, statusCode: 200 }
+      return { message: "Client created successfully", data: client, statusCode: 200 }
     } catch (error) {
 
     }
@@ -37,7 +37,10 @@ export class ClientsService {
   }
 
   async findOne(id) {
-    const client = await this.prisma.users.findFirst({ where: { id }, select: { id: true, customer: true, firstName: true, lastName: true, email: true, customerId: true } });
+    console.log('+++ id +++', id);
+
+    const client = await this.prisma.users.findFirst({ where: { id }, include: { customer: true } });
+    delete client.password;
     if (!client) throw new NotFoundException('Client not found!')
     return client;
   }
@@ -64,7 +67,7 @@ export class ClientsService {
     if (data.password) data.password = crypto.createHash('sha256').update(data.password).digest('hex')
     data = await this.prisma.users.update({ data, where: { id } });
     await this.publishUsers(client.customerId)
-    return { message: "Client updated successfully",data, statusCode: 200 }
+    return { message: "Client updated successfully", data, statusCode: 200 }
   }
 
   async remove(id) {
@@ -75,8 +78,8 @@ export class ClientsService {
     return { message: "Client deleted successfully", statusCode: 200 }
   }
 
-  async publishUsers(customerId: string){
-    let questions = await this.prisma.users.findMany({where:{customerId}})
-    this.mqttService.publish(`users/${customerId}`,JSON.stringify(questions));
+  async publishUsers(customerId: string) {
+    let questions = await this.prisma.users.findMany({ where: { customerId } })
+    this.mqttService.publish(`users/${customerId}`, JSON.stringify(questions));
   }
 }
