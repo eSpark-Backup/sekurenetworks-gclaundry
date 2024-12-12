@@ -18,7 +18,19 @@ export class ClientsService {
   async create(data: any) {
     try {
       data.password = crypto.createHash('sha256').update(data.password).digest('hex')
-      const client = await this.prisma.users.create({ data });
+
+      const kiosksConnect = data.kiosksIds?.map((id) => ({ macId: id })) || [];
+
+      const client = await this.prisma.users.create({
+        data: {
+          ...data,
+          kiosks: {
+            connect: kiosksConnect,
+          },
+        },
+      })
+
+      // const client = await this.prisma.users.create({ data });
       await this.publishUsers(client.customerId)
       return { message: "Client created successfully", data: client, statusCode: 200 }
     } catch (error) {

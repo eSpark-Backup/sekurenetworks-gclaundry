@@ -66,6 +66,7 @@ model Kiosk {
   Questions              Question[]
   logs                   Log[]
   transactions           Transaction[]
+  users                  Users[]        @relation("UserKiosks")
 
   @@index([customerId])
 }
@@ -110,7 +111,7 @@ model Users {
   updatedAt       DateTime           @updatedAt
   studentId       String?            @unique
   accountDate     String?
-  accountStatus   accountStatus?    @default(Active)
+  accountStatus   accountStatus?     @default(Active)
   DOB             String?
   phone           String?
   accountType     SubscriptionTypes? @default(Free)
@@ -121,6 +122,7 @@ model Users {
   sheetPreference TissueType?        @default(unscented)
   uniquePin       Int?
   classYear       classYearType?     @default(Freshman)
+  kiosks          Kiosk[]            @relation("UserKiosks")
 }
 
 model Question {
