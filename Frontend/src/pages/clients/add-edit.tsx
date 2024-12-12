@@ -189,6 +189,7 @@ const AddEditUser = () => {
                         <TextField
                           {...params}
                           placeholder="Select Customer"
+                          label="Customer *"
                           error={Boolean(formik.touched.customerId && formik.errors.customerId)}
                           helperText={formik.touched.customerId && formik.errors.customerId}
 
@@ -209,7 +210,8 @@ const AddEditUser = () => {
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          placeholder="Select Year"
+                          placeholder="Class Year"
+                          label="Class Year *"
                           error={Boolean(formik.touched.classYear && formik.errors.classYear)}
                           helperText={formik.touched.classYear && formik.errors.classYear}
                         />
@@ -317,6 +319,7 @@ const AddEditUser = () => {
                           <TextField
                             {...params}
                             placeholder="Select Gender"
+                            label="Gender *"
                             error={Boolean(formik.touched.gender && formik.errors.gender)}
                             helperText={formik.touched.gender && formik.errors.gender}
                           />
@@ -376,6 +379,7 @@ const AddEditUser = () => {
                           <TextField
                             {...params}
                             placeholder="Select Sheet Preference"
+                            label="Sheet Preference *"
                             error={Boolean(formik.touched.sheetPreference && formik.errors.sheetPreference)}
                             helperText={formik.touched.sheetPreference && formik.errors.sheetPreference}
                           />
@@ -423,6 +427,7 @@ const AddEditUser = () => {
                           <TextField
                             {...params}
                             placeholder="Select Account Type"
+                            label="Account Type *"
                             error={Boolean(formik.touched.accountType && formik.errors.accountType)}
                             helperText={formik.touched.accountType && formik.errors.accountType}
                           />
@@ -443,6 +448,7 @@ const AddEditUser = () => {
                           <TextField
                             {...params}
                             placeholder="Select Account Status"
+                            label="Account Status *"
                             error={Boolean(formik.touched.accountStatus && formik.errors.accountStatus)}
                             helperText={formik.touched.accountStatus && formik.errors.accountStatus}
                           />

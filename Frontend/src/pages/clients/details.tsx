@@ -95,16 +95,18 @@ const ClientDetail = () => {
                     <Typography variant="h5">PIN: {client.uniquePin}</Typography>
                     <Typography variant="h5">Class Year: {client.classYear}</Typography>
                     <br/>
-                    <Typography variant="h3">Account Details </Typography>
-                    <Typography variant="h5">Account Date: {client.accountDate}</Typography>
-                    <Typography variant="h5">Account Status: {client.accountStatus}</Typography>
-                    <Typography variant="h5">Account Type: {client.accountType}</Typography>
-
-                    <br/>
                     <Typography variant="h3">Preferences</Typography>
                     <Typography variant="h5">Scented: {client.scented}</Typography>
                     <Typography variant="h5">Unscented: {client.unscented}</Typography>
                     <Typography variant="h5">Sheet Preference: {client.sheetPreference}</Typography>
+                   
+
+                    <br/>
+                    <Typography variant="h3">Account Details </Typography>
+                    <Typography variant="h5">Account Date: {client.accountDate}</Typography>
+                    <Typography variant="h5">Account Status: {client.accountStatus}</Typography>
+                    <Typography variant="h5">Account Type: {client.accountType}</Typography>
+                 
                     
 
 
