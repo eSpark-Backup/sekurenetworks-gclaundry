@@ -64,11 +64,12 @@ const AddEditUser = () => {
       sheetPreference: "",
       accountDate: "",
       accountType: "",
-      accountStatus: ""
+      accountStatus: "",
     },
     validationSchema,
     onSubmit: async (values) => {
-      console.log(values);
+      delete (values as any)?.customer;
+
       if (isEditMode) await updateClient(user?.id, values);
       else await createClient(values);
 
