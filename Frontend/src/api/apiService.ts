@@ -36,6 +36,7 @@ export class ApiService {
     dashboard = {
         get:()=> axiosService.get('/report'),
         getReports: (query: Object) => axiosService.get(`/report/analytics?${encodeQueryData(query)}`),
+        getReportdetails: (query: Object) => axiosService.get(`/report/analytics-detail?${encodeQueryData(query)}`),
     }
 }
 
