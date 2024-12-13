@@ -1,0 +1,35 @@
+name: Genco Frontend Staging CICD
+
+on:
+  push:
+    branches: [ "fe-stg" ]
+
+
+jobs:
+  deploy:
+    runs-on: genco-runner
+
+    steps:
+
+    - name: Checkout source repository
+      uses: actions/checkout@v4
+
+    - name: Create .env File
+      run: |
+        touch .env
+        echo "VITE_FIREBASE_API_KEY=${{ secrets.VITE_FIREBASE_API_KEY }}" >> .env
+        echo "VITE_FIREBASE_AUTH_DOMAIN=${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}" >> .env
+        echo "VITE_FIREBASE_PROJECT_ID=${{ secrets.VITE_FIREBASE_PROJECT_ID }}" >> .env
+        echo "VITE_FIREBASE_STOREAGE_BUCKET=${{ secrets.VITE_FIREBASE_STOREAGE_BUCKET }}" >> .env
+        echo "VITE_FIREBASE_MESSAGE_SENDER_ID=${{ secrets.VITE_FIREBASE_MESSAGE_SENDER_ID }}" >> .env
+        echo "VITE_FIREBASE_APP_ID=${{ secrets.VITE_FIREBASE_APP_ID }}" >> .env
+        echo "VITE_FIREBASE_MEASUREMENT_ID=${{ secrets.VITE_FIREBASE_MEASUREMENT_ID }}" >> .env
+        echo "VITE_APP_PIN=${{ secrets.VITE_APP_PIN }}" >> .env
+        echo "VITE_API_URL=${{ secrets.VITE_API_URL }}" >> .env
+
+    - name: Deploy Docker Container     
+      run: |
+        docker stop genco-fe-stg || true
+        docker rm genco-fe-stg || true
+        docker build . -t genco-frontend-stg:latest
+        docker run -d -p 3000:3000 --name genco-fe-stg genco-frontend-stg:latest
