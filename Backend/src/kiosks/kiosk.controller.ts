@@ -22,11 +22,7 @@ export class KioskController {
     return this.kioskService.findAll(filter);
   }
 
-  @Get(':macId/moreInfo')
-  moreInfo(@Param('macId') macId: string) {
-    return this.kioskService.getKioskData(macId);
-  }
-
+ 
   @Get('/byKioskIds')
   findByKioskIds(@Query() { kioskIds }) {
     return this.kioskService.findByIds(kioskIds?.split(','));

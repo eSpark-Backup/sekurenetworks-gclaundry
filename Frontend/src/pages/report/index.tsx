@@ -8,6 +8,7 @@ import GencoTable from "@/components/Table";
 import { Customer } from "@/types/customer";
 import { IReport } from "@/types/IReports";
 import { KIOSK } from "@/types/kiosk";
+import { LoadingButton } from '@mui/lab';
 import {
   Autocomplete,
   Box,
@@ -27,6 +28,7 @@ const ClientsList = () => {
   const [kiosks, setKiosks] = useState<KIOSK[]>([]);
   const [reports, setReports] = useState<{ count: number; data: IReport[] }>({ count: 0, data: [] });
   const [loadingKiskos, setLoadingKiosks] = useState(false);
+  const [loadingDetailPDF, setLoadingDetailPDF] = useState(false);
   const [filters, setFilters] = useState<{
     kiosks: KIOSK[];
     customer: Customer | null;
@@ -68,6 +70,26 @@ const ClientsList = () => {
     }
   );
 
+  const { runAsync: getReportDetails } = useRequest(
+    (query) => apiService.dashboard.getReportdetails(query),
+    {
+      manual: true,
+      onSuccess: ({ data }) => {
+        setLoadingDetailPDF(false);
+        const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'ReportDetails.pdf');
+        document.body.appendChild(link);
+        link.click();
+      },
+      onError: () => {
+        setLoadingDetailPDF(false);
+      }
+    }
+  );
+
+
 
   useEffect(() => {
     (async () => {
@@ -102,21 +124,20 @@ const ClientsList = () => {
     fetchReports();
 
 
-  }, [filters.pageIndex, filters.pageSize]);
+  }, [filters.pageIndex, filters.pageSize, filters.from, filters.to, filters.customer, filters.kiosks]);
 
+  // const ApplyFilers = async () => {
+  //   let kiosks = filters.kiosks.map((e) => e.macId);
 
-  const ApplyFilers = async () => {
-    let kiosks = filters.kiosks.map((e) => e.macId);
-
-    await getReports({
-      from: filters.from?.toISOString(),
-      to: filters.to?.toISOString(),
-      customerId: filters.customer?.id,
-      kiosks,
-      skip: filters.pageIndex,
-      take: filters.pageSize,
-    });
-  }
+  //   await getReports({
+  //     from: filters.from?.toISOString(),
+  //     to: filters.to?.toISOString(),
+  //     customerId: filters.customer?.id,
+  //     kiosks,
+  //     skip: filters.pageIndex,
+  //     take: filters.pageSize,
+  //   });
+  // }
 
 
   const exportToPDF = () => {
@@ -175,20 +196,23 @@ const ClientsList = () => {
       headStyles: { fillColor: [255, 7, 25] },
     });
 
-    // Save the PDF
-    // Genetrating name 
-    // const fileNameParts = [
-    //   "Reports", // Base name
-    //   filters.customer?.schoolName, // Add customer name if it exists
-    //   filters.kiosks.length > 0 ? filters.kiosks.map(e => e.name).join("_") : null, // Add kiosk names if they exist
-    //   filters.from ? filters.from.toDate().toLocaleDateString() : null, // Add "from" date if it exists
-    //   filters.to ? filters.to.toDate().toLocaleDateString() : null, // Add "to" date if it exists
-    // ];
-
-    // const fileName = fileNameParts.filter(Boolean).join("_") + ".pdf";
-
-    // Save the PDF with the constructed name
     doc.save('Reports.pdf');
+  };
+
+
+  const fetchReportDetails = async () => {
+    setLoadingDetailPDF(true);
+    let kiosks = filters.kiosks.map((e) => e.macId);
+    await getReportDetails({
+      from: filters.from?.toISOString(),
+      to: filters.to?.toISOString(),
+      customerId: filters.customer?.id,
+      kiosks,
+      skip: filters.pageIndex,
+      take: filters.pageSize,
+    });
+
+
   };
 
 
@@ -198,7 +222,7 @@ const ClientsList = () => {
       <Box sx={{ p: 2, borderRadius: 2 }}>
         <Grid container spacing={2} display={"flex"} alignItems={"center"}>
           {/* First Grid Item (Filter Inputs - Responsive 12 columns on mobile, 9 on larger screens) */}
-          <Grid item xs={12} md={8}>
+          <Grid item xs={12} md={7}>
             <Grid container spacing={2}>
               {/* First Row: 2 Input Boxes */}
               <Grid item xs={12} sm={6}>
@@ -288,7 +312,7 @@ const ClientsList = () => {
           </Grid>
 
           {/* Second Grid Item (Filter Options - Responsive 12 columns on mobile, 3 on larger screens) */}
-          <Grid item xs={12} md={4}>
+          <Grid item xs={12} md={5}>
 
             <Box
               sx={{
@@ -301,12 +325,12 @@ const ClientsList = () => {
               <Box display="flex"
                 gap={2}>
 
-                <Button
+                {/* <Button
                   variant="contained"
                   onClick={ApplyFilers}
                 >
                   Apply
-                </Button>
+                </Button> */}
                 <Button
                   variant="contained"
                   disabled={filters.kiosks.length == 0 && !filters.customer && !filters.from && !filters.to}
@@ -336,14 +360,31 @@ const ClientsList = () => {
 
               </Box>
 
-              <Box>
-                <Button
-                  variant="contained"
-                  disabled={reports.data.length == 0 || loading}
-                  onClick={exportToPDF}
-                >
-                  Export PDF
-                </Button>
+              <Box sx={{
+                display: "flex",
+                gap: 2,
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}>
+                <Box>
+                  <Button
+                    variant="contained"
+                    disabled={reports.data.length == 0 || loading}
+                    onClick={exportToPDF}
+                  >
+                    Export Table
+                  </Button>
+                </Box>
+                <Box>
+                  <LoadingButton
+                    loading={loadingDetailPDF}
+                    variant="contained"
+                    disabled={reports.data.length == 0 || loading}
+                    onClick={fetchReportDetails}
+                  >
+                    Export Transactions
+                  </LoadingButton>
+                </Box>
               </Box>
             </Box>
           </Grid>
