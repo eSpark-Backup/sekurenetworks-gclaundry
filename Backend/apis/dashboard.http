@@ -1,3 +1,0 @@
-### Send GET request
-GET {{base_url}}/dashboard
-Authorization: Bearer {{auth_token}}

@@ -1,6 +1,0 @@
-.env
-node_modules/
-.idea/
-dist/
-.env.dev
-*.lock
