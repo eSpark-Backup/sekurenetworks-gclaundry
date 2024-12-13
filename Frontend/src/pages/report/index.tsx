@@ -119,6 +119,7 @@ const ClientsList = () => {
         take: filters.pageSize,
       });
     };
+  
 
 
     fetchReports();

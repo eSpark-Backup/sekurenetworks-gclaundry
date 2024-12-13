@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { subMinutes } from 'date-fns';
 import { jsPDF } from 'jspdf';
 import { Response } from 'express';
+import autoTable from 'jspdf-autotable';
 
 export class ReportService {
 
@@ -258,121 +259,99 @@ export class ReportService {
     }
 
 
+    
 
-    const doc = new jsPDF();
+    const doc = new jsPDF({orientation: 'landscape'});  // Create a new PDF document
+
+    let isFirstPage = true;
 
     // Set the title with center alignment
-    doc.setFontSize(18);
-    doc.text('Transactions Report', 105, 10, { align: 'center' });
-
-    let yPosition = 20;  // Start from this Y-position for the body
-
-    // Iterate through the data and add it to the PDF
+    if (isFirstPage) {
+      doc.setFontSize(18);
+      doc.text('Transactions Report', doc.internal.pageSize.width / 2, 15, { align: 'center' });
+      isFirstPage = false;
+    }
+    
+    let yPosition = 30;  // Start from this Y-position for the body
+    
+    // Iterate through the reports for each kiosk
     reports.forEach((report) => {
+      // Add kiosk name as a subtitle
       doc.setFontSize(14);
-
-      // Kiosk Name (Center aligned)
-      if (yPosition > 270) {  // Check for page overflow before printing
-        doc.addPage();
-        yPosition = 10;  // Reset Y position to top of the new page
-      }
-      doc.text(`Kiosk: ${report.kiosk.name}`, 105, yPosition, { align: 'center' });
+      doc.text(`Kiosk: ${report.kiosk.name}`, doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
       yPosition += 10;
-
+    
       if (report.transactions.length === 0) {
-        if (yPosition > 270) {
-          doc.addPage();
-          yPosition = 10;  // Reset Y position to top of the new page
-        }
-        doc.text('No transactions found', 105, yPosition, { align: 'center' });
-        yPosition += 10;
-      }
-
-      // Transaction details (Left aligned)
-      report.transactions.forEach((transaction) => {
-
-        // Check for page overflow before each text block
-        const transactionDetails = [
-          `Transaction ID: ${transaction.id}`,
-          `Quantity: ${transaction.quantity}`,
-          `Tissue Type: ${transaction.tissueType}`,
-          `Status: ${transaction.status}`,
-          `Error: ${transaction.error || "empty"}`,
-          `Time: ${new Date(transaction.time).toLocaleString("en-US", {hour12: true })}`,
-        ];
-
-
-        // Check each line of transaction text
-        transactionDetails.forEach((line) => {
-          if (yPosition > 270) {
-            doc.addPage();
-            yPosition = 10;
-          }
-          doc.text(line, 10, yPosition);
-          yPosition += 8;
+        doc.setFontSize(12);
+        doc.text('No transactions found', doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
+        yPosition += 15;
+      } else {
+        // Prepare data for the table
+        const tableData = report.transactions.map(transaction => [
+          transaction.id,
+          transaction.quantity,
+          transaction.tissueType,
+          transaction.status,
+          transaction.error || "N/A",
+          new Date(transaction.time).toLocaleString("en-US", {hour12: true}),
+          transaction.question?.question || "N/A",
+          (transaction.question?.options?.map((e, index) => `${index + 1}. ${e.option}`).join(", ")) || "None",
+          transaction.question?.options.find(e => e.is_valid)?.option || "None",
+          transaction.selectedAnswer,
+          transaction.quote?.quote || "N/A"
+        ]);
+    
+        // Add the table
+        autoTable(doc, {
+          startY: yPosition,
+          head: [['ID', 'Quantity', 'Type', 'Status', 'Error', 'Time', 'Question', 'Options', 'Valid Answer', 'Selected Answer', 'Quote']],
+          body: tableData,
+          didDrawPage: (data) => {
+            // Re-add the title on each new page
+            doc.setFontSize(10);
+            // doc.text('Transactions Report', doc.internal.pageSize.width / 2, 15, { align: 'center' });
+            doc.text(`Page ${data.pageNumber}`, data.settings.margin.left, doc.internal.pageSize.height - 10);
+          },
+          styles: { fontSize: 8, cellPadding: 1.5 },
+          columnStyles: {
+            0: { cellWidth: 20 },
+            1: { cellWidth: 15 },
+            2: { cellWidth: 20 },
+            3: { cellWidth: 20 },
+            4: { cellWidth: 20 },
+            5: { cellWidth: 30 },
+            6: { cellWidth: 'auto' },
+            7: { cellWidth: 'auto' },
+            8: { cellWidth: 'auto' },
+            9: { cellWidth: 'auto' },
+            10: { cellWidth: 'auto' }
+          },
+          headStyles: { fillColor: [255, 7, 25], textColor: 255 },
+          willDrawCell: (data) => {
+            // Wrap text for certain columns
+            if (data.section === 'body' && [6, 7, 8, 9, 10].includes(data.column.index)) {
+              data.cell.styles.cellWidth = 'wrap';
+            }
+          },
         });
-
-        // Handle wrapping for long "Question" text
-        const questionLines = doc.splitTextToSize(`Question: ${transaction.question?.question || "empty"}`, 180);
-        if (yPosition + questionLines.length * 5 > 270) {
-          doc.addPage();
-          yPosition = 10;  // Reset Y position to top of the new page
-        }
-        doc.text(questionLines, 10, yPosition);
-        yPosition += questionLines.length * 8;  // Adjust Y position based on number of lines
-
-
-        // Handle options text
-        const optionsText = `Options: ${transaction.question?.options
-          ?.map((e, index) => `${index + 1}. ${e.option}`)
-          .join(", ") || "None"}`;
-        const optionsLines = doc.splitTextToSize(optionsText, 180);
-        if (yPosition + optionsLines.length * 8  > 270) {
-          doc.addPage();
-          yPosition = 10; // Reset Y position to top of the new page
-        }
-        doc.text(optionsLines, 10, yPosition);
-        yPosition += optionsLines.length * 8 ;
-
-        // Handle valid answer text
-        const validAnswer = transaction.question?.options.find((e) => e.is_valid)?.option || "None";
-        if (yPosition > 270) {
-          doc.addPage();
-          yPosition = 10; // Reset Y position to top of the new page
-        }
-        doc.text(`Valid Answer: ${validAnswer}`, 10, yPosition);
-        yPosition += 8;
-
-
-        if (yPosition > 270) {
-          doc.addPage();
-          yPosition = 10;
-        }
-        doc.text(`Selected Answer: ${transaction.selectedAnswer}`, 10, yPosition);
-        yPosition += 8;
-
-        // Handle wrapping for long "Quote" text
-        const quoteLines = doc.splitTextToSize(`Quote: ${transaction.quote?.quote || "empty"}`, 180);
-        if (yPosition + quoteLines.length * 8 > 270) {
-          doc.addPage();
-          yPosition = 10;  // Reset Y position to top of the new page
-        }
-        doc.text(quoteLines, 10, yPosition);
-        yPosition += quoteLines.length * 8;  // Adjust Y position based on number of lines
-
-        yPosition += 15;  // Space between transactions
-      });
+    
+        // Update yPosition for the next kiosk's data
+        yPosition = (doc as any).lastAutoTable.finalY + 15;
+      }
+    
+      // Add a page break if there's not enough space for the next kiosk's data
+      if (yPosition > doc.internal.pageSize.height - 20) {
+        doc.addPage();
+        yPosition = 30;
+      }
     });
-
-
-
-
+    
     // Send the PDF as a downloadable file
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename=transactions-report.pdf',
     });
-
+    
     res.send(doc.output());
 
   }
