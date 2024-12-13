@@ -1,6 +1,6 @@
 FROM node:lts-alpine
 WORKDIR /usr/src/app
-COPY ["package.json", "package-lock.json*", "npm-shrinkwrap.json*", "prisma"]
+COPY ["package.json", "package-lock.json*", "prisma", "./"]
 RUN npm cache clean --force
 RUN npm install --legacy-peer-deps --production=false --silent && mv node_modules ../
 COPY . .
