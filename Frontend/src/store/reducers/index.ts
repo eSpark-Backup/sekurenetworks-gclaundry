@@ -10,6 +10,7 @@ import menu from './menu';
 import snackbar from './snackbar';
 import productReducer from './product';
 import cartReducer from './cart';
+import common from './common';
 
 // ==============================|| COMBINE REDUCERS ||============================== //
 
@@ -26,7 +27,9 @@ const reducers = combineReducers({
     },
     cartReducer
   ),
-  product: productReducer
+  product: productReducer,
+  common
+  
 });
 
 export default reducers;
