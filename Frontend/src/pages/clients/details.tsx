@@ -12,6 +12,7 @@ import AlertDialog from "../../components/@extended/AlertDialog";
 import MainCard from "../../components/MainCard";
 import GencoTable from "@/components/Table";
 import { columns } from "../kiosk/dto/data";
+import { Ifilter } from "@/types/IFilter";
 
 const ClientDetail = () => {
   const params = useParams();

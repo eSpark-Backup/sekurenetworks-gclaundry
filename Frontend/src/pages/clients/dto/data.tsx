@@ -1,5 +1,7 @@
 import { Customer } from "@/types/customer";
 import { User } from "@/types/IUser";
+import { KIOSK } from "@/types/kiosk";
+import { Count } from "@/types/lCount";
 import {
   EditTwoTone,
   FileTextTwoTone
@@ -40,6 +42,15 @@ export const columns: ColumnDef<User>[] = [
       );
     },
   },
+    {
+      header: "Total Kiosk",
+      accessorKey: "_count",
+      cell: ({ getValue }) => (
+        <Typography variant="subtitle1">
+          {getValue<Count>()?.kiosks}
+        </Typography>
+      ),
+    },
   {
     header: "Actions",
     cell: ({ row }) => {

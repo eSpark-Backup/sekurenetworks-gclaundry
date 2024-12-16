@@ -44,7 +44,12 @@ export class ClientsService {
     if (take) take = Number(take)
     if (skip) skip = Number(skip)
     const [data, count] = await this.prisma.$transaction([
-      this.prisma.users.findMany({ where: { email: { contains: email, mode: 'insensitive' } }, take, skip, select: { id: true, customer: true, firstName: true, lastName: true, email: true, } }),
+      this.prisma.users.findMany({ where: { email: { contains: email, mode: 'insensitive' } }, take, skip, select: { id: true, customer: true, firstName: true, lastName: true, email: true, 
+        _count: {
+          select: { kiosks: true }, // This will return the count of kiosks
+        },
+
+      } }),
       this.prisma.users.count({ where: { email: { contains: email, mode: 'insensitive' } } })
     ])
     return { data, count };
