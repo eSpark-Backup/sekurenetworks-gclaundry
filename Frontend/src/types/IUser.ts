@@ -1,6 +1,7 @@
 import { Customer } from "./customer";
 
 export interface User {
+    kiosks: any;
     id: string;
     customer: Customer;
     customerId?: string;

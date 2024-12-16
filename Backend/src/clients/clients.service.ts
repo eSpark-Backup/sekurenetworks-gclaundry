@@ -21,6 +21,8 @@ export class ClientsService {
 
       const kiosksConnect = data.kiosksIds?.map((id) => ({ macId: id })) || [];
 
+      delete data.kiosksIds;
+
       const client = await this.prisma.users.create({
         data: {
           ...data,
@@ -49,9 +51,8 @@ export class ClientsService {
   }
 
   async findOne(id) {
-    console.log('+++ id +++', id);
 
-    const client = await this.prisma.users.findFirst({ where: { id }, include: { customer: true } });
+    const client = await this.prisma.users.findFirst({ where: { id }, include: { customer: true, kiosks:true} });
     delete client.password;
     if (!client) throw new NotFoundException('Client not found!')
     return client;

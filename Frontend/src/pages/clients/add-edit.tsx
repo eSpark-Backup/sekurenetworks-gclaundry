@@ -1,4 +1,4 @@
-import { Autocomplete, Box, Button, Grid, Stack, TextField, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Chip, Grid, Stack, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import MainCard from "../../components/MainCard";
 
@@ -21,6 +21,7 @@ const validationSchema = yup.object({
   lastName: yup.string().required("Last Name is required"),
   email: yup.string().email().required("Email is required"),
   customerId: yup.string().required("Customer is required"),
+  kiosksIds: yup.array().required("Kiosks is required"), 
   classYear: yup.string().required("Class Year is required"),
   studentId: yup.string().required("Student ID is required"),
   DOB: yup.string().required("DOB is required"),
@@ -44,11 +45,15 @@ const AddEditUser = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [updateDialog, setUpdateDialog] = useState(false);
   const [customers, setCustomers] = useState<Customer[]>();
+  const [kiosks, setKiosks] = useState<any[]>();
+  const [loadingKiosks, setLoadingKiosks] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>();
+  const [selectedKiosks, setSelectedKiosks] = useState<any | null>([]);
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: {
       customerId: null,
+      kiosksIds: [],
       firstName: "",
       lastName: "",
       email: "",
@@ -116,6 +121,21 @@ const AddEditUser = () => {
     }
   );
 
+  const { runAsync: getKiosks } = useRequest(
+    (query) => apiService.kisok.getKiosks(query),
+    {
+      manual: true,
+      debounceWait: 1000,
+      onSuccess: ({ data }) => {
+        setKiosks(data.data);
+        setLoadingKiosks(false);
+      },
+      onError: () => {
+        setLoadingKiosks(false);
+      },
+    }
+  );
+
   const fetchClient = async (id: string): Promise<User> => {
     const { data } = await runAsync(id);
     setUser(data);
@@ -132,6 +152,8 @@ const AddEditUser = () => {
         setSelectedCustomer(
           data.data.find((e: any) => e.id === client.customerId)
         );
+
+        setSelectedKiosks(client.kiosks);
       }
     })();
   }, [params.id]);
@@ -179,9 +201,16 @@ const AddEditUser = () => {
                       }}
                       options={customers || []}
                       getOptionLabel={(option) => option.schoolName}
-                      onChange={(e: any, newValue) => {
+                      onChange={async (e: any, newValue) => {
                         formik.setFieldValue("customerId", newValue?.id);
+                       
+                        if (!newValue) {
+                          setSelectedKiosks([]);
+                          return;
+                        }
                         setSelectedCustomer(newValue);
+                        setLoadingKiosks(true);
+                        await getKiosks({ customerId: newValue?.id });
                       }}
                       autoSelect={true}
                       value={selectedCustomer || null}
@@ -200,22 +229,38 @@ const AddEditUser = () => {
                   <Grid item xs={12} sm={6}>
                     <Autocomplete
                       fullWidth
-                      options={classYearOptions}
-                      getOptionLabel={(option) => option}
+                      multiple
+                      disabled={kiosks?.length == 0 || loadingKiosks || !selectedCustomer}
+                      options={kiosks || []}
+                      getOptionLabel={(option) => option.name}
                       onChange={(e: any, newValue) => {
-                        formik.setFieldValue("classYear", newValue);
+                        formik.setFieldValue("kiosksIds", newValue.map((e: any) => e.macId));
+                        setSelectedKiosks(newValue);
                       }}
                       autoSelect={true}
-                      value={formik.values.classYear || null}
+                      value={selectedKiosks || []}
                       renderInput={(params) => (
                         <TextField
                           {...params}
-                          placeholder="Class Year"
-                          label="Class Year *"
-                          error={Boolean(formik.touched.classYear && formik.errors.classYear)}
-                          helperText={formik.touched.classYear && formik.errors.classYear}
+                          placeholder={loadingKiosks ? "Loading Kiosks..." : "Select Kiosks"}
+                          error={Boolean(formik.touched.kiosksIds && formik.errors.kiosksIds)}
+                          helperText={formik.touched.kiosksIds && formik.errors.kiosksIds}
                         />
                       )}
+                      // renderTags={(value, getTagProps) =>
+                      //   value
+                      //     .slice(0, 1)
+                      //     .map((option, index) => (
+                      //       <Chip
+                      //         {...getTagProps({ index })}
+                      //         label={`${option.name}${value.length > 1
+                      //           ? ` & ${value.length - 1 ? `+${value.length - 1}` : ""
+                      //           }`
+                      //           : ""
+                      //           }`}
+                      //       />
+                      //     ))
+                      // }
                     />
                   </Grid>
                 </Grid>
@@ -336,6 +381,35 @@ const AddEditUser = () => {
                       />
                     </Grid>
                   </Grid>
+
+
+
+                  <Box mt={2}>
+                  <Grid container spacing={2} >
+
+                    <Grid item xs={12} sm={6}>
+                      <Autocomplete
+                        fullWidth
+                        options={classYearOptions}
+                        getOptionLabel={(option) => option}
+                        onChange={(e: any, newValue) => {
+                          formik.setFieldValue("classYear", newValue);
+                        }}
+                        autoSelect={true}
+                        value={formik.values.classYear || null}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            placeholder="Class Year"
+                            label="Class Year *"
+                            error={Boolean(formik.touched.classYear && formik.errors.classYear)}
+                            helperText={formik.touched.classYear && formik.errors.classYear}
+                          />
+                        )}
+                      />
+                    </Grid>
+                  </Grid>
+                  </Box>
                 </Box>
 
 
