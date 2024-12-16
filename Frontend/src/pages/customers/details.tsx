@@ -128,6 +128,7 @@ const CustomerDetail = () => {
                         <GencoTable
                           tableTitle="Kiosks"
                           columns={columns}
+                          enablePagination={false}
                           pagination={{
                             pageSize: filter.pageSize,
                             pageIndex: filter.pageIndex,

@@ -10,6 +10,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import AlertDialog from "../../components/@extended/AlertDialog";
 import MainCard from "../../components/MainCard";
+import GencoTable from "@/components/Table";
+import { columns } from "../kiosk/dto/data";
 
 const ClientDetail = () => {
   const params = useParams();
@@ -17,7 +19,10 @@ const ClientDetail = () => {
 
   const [client, setClient] = useState<User>();
   const [openDialog, setOpenDialog] = useState(false);
-  
+    const [filter, setFilter] = useState<Ifilter>({
+      pageIndex: 0,
+      pageSize: 10,
+    });
   const { runAsync: deleteClient } = useRequest(
     (id) => apiService.user.delete(id),
     {
@@ -129,6 +134,40 @@ const ClientDetail = () => {
                 </Grid>
               </Grid>
             </MainCard>
+          </Grid>
+
+
+          <Grid item xs={12}>
+            {client.kiosks?.length !== 0 && (
+              <Grid xs={12} item>
+                <Stack spacing={2.5}>
+                  <MainCard>
+                    <Grid item xs={12}>
+                      <Typography variant="h3" paddingTop={2} paddingBottom={2}>
+                        Total Kiosks: {client.kiosks.length}
+                      </Typography>
+                      <Stack spacing={2.5}>
+                        <GencoTable
+                          tableTitle="Kiosks"
+                          columns={columns}
+                          enablePagination={false}
+                          pagination={{
+                            pageSize: filter.pageSize,
+                            pageIndex: filter.pageIndex,
+                          }}
+                          onPageChange={async (e: any) =>
+                            setFilter({ ...e, name: null })
+                          }
+                          count={client.kiosks.length}
+                          isLoading={loading}
+                          data={client.kiosks}
+                        />
+                      </Stack>
+                    </Grid>
+                  </MainCard>
+                </Stack>
+              </Grid>
+            )}
           </Grid>
         </Grid>
       </MainCard>
