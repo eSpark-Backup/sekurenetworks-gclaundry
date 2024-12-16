@@ -105,9 +105,11 @@ const MainLayout = () => {
                   {
                     common?.kisko?.customerName &&
                     <Grid item sx={headingSx}>
-                      <Typography variant="h2">{" - "}</Typography>
+                      <Typography variant="h2" sx={{mx:1}}>{" - "} </Typography>
                     </Grid>
                   }
+
+
 
                   <Grid item sx={headingSx}>
                     <Typography variant="h2">{common?.kisko?.name}</Typography>
