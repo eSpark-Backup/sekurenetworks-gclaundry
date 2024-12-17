@@ -1,5 +1,7 @@
 FROM node:lts-alpine
 WORKDIR /usr/src/app
+RUN apk add --no-cache openssl
+
 COPY ["package.json", "package-lock.json*", "prisma", "./"]
 RUN npm cache clean --force
 RUN npm install --legacy-peer-deps
