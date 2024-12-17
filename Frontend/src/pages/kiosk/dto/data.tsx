@@ -29,7 +29,7 @@ export const columns: ColumnDef<KIOSK>[] = [
       return customer ? (
         <Stack direction="column" spacing={0}>
           <span>
-            {customer.firstName} {customer.lastName}
+            {customer.schoolName}
           </span>
           <small>{customer.email}</small>
         </Stack>
