@@ -1,12 +1,15 @@
 FROM node:lts-alpine
 WORKDIR /usr/src/app
-COPY ["package.json", "package-lock.json*", "prisma", "./"]
+COPY ["package.json", "package-lock.json*", "./"]
 RUN npm cache clean --force
-RUN apt-get update && apt-get upgrade -y && apt-get -qy install openssl
-RUN npm install --legacy-peer-deps --production=false --silent && mv node_modules ../
+RUN npm install --legacy-peer-deps
+
 COPY . .
+
 RUN npx prisma generate
+
 RUN npm run build
 RUN chown -R node /usr/src/app
 USER node
+
 CMD ["npm", "run", "start:migrate:prod"]
