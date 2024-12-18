@@ -9,11 +9,19 @@ export class FirebaseAdmin {
   private actionCodeSettings;
 
   constructor(private readonly configService: ConfigService) {
+    const formatPrivateKey = (key: string): string => {
+      if (typeof key !== 'string') {
+        key = JSON.stringify(key)
+  ;
+      }
+      return key.replace(/\\n/g, '\n'); // Replace escaped newlines
+    };
+    console.log("KEY", this.configService.get('firebase.private_key'))
     this.firebase_params = {
       type: this.configService.get('firebase.type'),
       projectId: this.configService.get('firebase.project_id'),
       privateKeyId: this.configService.get('firebase.private_key_id'),
-      privateKey: this.configService.get('firebase.private_key'),
+      privateKey: formatPrivateKey(this.configService.get('firebase.private_key')),
       clientEmail: this.configService.get('firebase.client_email'),
       clientId: this.configService.get('firebase.client_id'),
       authUri: this.configService.get('firebase.auth_uri'),
@@ -28,7 +36,7 @@ export class FirebaseAdmin {
       client_email: this.configService.get('firebase.client_email'),
       client_id: this.configService.get('firebase.client_id'),
       private_key_id: this.configService.get('firebase.private_key_id'),
-      private_key: this.configService.get('firebase.private_key'),
+      private_key: formatPrivateKey(this.configService.get('firebase.private_key'))
     };
 
     this.actionCodeSettings = {
