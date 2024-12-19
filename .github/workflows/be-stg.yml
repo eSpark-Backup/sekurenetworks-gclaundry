@@ -1,4 +1,4 @@
-name: Deployment on Dev Environment
+name: Genco Backend Staging CICD
 
 on:
   push:
