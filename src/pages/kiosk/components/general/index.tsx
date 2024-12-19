@@ -30,6 +30,8 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import MachineInfo from "../machineInfo";
 import { kioskSchema } from "./data";
+import { useDispatch } from "@/store";
+import { setSelectedKisko } from "@/store/reducers/common";
 
 export default () => {
   const [updateDialog, setUpdateDialog] = useState(false);
@@ -37,6 +39,7 @@ export default () => {
   const [customers, setCustomers] = useState<Customer[]>();
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>();
   const params = useParams();
+  const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
       type: "",
@@ -61,7 +64,7 @@ export default () => {
       },
     },
     validationSchema: kioskSchema,
-    onSubmit: () => {},
+    onSubmit: () => { },
   });
   const navigate = useNavigate();
   const { loading, runAsync } = useRequest(
@@ -117,9 +120,9 @@ export default () => {
         location,
         onSiteContact,
       } = data;
-      setSelectedCustomer(
-        customersData.data.find((e: any) => e.id === customerId)
-      );
+
+      let selectedCustomer = customersData.data.find((e: any) => e.id === customerId)
+      setSelectedCustomer(selectedCustomer);
       formik.setValues({
         type,
         name,
@@ -129,7 +132,15 @@ export default () => {
         location,
         onSiteContact,
       } as any);
+
+      dispatch(setSelectedKisko({ kisko: { name, customerName: selectedCustomer?.schoolName } }));
+      
     })();
+
+    // save kisko name and customers name in localStorage
+
+
+
   }, [params.id]);
 
   const handleChangeCountry = (value) => {
@@ -428,7 +439,7 @@ export default () => {
                     <Grid item xs={12} padding={3} />
                     <Typography variant="h3">Machine Info</Typography>
                     <Divider />
-                    { kiosk?.machineInfo && <MachineInfo machineInfo={kiosk?.machineInfo!} /> }
+                    {kiosk?.machineInfo && <MachineInfo machineInfo={kiosk?.machineInfo!} />}
                   </Grid>
                 </MainCard>
               </Stack>

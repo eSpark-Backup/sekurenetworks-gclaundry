@@ -108,6 +108,9 @@ const ClientsList = () => {
 
   useEffect(() => {
     // i want to refetch the reports when the filters change
+    setFilters({ ...filters, pageIndex: 0, pageSize: 10 });
+
+
     const fetchReports = async () => {
       let kiosks = filters.kiosks.map((e) => e.macId);
       await getReports({
@@ -125,7 +128,28 @@ const ClientsList = () => {
     fetchReports();
 
 
-  }, [filters.pageIndex, filters.pageSize, filters.from, filters.to, filters.customer, filters.kiosks]);
+  }, [filters.from, filters.to, filters.customer, filters.kiosks]);
+
+  useEffect(() => {
+    // i want to refetch the reports when the filters change
+    const fetchReports = async () => {
+      let kiosks = filters.kiosks.map((e) => e.macId);
+      await getReports({
+        from: filters.from?.toISOString(),
+        to: filters.to?.toISOString(),
+        customerId: filters.customer?.id,
+        kiosks,
+        skip: filters.pageIndex,
+        take: filters.pageSize,
+      });
+    };
+  
+
+
+    fetchReports();
+
+
+  }, [filters.pageIndex, filters.pageSize]);
 
   // const ApplyFilers = async () => {
   //   let kiosks = filters.kiosks.map((e) => e.macId);
@@ -380,7 +404,7 @@ const ClientsList = () => {
                   <LoadingButton
                     loading={loadingDetailPDF}
                     variant="contained"
-                    disabled={reports.data.length == 0 || loading}
+                    disabled={reports.data.length == 0 || loading || filters.customer == null}
                     onClick={fetchReportDetails}
                   >
                     Export Transactions
