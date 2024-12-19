@@ -16,7 +16,6 @@ async function bootstrap() {
     next();
   });
   // app.setGlobalPrefix('v1');
-  console.log('Environment Variables:', process.env);
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalPipes(
     new ValidationPipe({

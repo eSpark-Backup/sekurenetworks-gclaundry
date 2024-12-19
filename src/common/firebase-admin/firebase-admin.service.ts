@@ -16,7 +16,6 @@ export class FirebaseAdmin {
       }
       return key.replace(/\\n/g, '\n'); // Replace escaped newlines
     };
-    console.log("KEY", this.configService.get('firebase.private_key'))
     this.firebase_params = {
       type: this.configService.get('firebase.type'),
       projectId: this.configService.get('firebase.project_id'),
