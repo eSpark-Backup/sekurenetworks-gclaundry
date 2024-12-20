@@ -8,6 +8,7 @@ import EditKiosk from "@/pages/kiosk/editKiosk";
 import AddEditCustomer from "@/pages/customers/add-edit";
 import AddEditClient from "@/pages/clients/add-edit"
 import AppLogout from "../sections/auth/AppLogout";
+import SQANDEM from "@/pages/sq-and-em";
 
 const Kiosks = Loadable(lazy(() => import("@/pages/kiosk")));
 const KioskDetail = Loadable(lazy(() => import("@/pages/kiosk/detail")));
@@ -90,6 +91,10 @@ const MainRoutes = {
         {
           path: "report",
           element: <Report />,
+        },
+        {
+          path: "/sq-and-em",
+          element: <SQANDEM />,
         },
       ],
     },

@@ -68,13 +68,13 @@ const Questions = () => {
         >
           <Typography variant="h3">Manage Questions</Typography>
 
-          <Button
+          {/* <Button
             variant="contained"
             startIcon={<PlusOutlined />}
             onClick={toggleQuestionsManipulator}
           >
             Add New Question
-          </Button>
+          </Button> */}
         </Stack>
       </Stack>
 

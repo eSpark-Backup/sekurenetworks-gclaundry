@@ -2,7 +2,8 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { BarChartOutlined, BookOutlined, LayoutOutlined, NumberOutlined, UserOutlined } from '@ant-design/icons';
+import { BarChartOutlined, BookOutlined, LayoutOutlined, NumberOutlined, UserOutlined, QuestionCircleOutlined } from '@ant-design/icons';
+
 
 // icons
 const icons = {
@@ -10,7 +11,8 @@ const icons = {
   NumberOutlined,
   UserOutlined,
   BookOutlined,
-  BarChartOutlined
+  BarChartOutlined,
+  QuestionCircleOutlined
 };
 
 // ==============================|| MENU ITEMS - SUPPORT ||============================== //
@@ -55,6 +57,13 @@ const other = {
       type: 'item',
       url: '/report',
       icon: icons.BarChartOutlined
+    },
+    {
+      id: 'sq-and-em',
+      title: <FormattedMessage id="SQ & EM" />,
+      type: 'item',
+      url: '/sq-and-em',
+      icon: icons.QuestionCircleOutlined
     }
   ]
 };

@@ -128,13 +128,13 @@ const Quotes = () => {
           alignItems="center"
         >
           <Typography variant="h3">Manage Environmental Messages</Typography>
-          <Button
+          {/* <Button
             variant="contained"
             startIcon={<PlusOutlined />}
             onClick={() => setEditDailog(true)}
           >
             Add New EM
-          </Button>
+          </Button> */}
         </Stack>
       </Stack>
 
@@ -153,11 +153,11 @@ const Quotes = () => {
                           marginBottom: "0.5rem",
                         }}
                       >
-                        <Chip
+                        {/* <Chip
                           size="small"
                           label={message.isActive ? "Active" : "inactive"}
                           color={message.isActive ? "success" : "default"}
-                        />
+                        /> */}
                       </Box>
 
                       <Box
@@ -182,9 +182,10 @@ const Quotes = () => {
                             display: "flex",
                             gap: "0.3rem",
                             alignItems: "center",
+                            minWidth: "3rem",
                           }}
                         >
-                          <IconButton
+                          {/* <IconButton
                             disabled={isDeleteLoading}
                             onClick={() => {
                               formik.setValues(message);
@@ -192,7 +193,7 @@ const Quotes = () => {
                             }}
                           >
                             <EditOutlined />
-                          </IconButton>
+                          </IconButton> */}
 
                           {isDeleteLoading ? (
                             <Box
@@ -233,7 +234,7 @@ const Quotes = () => {
             handleClose={() => setDeleteDailog({ state: false, id: null })}
             handleConfirm={async () => await deleteQoute(deleteDailog.id)}
             okBtnText="Delete"
-            text="Are you sure, you want to Delete this Quote?"
+            text="Are you sure, you want to Remove this Quote?"
           />
         </Box>
 

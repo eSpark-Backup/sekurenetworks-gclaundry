@@ -82,7 +82,7 @@ const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
         open={isDeleteDialogOpen}
         handleClose={toggleQuestionDialog}
         handleConfirm={deleteQuestionHandler}
-        text="Are you sure, you want to Delete this Question?"
+        text="Are you sure, you want to remove this Question?"
         okBtnText="Delete"
       />
     </Box>
