@@ -18,6 +18,7 @@ export default () => ({
       'https://generation-conscious--wip-9q0oz6i3.web.app',
       'generation-conscious.web.app',
       'generation-conscious.firebaseapp.com',
+      'https://genco-stg.esparkconsultants.com/api',
     ],
   },
   auth: {
