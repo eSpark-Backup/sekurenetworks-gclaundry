@@ -13,6 +13,7 @@ import { useParams } from "react-router-dom";
 import { getKioskQuestions } from "@/api/kiosk";
 import ApiLoader from "@/components/api-loader";
 import { QuestionsList, QuestionsManipulator } from "./shared";
+import KiosksAssigner from "./shared/kiosks-assigner";
 
 const Questions = () => {
   const { id } = useParams();
@@ -34,6 +35,14 @@ const Questions = () => {
     isopen: false,
     details: null,
   });
+  const [selectedQuestions, setSelectedQuestions] = useState([]);
+  const [openSelectedKioksDialog, setOpenSelectedKioksDialog] = useState(false);
+
+  useEffect(() => {
+    console.log(selectedQuestions, "selectedQuestions");
+
+  }
+    , [selectedQuestions]);
 
   const dummyQuestions = [
     {
@@ -143,23 +152,47 @@ const Questions = () => {
     fetchKiosksQustions();
   }, [fetchKiosksQustions]);
 
+  const toggleSelectedQuestion = (question: Question) => {
+    setSelectedQuestions((prev) => {
+      const isAlreadySelected = prev.some((q) => q.id === question.id);
+      if (isAlreadySelected) {
+        return prev.filter((q) => q.id !== question.id);
+      }
+      return [...prev, question];
+    });
+  };
+
   return (
     <Box>
       <Stack spacing={3}>
         <Stack
           direction={matchDownSM ? "column" : "row"}
           justifyContent="space-between"
-          alignItems="center"
+          sx={{ alignItems: "center", gap: "1rem" }}
         >
           <Typography variant="h3">Manage Questions</Typography>
 
-          <Button
-            variant="contained"
-            startIcon={<PlusOutlined />}
-            onClick={toggleQuestionsManipulator}
-          >
-            Add New Question
-          </Button>
+          <Box sx={{
+            display: "flex",
+            gap: "1rem",
+            flexDirection: { xs: "column", sm: "row" },
+          }}>
+            <Button
+              variant="contained"
+              disabled={!selectedQuestions.length}
+              onClick={() => setOpenSelectedKioksDialog(true)}
+
+            >
+              Assign Questions
+            </Button>
+            <Button
+              variant="contained"
+              startIcon={<PlusOutlined />}
+              onClick={toggleQuestionsManipulator}
+            >
+              Add New Question
+            </Button>
+          </Box>
         </Stack>
       </Stack>
 
@@ -168,6 +201,8 @@ const Questions = () => {
           onEditClick={toggleQuestionsManipulator}
           onDelete={onDeleteHandler}
           questions={questions}
+          toggleSelectedQuestion={toggleSelectedQuestion}
+          selectedQuestions={selectedQuestions}
         />
         {questionDialog.isopen && (
           <QuestionsManipulator
@@ -177,8 +212,18 @@ const Questions = () => {
             open={questionDialog.isopen}
             handleClose={toggleQuestionsManipulator}
             onManipulation={onManipulationHandler}
+
           />
         )}
+
+        {
+          <KiosksAssigner
+            open={openSelectedKioksDialog}
+            handleClose={() => setOpenSelectedKioksDialog(false)}
+          // handleClose={() => { }}
+          // selectedQuestions={selectedQuestions}
+          />
+        }
       </ApiLoader>
     </Box>
   )

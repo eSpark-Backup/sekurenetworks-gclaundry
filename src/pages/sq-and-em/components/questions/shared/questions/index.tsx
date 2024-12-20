@@ -8,7 +8,7 @@ import { deleteQuestion } from "@/api/kiosk";
 import DeleteQuestionConfirmation from "../delete-confirmation";
 import ConfirmationDailog from "@/components/ConfirmDailog";
 
-const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
+const QuestionsList = ({ questions = [], onEditClick, onDelete, toggleSelectedQuestion, selectedQuestions }) => {
   const [deleteQuestionLoading, setDeleteQuestionLoading] = useState({
     id: null,
     isLoading: false,
@@ -19,6 +19,9 @@ const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
   const toggleQuestionDialog = ({ id = null } = {}) => {
     setDeleteQuestionId(id);
   };
+
+  const isQuestionSelected = (id) =>
+    selectedQuestions.some((question) => question.id === id);
 
   const updateDeleteQuestionLoading = (isLoading = false, id = null) => {
     setDeleteQuestionLoading({
@@ -56,16 +59,26 @@ const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
         <Box>
           {questions.map((question, i) => {
             const isDeleteLoading = deleteQuestionLoading.id === question.id;
-
+            const isSelected = isQuestionSelected(question.id);
             return (
-              <Box my="0.3rem" key={question.id}>
-                <QuestionCard
-                  index={i}
-                  questionDetails={question}
-                  isDeleteLoading={isDeleteLoading}
-                  onEditClick={onEditClick}
-                  onDeleteClick={deleteCOnfirmationHandler}
-                />
+              <Box my="0.3rem" key={question.id} sx={{ display: "flex", alignItems: "center" }}>
+                <Box>
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => toggleSelectedQuestion(question)}
+                    style={{ marginRight: "1rem", cursor: "pointer", width: "1rem", height: "1rem", accentColor: isSelected ? "red" : "initial", }}
+                  />
+                </Box>
+                <Box sx={{ width: "100%" }}>
+                  <QuestionCard
+                    index={i}
+                    questionDetails={question}
+                    isDeleteLoading={isDeleteLoading}
+                    onEditClick={onEditClick}
+                    onDeleteClick={deleteCOnfirmationHandler}
+                  />
+                </Box>
               </Box>
             );
           })}
