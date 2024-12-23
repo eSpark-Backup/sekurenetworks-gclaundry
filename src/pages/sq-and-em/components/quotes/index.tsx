@@ -27,6 +27,7 @@ import { useRequest } from "ahooks";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import * as yup from "yup";
+import KiosksAssigner from "../questions/shared/kiosks-assigner";
 
 const Quotes = () => {
   const { id } = useParams();
@@ -40,6 +41,8 @@ const Quotes = () => {
   }>({ state: false, id: null });
 
   const [quotes, setQuotes] = useState<IEnviromentalMessage[]>([]);
+  const [selectedQuotes, setSelectedQuotes] = useState([]);
+  const [openSelectedKioksDialog, setOpenSelectedKioksDialog] = useState(false);
 
   const DummyQoutes = [
     {
@@ -135,6 +138,19 @@ const Quotes = () => {
     setEditDailog(false);
   };
 
+  const toggleSelectedQuote = (qoute: any) => {
+    setSelectedQuotes((prev) => {
+      const isAlreadySelected = prev.some((q) => q.id === qoute.id);
+      if (isAlreadySelected) {
+        return prev.filter((q) => q.id !== qoute.id);
+      }
+      return [...prev, qoute];
+    });
+  };
+
+  const isQuoteSelected = (id) =>
+    selectedQuotes.some((qoutes) => qoutes.id === id);
+
   useEffect(() => {
     (async () => {
       await getQoutes(id);
@@ -150,13 +166,29 @@ const Quotes = () => {
           alignItems="center"
         >
           <Typography variant="h3">Manage Environmental Messages</Typography>
-          <Button
-            variant="contained"
-            startIcon={<PlusOutlined />}
-            onClick={() => setEditDailog(true)}
-          >
-            Add New EM
-          </Button>
+
+          <Box sx={{
+            display: "flex",
+            gap: "1rem",
+            flexDirection: { xs: "column", sm: "row" },
+          }}>
+            <Button
+              variant="contained"
+              disabled={!selectedQuotes.length}
+              onClick={() => setOpenSelectedKioksDialog(true)}
+
+            >
+              Assign Quotes
+            </Button>
+
+            <Button
+              variant="contained"
+              startIcon={<PlusOutlined />}
+              onClick={() => setEditDailog(true)}
+            >
+              Add New EM
+            </Button>
+          </Box>
         </Stack>
       </Stack>
 
@@ -165,80 +197,91 @@ const Quotes = () => {
           {quotes.length > 0 ? (
             <Box>
               {quotes.map((message) => {
+                const isSelected = isQuoteSelected(message.id);
                 return (
-                  <Box my="0.3rem" key={message.id}>
-                    <MainCard>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "flex-end",
-                          marginBottom: "0.5rem",
-                        }}
-                      >
-                        <Chip
-                          size="small"
-                          label={message.isActive ? "Active" : "inactive"}
-                          color={message.isActive ? "success" : "default"}
-                        />
-                      </Box>
-
-                      <Box
-                        sx={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Typography
-                          variant="body1"
-                          fontSize="1.3rem"
+                  <Box my="0.3rem" key={message.id} sx={{ display: "flex", alignItems: "center" }}>
+                    <Box>
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelectedQuote(message)}
+                        style={{ marginRight: "1rem", cursor: "pointer", width: "1rem", height: "1rem", accentColor: isSelected ? "red" : "initial", }}
+                      />
+                    </Box>
+                    <Box sx={{ width: "100%" }}>
+                      <MainCard>
+                        <Box
                           sx={{
-                            whiteSpace: "pre-wrap",
-                            wordBreak: "break-word",
+                            display: "flex",
+                            justifyContent: "flex-end",
+                            marginBottom: "0.5rem",
                           }}
                         >
-                          {message.quote}
-                        </Typography>
+                          <Chip
+                            size="small"
+                            label={message.isActive ? "Active" : "inactive"}
+                            color={message.isActive ? "success" : "default"}
+                          />
+                        </Box>
 
                         <Box
                           sx={{
                             display: "flex",
-                            gap: "0.3rem",
-                            alignItems: "center",
+                            justifyContent: "space-between",
                           }}
                         >
-                          <IconButton
-                            disabled={isDeleteLoading}
-                            onClick={() => {
-                              formik.setValues(message);
-                              setEditDailog(true);
+                          <Typography
+                            variant="body1"
+                            fontSize="1.3rem"
+                            sx={{
+                              whiteSpace: "pre-wrap",
+                              wordBreak: "break-word",
                             }}
                           >
-                            <EditOutlined />
-                          </IconButton>
+                            {message.quote}
+                          </Typography>
 
-                          {isDeleteLoading ? (
-                            <Box
-                              sx={{
-                                display: "flex",
-                                justifyContent: "center",
-                                minWidth: "2.4rem",
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: "0.3rem",
+                              alignItems: "center",
+                            }}
+                          >
+                            <IconButton
+                              disabled={isDeleteLoading}
+                              onClick={() => {
+                                formik.setValues(message);
+                                setEditDailog(true);
                               }}
                             >
-                              <CircularProgress size="1rem" />
-                            </Box>
-                          ) : (
-                            <IconButton
-                              color="error"
-                              onClick={() =>
-                                setDeleteDailog({ state: true, id: message.id })
-                              }
-                            >
-                              <DeleteOutlined />
+                              <EditOutlined />
                             </IconButton>
-                          )}
+
+                            {isDeleteLoading ? (
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  justifyContent: "center",
+                                  minWidth: "2.4rem",
+                                }}
+                              >
+                                <CircularProgress size="1rem" />
+                              </Box>
+                            ) : (
+                              <IconButton
+                                color="error"
+                                onClick={() =>
+                                  setDeleteDailog({ state: true, id: message.id })
+                                }
+                              >
+                                <DeleteOutlined />
+                              </IconButton>
+                            )}
+                          </Box>
                         </Box>
-                      </Box>
-                    </MainCard>
+                      </MainCard>
+                    </Box>
                   </Box>
                 );
               })}
@@ -319,6 +362,15 @@ const Quotes = () => {
           </Dialog>
         </form>
       </ApiLoader>
+
+      {
+        <KiosksAssigner
+          open={openSelectedKioksDialog}
+          handleClose={() => setOpenSelectedKioksDialog(false)}
+        // handleClose={() => { }}
+        // selectedQuestions={selectedQuestions}
+        />
+      }
     </Box>
   );
 };

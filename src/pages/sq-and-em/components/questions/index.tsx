@@ -38,11 +38,6 @@ const Questions = () => {
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [openSelectedKioksDialog, setOpenSelectedKioksDialog] = useState(false);
 
-  useEffect(() => {
-    console.log(selectedQuestions, "selectedQuestions");
-
-  }
-    , [selectedQuestions]);
 
   const dummyQuestions = [
     {
