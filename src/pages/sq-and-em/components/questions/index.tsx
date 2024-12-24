@@ -110,6 +110,7 @@ const Questions = () => {
       type: "QUESTION",
     });
 
+    fetchKiosksQustions();
   }
 
 

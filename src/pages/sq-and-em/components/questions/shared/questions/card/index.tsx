@@ -4,9 +4,10 @@ import {
   Chip,
   CircularProgress,
   IconButton,
+  Tooltip,
   Typography,
 } from "@mui/material";
-import { DeleteOutlined, EditOutlined,CheckOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, CheckOutlined } from "@ant-design/icons";
 
 import MainCard from "@/components/MainCard";
 import { StyledoptionWrapper } from "./ui";
@@ -20,6 +21,8 @@ const QuestionCard = ({
 }) => {
   const question = `Q${index + 1}. ${questionDetails.question}`;
 
+  let kioks = questionDetails.kiosks?.map((kiosk) => kiosk.kioskName).join("\n")
+
   return (
     <MainCard>
       <Box
@@ -27,8 +30,25 @@ const QuestionCard = ({
           display: "flex",
           justifyContent: "flex-end",
           marginBottom: "0.5rem",
+          gap: "0.3rem",
         }}
       >
+
+        {questionDetails?.kiosks?.length > 0 &&
+          <Tooltip title={<div style={{ minWidth: '80px', whiteSpace: 'pre-wrap' }}>
+            {kioks}
+          </div>}
+            placement="top"
+          >
+            <Chip sx={{
+              backgroundColor: "#f3f3f3",
+              color: "#000",
+              fontSize: "0.8rem",
+            }} size="small" label={"Assigned to"} color={"info"} />
+          </Tooltip>
+
+        }
+
         {questionDetails.isActive ? (
           <Chip size="small" label="Active" color="success" />
         ) : (
