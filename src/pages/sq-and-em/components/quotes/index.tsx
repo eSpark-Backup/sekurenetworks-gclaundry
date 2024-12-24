@@ -43,38 +43,22 @@ const Quotes = () => {
   const [quotes, setQuotes] = useState<IEnviromentalMessage[]>([]);
   const [selectedQuotes, setSelectedQuotes] = useState([]);
   const [openSelectedKioksDialog, setOpenSelectedKioksDialog] = useState(false);
+  const [selectedKiosks, setSelectedKiosks] = useState([]);
+  const [assignLoading, setAssignLoading] = useState(false);
 
-  const DummyQoutes = [
-    {
-      "id": "b5f66902-dc71-4997-82a1-5dc5892b2695",
-      "quote": "If 2 out of 3 people refill Generation Conscious sheets instead of using pods or liquid detergent then we can achieve a 45% carbon reduction pathway in the laundry detergent category",
-      "isActive": true,
-      "kioskId": "14:f6:d8:31:d3:15"
-    },
-    {
-      "id": "94f7204b-f8cf-4aea-8d16-124f2f54e583",
-      "quote": "Hygiene Security: Did you know 1 in 5 U.S. citizens cuts back on food to buy hygiene products",
-      "isActive": true,
-      "kioskId": "14:f6:d8:31:d3:15"
-    },
-    {
-      "id": "f9798bf5-792c-4666-9cb0-0a83e8c9e56e",
-      "quote": "Eco-Classism is where \"sustainable\" products are only accessible to upper-middle class people. ",
-      "isActive": true,
-      "kioskId": "14:f6:d8:31:d3:15"
-    }
-  ];
+  const isQuoteSelected = (id) =>
+    selectedQuotes.some((qoutes) => qoutes.id === id);
 
   // Get EM by mac id
   const {
     runAsync: getQoutes,
     loading,
     refreshAsync,
-  } = useRequest((macId) => apiService.quotes.get(macId), {
+  } = useRequest(() => apiService.quotes.getAll(), {
     manual: true,
     onSuccess: ({ data }) => {
-      // setQuotes(data);
-      setQuotes(DummyQoutes);
+      setQuotes(data);
+      // setQuotes(DummyQoutes);
     },
   });
 
@@ -92,8 +76,8 @@ const Quotes = () => {
   );
 
   // create EM
-  const { runAsync: createQoute } = useRequest(
-    (data) => apiService.quotes.create(data),
+  const { runAsync: createGeneral } = useRequest(
+    (data) => apiService.quotes.createGeneral(data),
     {
       manual: true,
       onSuccess: async () => {
@@ -129,7 +113,7 @@ const Quotes = () => {
     validationSchema: quoteSchema,
     onSubmit: async (values: any) => {
       if (values.id) await updateQoute(values.id, values);
-      else await createQoute({ ...values, kioskId: id });
+      else await createGeneral({ ...values, kioskId: id });
     },
   });
 
@@ -148,8 +132,36 @@ const Quotes = () => {
     });
   };
 
-  const isQuoteSelected = (id) =>
-    selectedQuotes.some((qoutes) => qoutes.id === id);
+
+
+    const { runAsync: assignToKiosk } = useRequest(
+      (data) => apiService.kisok.assignToKiosk(data),
+      {
+        manual: true,
+        onSuccess: ({ data }: any) => {
+          toast(data.message, { type: "success" });
+          setAssignLoading(false);
+          setOpenSelectedKioksDialog(false);
+          setSelectedKiosks([]);
+          setSelectedQuotes([]);
+        },
+        onError: (error) => {
+          console.error(error);
+          toast("An error occured while assigning questions", { type: "error" });
+          setAssignLoading(false);
+        },
+      }
+    );
+  
+    const handleKiosksAssign = async () => {
+      setAssignLoading(true);
+      await assignToKiosk({
+        kioskIds: selectedKiosks.map((k) => k.macId),
+        dataIds: selectedQuotes.map((q) => q.id),
+        type: "QUOTE",
+      });
+  
+    }
 
   useEffect(() => {
     (async () => {
@@ -367,8 +379,11 @@ const Quotes = () => {
         <KiosksAssigner
           open={openSelectedKioksDialog}
           handleClose={() => setOpenSelectedKioksDialog(false)}
-        // handleClose={() => { }}
-        // selectedQuestions={selectedQuestions}
+          selectedKiosks={selectedKiosks}
+          setSelectedKiosks={setSelectedKiosks}
+          onAssign={handleKiosksAssign}
+          assignLoading={assignLoading}
+  
         />
       }
     </Box>

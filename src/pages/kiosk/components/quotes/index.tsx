@@ -55,13 +55,13 @@ const Quotes = () => {
 
   // delete EM
   const { runAsync: deleteQoute, loading: isDeleteLoading } = useRequest(
-    (id) => apiService.quotes.delete(id),
+    (id) => apiService.kisok.unAssignItem(id),
     {
       manual: true,
       onSuccess: async () => {
         setDeleteDailog({ state: false, id: null });
         await refreshAsync();
-        toast("Qoute deleted successfully", { type: "success" });
+        toast("Qoute unassign successfully", { type: "success" });
       },
     }
   );
@@ -209,7 +209,7 @@ const Quotes = () => {
                             <IconButton
                               color="error"
                               onClick={() =>
-                                setDeleteDailog({ state: true, id: message.id })
+                                setDeleteDailog({ state: true, id: message.relationId })
                               }
                             >
                               <DeleteOutlined />

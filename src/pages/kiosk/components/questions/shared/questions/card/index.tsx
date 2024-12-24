@@ -17,6 +17,7 @@ const QuestionCard = ({
   onEditClick,
   onDeleteClick,
   isDeleteLoading = false,
+  setDeleteRelationId,
 }) => {
   const question = `Q${index + 1}. ${questionDetails.question}`;
 
@@ -60,7 +61,10 @@ const QuestionCard = ({
           ) : (
             <IconButton
               color="error"
-              onClick={() => onDeleteClick(questionDetails.id)}
+              onClick={() => {
+                setDeleteRelationId(questionDetails.relationId);
+                onDeleteClick(questionDetails.id)
+              }}
             >
               <DeleteOutlined />
             </IconButton>

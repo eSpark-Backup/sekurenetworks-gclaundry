@@ -8,11 +8,15 @@ export class ApiService {
         getKiosk: (macId: string) => axiosService.get(`/kiosk/${macId}`),
         update: (macId: string,body:any) => axiosService.patch(`/kiosk/${macId}`,body),
         delete: (macId: string) => axiosService.delete(`/kiosk/${macId}`),
+        assignToKiosk: (body:any) => axiosService.post(`/kiosk/assign`,body),
+        unAssignItem: (id:any) => axiosService.delete(`/kiosk/unassign/${id}`),
     };
 
     quotes = {
         get: (macId: string) => axiosService.get<IEnviromentalMessage[]>(`/quotes/${macId}`),
+        getAll: () => axiosService.get<IEnviromentalMessage[]>(`/quotes/all`),
         create: (body:any) => axiosService.post(`/quotes/`,body),
+        createGeneral: (body:any) => axiosService.post(`/quotes/create-general`,body),
         update: (id: string,body:any) => axiosService.patch(`/quotes/${id}`,body),
         delete: (id: string) => axiosService.delete(`/quotes/${id}`),
     };

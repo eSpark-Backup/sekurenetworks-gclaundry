@@ -1,9 +1,40 @@
-import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, Divider, TextField, Tooltip } from '@mui/material'
+import { getAllKioskData } from '@/api/kiosk';
+import { LoadingButton } from '@mui/lab';
+import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, Divider, TextField, Tooltip, Typography } from '@mui/material'
+import { useEffect, useState } from 'react';
 
 const KiosksAssigner = ({
     open,
-    handleClose
+    handleClose,
+    selectedKiosks,
+    setSelectedKiosks,
+    onAssign,
+    assignLoading
+
 }) => {
+    const [kioks, setKioks] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+  
+    const fetchKiosks = async () => {
+        try {
+            const res = await getAllKioskData();
+            setKioks(res || []);
+           
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        fetchKiosks();
+    }, []);
+
+
+
     return (
         <Dialog
             open={open}
@@ -14,26 +45,24 @@ const KiosksAssigner = ({
         >
 
             <DialogContent>
-                <Autocomplete 
+                <Typography variant="h4" gutterBottom>Select Kiosks to Assign</Typography>
+                <br/>
+                <Autocomplete
                     multiple
                     id="tags-outlined"
-                    options={
-                        [
-                            { title: "Kiosk 1" },
-                            { title: "Kiosk 2" },
-                            { title: "Kiosk 3" },
-                            { title: "Kiosk 4" },
-                            { title: "Kiosk 5" },
-                        ]
-                    }
-                    getOptionLabel={(option) => option.title}
+                    options={kioks}
+                    loading={isLoading}
+                    disabled={isLoading}
+                    getOptionLabel={(option) => option.name}
                     filterSelectedOptions
+                    value={selectedKiosks} 
+                    onChange={(event, newValue) => setSelectedKiosks(newValue)} 
                     renderInput={(params) => (
                         <TextField
                             {...params}
                             variant="outlined"
-                            label="Select Kiosks"
-                            placeholder="Kiosks"
+                            label="Kiosks"
+                            placeholder={"Select Kiosks"}
                         />
                     )}
                 />
@@ -52,21 +81,16 @@ const KiosksAssigner = ({
 
                 <Tooltip title={"disabledMessage"}>
                     <div>
-                        <Button
+                        <LoadingButton
                             variant="contained"
                             sx={{ fontWeight: 600 }}
-                        //   onClick={onSubmitHandler}
-                        //   disabled={!!disabledMessage || isLoading}
+                          onClick={onAssign}
+                          disabled={kioks.length === 0 || assignLoading}
+                          loading={assignLoading}
                         >
-                            {/* {isLoading
-                ? isCreate
-                  ? "Creating..."
-                  : "Updating..."
-                : isCreate
-                ? "Create"
-                : "Update"} */}
+                            
                             Assign
-                        </Button>
+                        </LoadingButton>
                     </div>
                 </Tooltip>
             </DialogActions>

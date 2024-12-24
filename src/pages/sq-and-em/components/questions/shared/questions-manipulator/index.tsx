@@ -20,7 +20,7 @@ import {
 
 import { DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { toast } from "react-toastify";
-import { addQuestion, updateQuestion } from "@/api/kiosk";
+import { addGeneralQuestion, updateQuestion } from "@/api/kiosk";
 
 const emptyoption = {
   is_valid: false,
@@ -35,7 +35,7 @@ const QuestionsManipulator = ({
   kioskId,
   handleClose,
 }) => {
-  const manipulationApi = isCreate ? addQuestion : updateQuestion;
+  const manipulationApi = isCreate ? addGeneralQuestion : updateQuestion;
 
   const [isLoading, setIsLoading] = useState(false);
   const [questionDetails, setQuestionsDetails] = useState({
