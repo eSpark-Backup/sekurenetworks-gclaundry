@@ -13,6 +13,18 @@ export class QuotesService {
     this.prisma = new PrismaClient()
   }
 
+  async createGeneral(quotesData: any) {
+
+    const quote = await this.prisma.quote.create({
+      data: {
+        isActive: quotesData.isActive ?? true,
+        quote: quotesData.quote
+      }
+    });
+    // await this.publishQoutes(quotesData.kioskId)
+    return quote
+  }
+
   async create(quotesData: any) {
 
     const kiosk = await this.kioskService.findOne(quotesData.kioskId);
@@ -50,20 +62,48 @@ export class QuotesService {
   }
 
   async delete(id: string) {
-    const quote = await this.prisma.quote.findFirst({where: { id }})
+    const quote = await this.prisma.quote.findFirst({ where: { id } })
     if (!quote) throw new NotFoundException('Quote not found!');
     const count = await this.prisma.quote.count({ where: { kioskId: quote.kioskId } })
-    if(count <= 1) throw new BadRequestException("Atleast 1 qoute is required")
-    await this.prisma.quote.delete({where: { id }})
+    if (count <= 1) throw new BadRequestException("Atleast 1 qoute is required")
+
+    let QuotesRelations = await this.prisma.kioskRelation.findMany({ where: { quoteId: id } });
+
+    if (QuotesRelations.length > 0) {
+      await this.prisma.kioskRelation.deleteMany({ where: { quoteId: id } });
+    }
+
+
+    await this.prisma.quote.delete({ where: { id } })
     await this.publishQoutes(quote.kioskId)
-    return {message:"Quote deleted Sucessfully"};
+    return { message: "Quote deleted Sucessfully" };
   }
 
-  getAllQuotes(macId: string) {
-    return this.prisma.quote.findMany({
-      where: { kioskId: macId },
+  async getAllQuotesbyId(macId: string) {
+    // return this.prisma.quote.findMany({
+    //   where: { kioskId: macId },
+    // });
+
+    if (!macId) {
+      throw new BadRequestException("macID is required to get questions")
+    }
+
+
+    const relations = await this.prisma.kioskRelation.findMany({
+      where: { type: "QUOTE", kioskId: macId },
+      include: { quote: true },
     });
+
+    return relations.map((relation) => ({
+      ...relation.quote,
+      relationId: relation.id,
+    }));
   }
+
+  getAllQuotes() {
+    return this.prisma.quote.findMany();
+  }
+
 
 
   async publishQoutes(macId: string) {

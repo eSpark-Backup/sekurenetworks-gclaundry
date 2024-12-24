@@ -17,7 +17,7 @@ model Log {
 }
 
 model Transaction {
-  id             String   @id @default(uuid())
+  id             String     @id @default(uuid())
   quantity       Int
   tissueType     TissueType
   status         Status
@@ -30,15 +30,6 @@ model Transaction {
   kiosk          Kiosk      @relation(fields: [kioskId], references: [macId])
   question       Question?  @relation(fields: [questionId], references: [id])
   quote          Quote?     @relation(fields: [quoteId], references: [id])
-}
-
-model Quote {
-  id         String        @id @default(uuid())
-  quote      String
-  isActive   Boolean       @default(true)
-  kioskId    String
-  kiosk      Kiosk         @relation(fields: [kioskId], references: [macId])
-  appearance Transaction[]
 }
 
 model Kiosk {
@@ -60,18 +51,60 @@ model Kiosk {
   createdAt              DateTime       @default(now())
   updatedAt              DateTime       @updatedAt
   isDeleted              Boolean        @default(false)
-  customer               Customer?      @relation(fields: [customerId], references: [id] ,onDelete: SetNull)
+  customer               Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
   onSiteContact          OnSiteContact? @relation("Contact")
-  Quotes                 Quote[]
-  Questions              Question[]
+  // Quotes                 Quote[]
+  // Questions              Question[]
   logs                   Log[]
   transactions           Transaction[]
+
+  relations KioskRelation[]
+  Question  Question[]
+  Quote     Quote[]
 
   @@index([customerId])
 }
 
+model Question {
+  id            String        @id @default(uuid())
+  question      String
+  options       Json
+  isActive      Boolean       @default(true)
+  kioskId       String?
+  kiosk         Kiosk?         @relation(fields: [kioskId], references: [macId])
+  questionAsked Transaction[]
+
+  relations KioskRelation[]
+}
+
+model Quote {
+  id         String        @id @default(uuid())
+  quote      String
+  isActive   Boolean       @default(true)
+  kioskId    String?
+  kiosk      Kiosk?        @relation(fields: [kioskId], references: [macId])
+  appearance Transaction[]
+
+  relations KioskRelation[]
+}
+
+model KioskRelation {
+  id         String       @id @default(uuid())
+  kioskId    String
+  kiosk      Kiosk        @relation(fields: [kioskId], references: [macId])
+  questionId String?
+  question   Question?    @relation(fields: [questionId], references: [id])
+  quoteId    String?
+  quote      Quote?       @relation(fields: [quoteId], references: [id])
+  type       RelationType
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+
+  @@index([kioskId, questionId, quoteId])
+}
+
 model OnSiteContact {
-  id        String   @id @default(uuid())
+  id        String @id @default(uuid())
   firstName String
   lastName  String
   email     String
@@ -99,25 +132,20 @@ model Customer {
 }
 
 model Users {
-  id                 String            @id @default(uuid())
-  email              String            @unique
-  firstName          String
-  lastName           String
-  password           String            @db.Text
-  customerId         String
-  customer           Customer          @relation(fields: [customerId], references: [id])
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+  id         String   @id @default(uuid())
+  email      String   @unique
+  firstName  String
+  lastName   String
+  password   String   @db.Text
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
-model Question {
-  id            String   @id @default(uuid())
-  question      String
-  options       Json
-  isActive      Boolean       @default(true)
-  kioskId       String
-  kiosk         Kiosk         @relation(fields: [kioskId], references: [macId])
-  questionAsked Transaction[]
+enum RelationType {
+  QUESTION
+  QUOTE
 }
 
 enum TissueType {

@@ -20,6 +20,8 @@ export class KioskService {
     this.prisma = new PrismaClient()
   }
 
+
+
   async getKioskData(macId: string) {
 
     let kiosk = await this.prisma.kiosk.findFirst({
@@ -42,13 +44,13 @@ export class KioskService {
 
       kiosk = await this.prisma.kiosk.create({ data })
 
-      const qoutes = getDefaultMsgs(macId)
-      const survey = getDefaultSurvey(macId)
+      // const qoutes = getDefaultMsgs(macId)
+      // const survey = getDefaultSurvey(macId)
 
-      await this.prisma.$transaction([
-        this.prisma.question.createMany({ data: survey }),
-        this.prisma.quote.createMany({ data: qoutes })
-      ])
+      // await this.prisma.$transaction([
+      //   this.prisma.question.createMany({ data: survey }),
+      //   this.prisma.quote.createMany({ data: qoutes })
+      // ])
 
       await this.prisma.log.create({ data: { type: 'INFO', kioskId: macId, detail: log.created, createdAt: new Date() } })
 
@@ -268,6 +270,72 @@ export class KioskService {
     }
     const value = { scented, unscented, temperature, errors }
     await this.prisma.kiosk.update({ where: { macId }, data: { ...value, lastSeen: new Date() } })
+  }
+
+  async findAllKiosks() {
+    return await this.prisma.kiosk.findMany({ where: { isDeleted: false }, select: { macId: true, name: true } });
+  }
+
+
+  async assignToKiosks(data: any) {
+    const { kioskIds, dataIds, type } = data;
+  
+    // Build the relations array
+    const relations = [];
+    kioskIds.forEach((kioskId) => {
+      dataIds.forEach((dataId) => {
+        relations.push({
+          kioskId,
+          ...(type === "QUESTION" ? { questionId: dataId } : { quoteId: dataId }),
+          type,
+        });
+      });
+    });
+  
+    // Fetch existing relations from the database
+    const existingRelations = await this.prisma.kioskRelation.findMany({
+      where: {
+        kioskId: { in: kioskIds },
+        type,
+        ...(type === "QUESTION" ? { questionId: { in: dataIds } } : { quoteId: { in: dataIds } }),
+      },
+      select: {
+        kioskId: true,
+        ...(type === "QUESTION" ? { questionId: true } : { quoteId: true }),
+      },
+    });
+  
+    // Create a Set of existing relations for quick lookup
+    const existingSet = new Set(
+      existingRelations.map((relation) =>
+        `${relation.kioskId}-${type === "QUESTION" ? (relation as any).questionId : (relation as any).quoteId}`
+      )
+    );
+  
+    // Filter out duplicates
+    const filteredRelations = relations.filter(
+      (relation) =>
+        !existingSet.has(`${relation.kioskId}-${type === "QUESTION" ? relation.questionId : relation.quoteId}`)
+    );
+  
+    // Create new relations
+    if (filteredRelations.length > 0) {
+      await this.prisma.kioskRelation.createMany({
+        data: filteredRelations,
+      });
+    }
+  
+    return { message: "Assigned Successfully", statusCode: 200 };
+  }
+
+
+  async unassignItem(id: string) {
+    const relation = await this.prisma.kioskRelation.findFirst({ where: { id } });
+
+    if (!relation) throw new NotFoundException("Item not found");
+
+    await this.prisma.kioskRelation.delete({ where: { id } });
+    return { message: "Unassigned Successfully", statusCode: 200 };
   }
 
 }

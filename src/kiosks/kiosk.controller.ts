@@ -5,6 +5,7 @@ import {
   Get,
   Param,
   Patch,
+  Post,
   Query
 } from '@nestjs/common';
 import { KioskService } from './kiosk.service';
@@ -21,6 +22,16 @@ export class KioskController {
   findAll(@Query() filter: { take: number, skip: number, name: string | null, status: string | null ,error: string | null,customerId: string | null }) {
     return this.kioskService.findAll(filter);
   }
+
+  @Get('/kiosk-list') 
+  findAllKiosks() {
+    return this.kioskService.findAllKiosks();
+  }
+
+  // @Get('/sq-em')
+  // getKioksSQorEM(@Body() data: any) {
+  //   return this.kioskService.getKioksSQandEM(data);
+  // }
 
  
   @Get('/byKioskIds')
@@ -52,7 +63,18 @@ export class KioskController {
     return this.kioskService.delete(macId);
   }
 
+  @Post('/assign')
+  assignToKiosks(@Body() data: {
+    kioskIds: string[],
+    dataIds: string[],
+    type: string,
+  }) {
+    return this.kioskService.assignToKiosks(data);
+  }
 
-  
+  @Delete('/unassign/:id')
+  unassignItem(@Param('id') id: string) {
+    return this.kioskService.unassignItem(id);
+  }
 
 }
