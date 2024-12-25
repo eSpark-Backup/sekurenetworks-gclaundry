@@ -12,11 +12,15 @@ import { adjectives, colors, starWars, uniqueNamesGenerator } from 'unique-names
 import { getDefaultMsgs, getDefaultSurvey } from './dto/const';
 import { log } from './dto/logs';
 import { StatusDto } from './dto/status.schema';
+// import { MqttService } from 'src/mqtt/mqtt.service';
 
 @Injectable()
 export class KioskService {
   private prisma: PrismaClient;
-  constructor() {
+
+  constructor(
+    // private mqttService: MqttService
+  ) {
     this.prisma = new PrismaClient()
   }
 
@@ -279,7 +283,7 @@ export class KioskService {
 
   async assignToKiosks(data: any) {
     const { kioskIds, dataIds, type } = data;
-  
+
     // Build the relations array
     const relations = [];
     kioskIds.forEach((kioskId) => {
@@ -291,7 +295,7 @@ export class KioskService {
         });
       });
     });
-  
+
     // Fetch existing relations from the database
     const existingRelations = await this.prisma.kioskRelation.findMany({
       where: {
@@ -304,27 +308,61 @@ export class KioskService {
         ...(type === "QUESTION" ? { questionId: true } : { quoteId: true }),
       },
     });
-  
+
     // Create a Set of existing relations for quick lookup
     const existingSet = new Set(
       existingRelations.map((relation) =>
         `${relation.kioskId}-${type === "QUESTION" ? (relation as any).questionId : (relation as any).quoteId}`
       )
     );
-  
+
     // Filter out duplicates
     const filteredRelations = relations.filter(
       (relation) =>
         !existingSet.has(`${relation.kioskId}-${type === "QUESTION" ? relation.questionId : relation.quoteId}`)
     );
-  
+
     // Create new relations
     if (filteredRelations.length > 0) {
       await this.prisma.kioskRelation.createMany({
         data: filteredRelations,
       });
     }
-  
+
+
+    const questionsByKiosk = new Map<string, any[]>();
+    for (const relation of filteredRelations) {
+      if (!questionsByKiosk.has(relation.kioskId)) {
+        questionsByKiosk.set(relation.kioskId, []);
+      }
+      if (type === "QUESTION") {
+        const question = await this.prisma.question.findUnique({
+          where: { id: relation.questionId },
+        });
+
+        if (question && question.isActive) {
+          questionsByKiosk.get(relation.kioskId)?.push(question);
+        }
+      }
+      if (type === "QUOTE") {
+        const question = await this.prisma.quote.findUnique({
+          where: { id: relation.quoteId },
+        });
+
+        if (question && question.isActive) {
+          questionsByKiosk.get(relation.kioskId)?.push(question);
+        }
+      }
+    }
+
+    for (const [kioskId, questions] of questionsByKiosk) {
+      const kiosk = await this.prisma.kiosk.findUnique({ where: { macId: kioskId } });
+      if (kiosk && kiosk.macId && questions.length > 0) {
+        const topic = `survey/${kiosk.macId}`;
+        // this.mqttService.publish(topic, JSON.stringify(questions));
+      }
+    }
+
     return { message: "Assigned Successfully", statusCode: 200 };
   }
 

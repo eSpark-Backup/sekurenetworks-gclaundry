@@ -100,8 +100,43 @@ export class QuotesService {
     }));
   }
 
-  getAllQuotes() {
-    return this.prisma.quote.findMany();
+  async getAllQuotes() {
+    // Step 1: Fetch all quotes along with their relations
+    const quotes = await this.prisma.quote.findMany({
+      include: { relations: true },
+    });
+  
+    // Step 2: Extract unique kiosk IDs from relations
+    const kioskIds = [
+      ...new Set(quotes.flatMap((quote) => quote.relations.map((relation) => relation.kioskId))),
+    ];
+  
+    // Step 3: Fetch kiosk details for the extracted IDs
+    const kiosks = await this.prisma.kiosk.findMany({
+      where: {
+        macId: { in: kioskIds },
+      },
+      select: {
+        macId: true,
+        name: true,
+      },
+    });
+  
+    // Step 4: Map kiosk details by ID for quick lookup
+    const kioskMap = Object.fromEntries(kiosks.map((kiosk) => [kiosk.macId, kiosk]));
+  
+    // Step 5: Attach kiosk details to quotes
+    const quotesWithKioskDetails = quotes.map((quote) => ({
+      id: quote.id,
+      quote: quote.quote,
+      isActive: quote.isActive,
+      kiosks: quote.relations.map((relation) => ({
+        kioskId: relation.kioskId,
+        kioskName: kioskMap[relation.kioskId]?.name || null,
+      })),
+    }));
+  
+    return quotesWithKioskDetails;
   }
 
 
