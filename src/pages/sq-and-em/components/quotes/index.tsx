@@ -134,40 +134,45 @@ const Quotes = () => {
 
 
 
-    const { runAsync: assignToKiosk } = useRequest(
-      (data) => apiService.kisok.assignToKiosk(data),
-      {
-        manual: true,
-        onSuccess: ({ data }: any) => {
-          toast(data.message, { type: "success" });
-          setAssignLoading(false);
-          setOpenSelectedKioksDialog(false);
-          setSelectedKiosks([]);
-          setSelectedQuotes([]);
-        },
-        onError: (error) => {
-          console.error(error);
-          toast("An error occured while assigning questions", { type: "error" });
-          setAssignLoading(false);
-        },
-      }
-    );
-  
-    const handleKiosksAssign = async () => {
-      setAssignLoading(true);
-      await assignToKiosk({
-        kioskIds: selectedKiosks.map((k) => k.macId),
-        dataIds: selectedQuotes.map((q) => q.id),
-        type: "QUOTE",
-      });
-  
+  const { runAsync: assignToKiosk } = useRequest(
+    (data) => apiService.kisok.assignToKiosk(data),
+    {
+      manual: true,
+      onSuccess: ({ data }: any) => {
+        toast(data.message, { type: "success" });
+        setAssignLoading(false);
+        setOpenSelectedKioksDialog(false);
+        setSelectedKiosks([]);
+        setSelectedQuotes([]);
+      },
+      onError: (error) => {
+        console.error(error);
+        toast("An error occured while assigning questions", { type: "error" });
+        setAssignLoading(false);
+      },
     }
+  );
+
+  const handleKiosksAssign = async () => {
+    setAssignLoading(true);
+    await assignToKiosk({
+      kioskIds: selectedKiosks.map((k) => k.macId),
+      dataIds: selectedQuotes.map((q) => q.id),
+      type: "QUOTE",
+    });
+
+    await refreshAsync();
+
+  }
 
   useEffect(() => {
     (async () => {
       await getQoutes(id);
     })();
   }, [id]);
+
+
+
 
   return (
     <Box>
@@ -210,6 +215,9 @@ const Quotes = () => {
             <Box>
               {quotes.map((message) => {
                 const isSelected = isQuoteSelected(message.id);
+                const kioks = message?.kiosks?.map((kiosk) => kiosk.kioskName).join("\n")
+
+
                 return (
                   <Box my="0.3rem" key={message.id} sx={{ display: "flex", alignItems: "center" }}>
                     <Box>
@@ -227,8 +235,24 @@ const Quotes = () => {
                             display: "flex",
                             justifyContent: "flex-end",
                             marginBottom: "0.5rem",
+                            gap: "0.3rem",
                           }}
                         >
+                          {(message?.kiosks?.length ?? 0) > 0 &&
+                            <Tooltip title={<div style={{ minWidth: '80px', whiteSpace: 'pre-wrap' }}>
+                              {kioks}
+                            </div>}
+                              placement="top"
+                            >
+                              <Chip sx={{
+                                backgroundColor: "#f3f3f3",
+                                color: "#000",
+                                fontSize: "0.8rem",
+                              }} size="small" label={"Assigned to"} color={"info"} />
+                            </Tooltip>
+
+                          }
+
                           <Chip
                             size="small"
                             label={message.isActive ? "Active" : "inactive"}
@@ -383,7 +407,7 @@ const Quotes = () => {
           setSelectedKiosks={setSelectedKiosks}
           onAssign={handleKiosksAssign}
           assignLoading={assignLoading}
-  
+
         />
       }
     </Box>
