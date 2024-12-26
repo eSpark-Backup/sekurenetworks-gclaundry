@@ -35,14 +35,39 @@ export class QuestionsService {
     if (!question) {
       throw new NotFoundException('Question not found!');
     }
+
+    const kiosks = data.kiosks
+    
+    delete data.kiosks
+
     let updatedQustion = await this.prisma.question.update({ data, where: { id } })
-    await this.publishQuestion(question.kioskId)
-    return updatedQustion;
+
+    const kioskIds = kiosks.map((kiosk) => kiosk.kioskId) 
+
+    for (const kioskId of kioskIds) {
+      const kioskRelations = await this.prisma.kioskRelation.findMany({
+        where: { kioskId: kioskId },
+        include: { question: true },
+      });
+
+      const Questions = kioskRelations.map((rel) => (rel.question)).filter(Boolean);
+
+      const topic = `survey/${kioskId}`;
+      this.mqttService.publish(topic, JSON.stringify(Questions)); 
+    }
+
+    return {
+      ...updatedQustion,
+      kiosks
+    };
   }
+
+
+
   async delete(id: string) {
 
-
     const question = await this.prisma.question.findFirst({ where: { id } });
+    
     if (!question) throw new NotFoundException('Question not found!');
     const count = await this.prisma.question.count({ where: { kioskId: question.kioskId } });
     if (count <= 1) throw new BadRequestException("Atleast 1 Question is required")
@@ -55,7 +80,23 @@ export class QuestionsService {
 
     let questions = await this.prisma.question.delete({ where: { id } })
 
-    await this.publishQuestion(question.kioskId)
+    const kioskIds = questionsRelations.map((kiosk) => kiosk.kioskId) 
+
+    for (const kioskId of kioskIds) {
+      const kioskRelations = await this.prisma.kioskRelation.findMany({
+        where: { kioskId: kioskId },
+        include: { question: true },
+      });
+
+      const Questions = kioskRelations.map((rel) => (rel.question)).filter(Boolean);
+
+
+      const topic = `survey/${kioskId}`;
+      this.mqttService.publish(topic, JSON.stringify(Questions)); 
+    }
+    
+
+    // await this.publishQuestion(question.kioskId)
     return questions;
   }
 
@@ -104,7 +145,7 @@ export class QuestionsService {
     const questions = await this.prisma.question.findMany({
       include: { relations: true },
     });
-  
+
     // Extract unique kiosk IDs from relations
     const kioskIds = [
       ...new Set(questions.flatMap((q) => q.relations.map((r) => r.kioskId))),
@@ -120,10 +161,10 @@ export class QuestionsService {
         name: true,
       },
     });
-  
+
     // Map kiosk details by ID for quick lookup
     const kioskMap = Object.fromEntries(kiosks.map((kiosk) => [kiosk.macId, kiosk]));
-  
+
     // Attach kiosk details to questions
     const questionsWithKioskDetails = questions.map((question) => ({
       id: question.id,
@@ -136,7 +177,7 @@ export class QuestionsService {
       })),
     }));
 
-  
+
     return questionsWithKioskDetails;
   }
 

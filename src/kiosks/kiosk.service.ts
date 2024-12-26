@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException
 } from '@nestjs/common';
@@ -12,14 +14,15 @@ import { adjectives, colors, starWars, uniqueNamesGenerator } from 'unique-names
 import { getDefaultMsgs, getDefaultSurvey } from './dto/const';
 import { log } from './dto/logs';
 import { StatusDto } from './dto/status.schema';
-// import { MqttService } from 'src/mqtt/mqtt.service';
+import { MqttService } from 'src/mqtt/mqtt.service';
 
 @Injectable()
 export class KioskService {
   private prisma: PrismaClient;
 
   constructor(
-    // private mqttService: MqttService
+    @Inject(forwardRef(() => MqttService))
+    private mqttService: MqttService
   ) {
     this.prisma = new PrismaClient()
   }
@@ -335,31 +338,20 @@ export class KioskService {
       if (!questionsByKiosk.has(relation.kioskId)) {
         questionsByKiosk.set(relation.kioskId, []);
       }
-      if (type === "QUESTION") {
-        const question = await this.prisma.question.findUnique({
-          where: { id: relation.questionId },
-        });
-
-        if (question && question.isActive) {
-          questionsByKiosk.get(relation.kioskId)?.push(question);
-        }
-      }
-      if (type === "QUOTE") {
-        const question = await this.prisma.quote.findUnique({
-          where: { id: relation.quoteId },
-        });
-
-        if (question && question.isActive) {
-          questionsByKiosk.get(relation.kioskId)?.push(question);
-        }
-      }
     }
 
-    for (const [kioskId, questions] of questionsByKiosk) {
-      const kiosk = await this.prisma.kiosk.findUnique({ where: { macId: kioskId } });
-      if (kiosk && kiosk.macId && questions.length > 0) {
-        const topic = `survey/${kiosk.macId}`;
-        // this.mqttService.publish(topic, JSON.stringify(questions));
+    for (const [kioskId] of questionsByKiosk) {
+      const kioskRelations = await this.prisma.kioskRelation.findMany({
+        where: { kioskId: kioskId },
+        include: { question: true, quote: true },
+      });
+
+
+      const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(Boolean);
+
+      if (QuestionsOrQuotes.length > 0) {
+        const topic = `survey/${kioskId}`;
+        this.mqttService.publish(topic, JSON.stringify(QuestionsOrQuotes));
       }
     }
 
@@ -368,12 +360,44 @@ export class KioskService {
 
 
   async unassignItem(id: string) {
+    // Fetch and validate the relation
     const relation = await this.prisma.kioskRelation.findFirst({ where: { id } });
-
     if (!relation) throw new NotFoundException("Item not found");
 
+    // Delete the relation
     await this.prisma.kioskRelation.delete({ where: { id } });
+
+    // Fetch all remaining relations for the kiosk
+    const kioskRelations = await this.prisma.kioskRelation.findMany({
+      where: { kioskId: relation.kioskId },
+      include: { question: true, quote: true },
+    });
+
+    // If no more relations exist for the kiosk, return early
+    if (!kioskRelations.length) {
+      return { message: "Unassigned Successfully", statusCode: 200 };
+    }
+
+    // Determine the type of data to publish (quotes or questions)
+    const topic = `survey/${relation.kioskId}`;
+
+    if (relation.quoteId) {
+      // Extract and publish quotes
+      const quotes = kioskRelations.map((rel) => rel.quote).filter(Boolean);
+      this.mqttService.publish(topic, JSON.stringify(quotes));
+
+    }
+
+    if (relation.questionId) {
+      // Extract and publish questions
+      const questions = kioskRelations.map((rel) => rel.question).filter(Boolean);
+      this.mqttService.publish(topic, JSON.stringify(questions));
+
+    }
+
     return { message: "Unassigned Successfully", statusCode: 200 };
   }
 
 }
+
+
