@@ -33,7 +33,7 @@ const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
       updateDeleteQuestionLoading(true, deleteQuestionId);
       await unAssignQuestion(deleteRelationId);
       onDelete(deleteQuestionId);
-      toast("Question Deleted Successfully!", {
+      toast("Question Unassign Successfully!", {
         type: "success",
       });
     } catch (error) {

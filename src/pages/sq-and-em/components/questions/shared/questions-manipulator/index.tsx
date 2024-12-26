@@ -42,7 +42,9 @@ const QuestionsManipulator = ({
     question: details?.question || "",
     options: details?.options || [emptyoption],
     isActive: details?.isActive ?? true,
+    kiosks: details?.kiosks || [],
   });
+
 
   const isAnyOptionEmpty = questionDetails.options.some((op) => !op.option);
   const isAnyOptionSelected = questionDetails.options.some((op) => op.is_valid);
@@ -79,6 +81,7 @@ const QuestionsManipulator = ({
         isActive: questionDetails.isActive,
         options: questionDetails.options,
         question: questionDetails.question,
+        kiosks: questionDetails.kiosks,
       };
 
       if (isCreate) {

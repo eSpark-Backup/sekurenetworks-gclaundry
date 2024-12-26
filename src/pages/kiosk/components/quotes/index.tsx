@@ -61,7 +61,7 @@ const Quotes = () => {
       onSuccess: async () => {
         setDeleteDailog({ state: false, id: null });
         await refreshAsync();
-        toast("Qoute unassign successfully", { type: "success" });
+        toast("Qoute Unassign successfully", { type: "success" });
       },
     }
   );

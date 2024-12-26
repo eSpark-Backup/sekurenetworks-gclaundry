@@ -195,7 +195,7 @@ const Quotes = () => {
               onClick={() => setOpenSelectedKioksDialog(true)}
 
             >
-              Assign Quotes
+              Assign EM's
             </Button>
 
             <Button
