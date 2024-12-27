@@ -347,7 +347,10 @@ export class KioskService {
       });
 
 
-      const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(Boolean);
+      const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(rel => rel.isActive === true).filter(Boolean); 
+
+      console.log(QuestionsOrQuotes);
+      
 
       if (QuestionsOrQuotes.length > 0) {
         const topic = `survey/${kioskId}`;
@@ -383,14 +386,14 @@ export class KioskService {
 
     if (relation.quoteId) {
       // Extract and publish quotes
-      const quotes = kioskRelations.map((rel) => rel.quote).filter(Boolean);
+      const quotes = kioskRelations.map((rel) => rel.quote).filter(rel => rel.isActive === true).filter(Boolean);
       this.mqttService.publish(topic, JSON.stringify(quotes));
 
     }
 
     if (relation.questionId) {
       // Extract and publish questions
-      const questions = kioskRelations.map((rel) => rel.question).filter(Boolean);
+      const questions = kioskRelations.map((rel) => rel.question).filter(rel => rel.isActive === true).filter(Boolean);
       this.mqttService.publish(topic, JSON.stringify(questions));
 
     }
