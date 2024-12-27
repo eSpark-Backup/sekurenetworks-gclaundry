@@ -53,12 +53,40 @@ export class QuotesService {
     const quote = await this.prisma.quote.findFirst({
       where: { id },
     });
+
+
     if (!quote) {
       throw new NotFoundException('Quote not found!');
     }
+
+    const kiosks = data.kiosks
+    
+    delete data.kiosks
+
     const updatedQoute = await this.prisma.quote.update({ data, where: { id } });
-    await this.publishQoutes(quote.kioskId)
-    return updatedQoute
+
+    const kioskIds = kiosks.map((kiosk) => kiosk.kioskId) 
+
+    for (const kioskId of kioskIds) {
+      const kioskRelations = await this.prisma.kioskRelation.findMany({
+        where: { kioskId: kioskId },
+        include: { quote: true },
+      });
+
+      const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(Boolean);
+
+      const topic = `survey/${kioskId}`;
+      this.mqttService.publish(topic, JSON.stringify(Quotes)); 
+    }
+
+
+    // await this.publishQoutes(quote.kioskId)
+    delete updatedQoute.kioskId
+
+    return {
+      ...updatedQoute,
+      kiosks
+    }
   }
 
   async delete(id: string) {
@@ -67,15 +95,31 @@ export class QuotesService {
     const count = await this.prisma.quote.count({ where: { kioskId: quote.kioskId } })
     if (count <= 1) throw new BadRequestException("Atleast 1 qoute is required")
 
-    let QuotesRelations = await this.prisma.kioskRelation.findMany({ where: { quoteId: id } });
+    let quotesRelations = await this.prisma.kioskRelation.findMany({ where: { quoteId: id } });
 
-    if (QuotesRelations.length > 0) {
+    if (quotesRelations.length > 0) {
       await this.prisma.kioskRelation.deleteMany({ where: { quoteId: id } });
     }
 
-
     await this.prisma.quote.delete({ where: { id } })
-    await this.publishQoutes(quote.kioskId)
+
+    const kioskIds = quotesRelations.map((kiosk) => kiosk.kioskId) 
+
+    for (const kioskId of kioskIds) {
+      const kioskRelations = await this.prisma.kioskRelation.findMany({
+        where: { kioskId: kioskId },
+        include: { quote: true },
+      });
+
+      const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(Boolean);
+
+
+      const topic = `survey/${kioskId}`;
+      this.mqttService.publish(topic, JSON.stringify(Quotes)); 
+    }
+
+
+    // await this.publishQoutes(quote.kioskId)
     return { message: "Quote deleted Sucessfully" };
   }
 
