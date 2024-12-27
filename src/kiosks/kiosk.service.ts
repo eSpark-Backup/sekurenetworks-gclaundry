@@ -349,8 +349,6 @@ export class KioskService {
 
       const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(rel => rel.isActive === true).filter(Boolean); 
 
-      console.log(QuestionsOrQuotes);
-      
 
       if (QuestionsOrQuotes.length > 0) {
         const topic = `survey/${kioskId}`;
