@@ -7,6 +7,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import { LoadingButton } from "@mui/lab";
 
 interface ConfirmationDailogProps {
   open: boolean;
@@ -14,6 +15,7 @@ interface ConfirmationDailogProps {
   okBtnText: string;
   handleConfirm: () => any;
   handleClose: () => any;
+  assignLoading?: boolean;
 }
 
 const ConfirmationDailog: React.FC<ConfirmationDailogProps> = ({
@@ -22,6 +24,7 @@ const ConfirmationDailog: React.FC<ConfirmationDailogProps> = ({
   handleClose,
   text,
   okBtnText,
+  assignLoading,
 }) => {
   return (
     <Dialog
@@ -36,14 +39,15 @@ const ConfirmationDailog: React.FC<ConfirmationDailogProps> = ({
       </DialogContent>
       <DialogActions>
         <Button onClick={handleClose}>Cancel</Button>
-        <Button
+        <LoadingButton
           variant="contained"
           sx={{ fontWeight: 600 }}
           onClick={handleConfirm}
           autoFocus
+          loading={assignLoading}
         >
           {okBtnText}
-        </Button>
+        </LoadingButton>
       </DialogActions>
     </Dialog>
   );

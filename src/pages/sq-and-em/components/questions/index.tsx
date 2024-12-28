@@ -10,17 +10,20 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { getGeneralQuestions } from "@/api/kiosk";
+import { getAllKioskData, getGeneralQuestions } from "@/api/kiosk";
 import ApiLoader from "@/components/api-loader";
 import { QuestionsList, QuestionsManipulator } from "./shared";
 import KiosksAssigner from "./shared/kiosks-assigner";
 import { useRequest } from "ahooks";
 import apiService from "@/api/apiService";
 import { toast } from "react-toastify";
+import ConfirmationDailog from "@/components/ConfirmDailog";
+import useFetchKiosks from "@/hooks/useFetchKiosks";
 
 const Questions = () => {
   const { id } = useParams();
   const theme = useTheme();
+  const { kiosks, isLoading: kiosksLoading } = useFetchKiosks();
   const matchDownSM = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [isLaoding, setIsLoading] = useState(true);
@@ -42,6 +45,7 @@ const Questions = () => {
   const [openSelectedKioksDialog, setOpenSelectedKioksDialog] = useState(false);
   const [selectedKiosks, setSelectedKiosks] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
+  const [openAllKiosksConfirmationDialog, setOpenAllKiosksConfirmationDialog] = useState(false);
 
 
   const fetchKiosksQustions = useCallback(async () => {
@@ -91,6 +95,7 @@ const Questions = () => {
         toast(data.message, { type: "success" });
         setAssignLoading(false);
         setOpenSelectedKioksDialog(false);
+        setOpenAllKiosksConfirmationDialog(false);
         setSelectedKiosks([]);
         setSelectedQuestions([]);
       },
@@ -98,6 +103,7 @@ const Questions = () => {
         console.error(error);
         toast("An error occured while assigning questions", { type: "error" });
         setAssignLoading(false);
+        setOpenSelectedKioksDialog(false);
       },
     }
   );
@@ -113,10 +119,40 @@ const Questions = () => {
     fetchKiosksQustions();
   }
 
+  const handleAllKiosksAssign = async () => {
+    setAssignLoading(true);
+    await assignToKiosk({
+      kioskIds: kiosks.map((k) => k.macId),
+      dataIds: questions.map((q) => q.id),
+      type: "QUESTION",
+    });
+
+    fetchKiosksQustions();
+  }
+
+
+
 
   useEffect(() => {
     fetchKiosksQustions();
   }, [fetchKiosksQustions]);
+
+  // const fetchKiosks = async () => {
+  //     try {
+  //         const res = await getAllKioskData();
+  //         setKioks(res || []);
+
+  //     } catch (error) {
+  //         console.error(error);
+  //     } finally {
+  //         setIsLoading(false);
+  //     }
+  // };
+
+
+  // useEffect(() => {
+  //     fetchKiosks();
+  // }, []);
 
 
 
@@ -133,7 +169,8 @@ const Questions = () => {
           <Box sx={{
             display: "flex",
             gap: "1rem",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: { xs: "column", md: "row" },
+            mt: { xs: "1rem", md: 0 },
           }}>
             <Button
               variant="contained"
@@ -142,6 +179,12 @@ const Questions = () => {
 
             >
               Assign Questions
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => setOpenAllKiosksConfirmationDialog(true)}
+            >
+              Assign to All Kiosks
             </Button>
             <Button
               variant="contained"
@@ -174,17 +217,29 @@ const Questions = () => {
           />
         )}
 
-        {
-          <KiosksAssigner
-            open={openSelectedKioksDialog}
-            handleClose={() => setOpenSelectedKioksDialog(false)}
-            selectedKiosks={selectedKiosks}
-            setSelectedKiosks={setSelectedKiosks}
-            onAssign={handleKiosksAssign}
-            assignLoading={assignLoading}
 
-          />
-        }
+        <KiosksAssigner
+          open={openSelectedKioksDialog}
+          handleClose={() => setOpenSelectedKioksDialog(false)}
+          selectedKiosks={selectedKiosks}
+          setSelectedKiosks={setSelectedKiosks}
+          onAssign={handleKiosksAssign}
+          assignLoading={assignLoading}
+          kiosks={kiosks}
+          kiosksLoading={kiosksLoading}
+
+        />
+
+        <ConfirmationDailog
+          open={openAllKiosksConfirmationDialog}
+          handleClose={() => setOpenAllKiosksConfirmationDialog(false)}
+          handleConfirm={handleAllKiosksAssign}
+          text="Are you sure, you want to Assign below Questions to All kiosks?"
+          okBtnText="Assign"
+          assignLoading={assignLoading}
+
+        />
+
       </ApiLoader>
     </Box>
   )

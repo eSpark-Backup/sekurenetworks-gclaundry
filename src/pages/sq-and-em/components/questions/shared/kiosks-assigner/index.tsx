@@ -1,7 +1,6 @@
-import { getAllKioskData } from '@/api/kiosk';
+
 import { LoadingButton } from '@mui/lab';
 import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, Divider, TextField, Tooltip, Typography } from '@mui/material'
-import { useEffect, useState } from 'react';
 
 const KiosksAssigner = ({
     open,
@@ -9,30 +8,11 @@ const KiosksAssigner = ({
     selectedKiosks,
     setSelectedKiosks,
     onAssign,
-    assignLoading
+    assignLoading,
+    kiosks,
+    kiosksLoading,
 
 }) => {
-    const [kioks, setKioks] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-
-  
-    const fetchKiosks = async () => {
-        try {
-            const res = await getAllKioskData();
-            setKioks(res || []);
-           
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-
-    useEffect(() => {
-        fetchKiosks();
-    }, []);
-
 
 
     return (
@@ -50,9 +30,9 @@ const KiosksAssigner = ({
                 <Autocomplete
                     multiple
                     id="tags-outlined"
-                    options={kioks}
-                    loading={isLoading}
-                    disabled={isLoading}
+                    options={kiosks}
+                    loading={kiosksLoading}
+                    disabled={kiosksLoading}
                     getOptionLabel={(option) => option.name}
                     filterSelectedOptions
                     value={selectedKiosks} 
@@ -85,7 +65,7 @@ const KiosksAssigner = ({
                             variant="contained"
                             sx={{ fontWeight: 600 }}
                           onClick={onAssign}
-                          disabled={kioks.length === 0 || assignLoading}
+                          disabled={kiosks.length === 0 || assignLoading}
                           loading={assignLoading}
                         >
                             

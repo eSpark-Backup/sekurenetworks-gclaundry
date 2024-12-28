@@ -28,10 +28,13 @@ import { useFormik } from "formik";
 import { toast } from "react-toastify";
 import * as yup from "yup";
 import KiosksAssigner from "../questions/shared/kiosks-assigner";
+import useFetchKiosks from "@/hooks/useFetchKiosks";
 
 const Quotes = () => {
   const { id } = useParams();
   const theme = useTheme();
+  const { kiosks, isLoading: kiosksLoading } = useFetchKiosks();
+
   const matchDownSM = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [editDailog, setEditDailog] = useState(false);
@@ -45,6 +48,7 @@ const Quotes = () => {
   const [openSelectedKioksDialog, setOpenSelectedKioksDialog] = useState(false);
   const [selectedKiosks, setSelectedKiosks] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
+  const [openAllKiosksConfirmationDialog, setOpenAllKiosksConfirmationDialog] = useState(false);
 
   const isQuoteSelected = (id) =>
     selectedQuotes.some((qoutes) => qoutes.id === id);
@@ -165,6 +169,17 @@ const Quotes = () => {
 
   }
 
+  const handleAllKiosksAssign = async () => {
+    setAssignLoading(true);
+    await assignToKiosk({
+      kioskIds: kiosks.map((k) => k.macId),
+      dataIds: quotes.map((q) => q.id),
+      type: "QUOTE",
+    });
+
+    await refreshAsync();
+  }
+
   useEffect(() => {
     (async () => {
       await getQoutes(id);
@@ -187,7 +202,8 @@ const Quotes = () => {
           <Box sx={{
             display: "flex",
             gap: "1rem",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: { xs: "column", md: "row" },
+            mt: { xs: "1rem", md: 0 },
           }}>
             <Button
               variant="contained"
@@ -197,7 +213,12 @@ const Quotes = () => {
             >
               Assign EM's
             </Button>
-
+            <Button
+              variant="contained"
+              onClick={() => setOpenAllKiosksConfirmationDialog(true)}
+            >
+              Assign to All Kiosks
+            </Button>
             <Button
               variant="contained"
               startIcon={<PlusOutlined />}
@@ -399,17 +420,28 @@ const Quotes = () => {
         </form>
       </ApiLoader>
 
-      {
-        <KiosksAssigner
-          open={openSelectedKioksDialog}
-          handleClose={() => setOpenSelectedKioksDialog(false)}
-          selectedKiosks={selectedKiosks}
-          setSelectedKiosks={setSelectedKiosks}
-          onAssign={handleKiosksAssign}
-          assignLoading={assignLoading}
 
-        />
-      }
+      <KiosksAssigner
+        open={openSelectedKioksDialog}
+        handleClose={() => setOpenSelectedKioksDialog(false)}
+        selectedKiosks={selectedKiosks}
+        setSelectedKiosks={setSelectedKiosks}
+        onAssign={handleKiosksAssign}
+        assignLoading={assignLoading}
+        kiosks={kiosks}
+        kiosksLoading={kiosksLoading}
+      />
+
+      <ConfirmationDailog
+        open={openAllKiosksConfirmationDialog}
+        handleClose={() => setOpenAllKiosksConfirmationDialog(false)}
+        handleConfirm={handleAllKiosksAssign}
+        text="Are you sure, you want to Assign below Quotes to All kiosks?"
+        okBtnText="Assign"
+        assignLoading={assignLoading}
+
+      />
+
     </Box>
   );
 };
