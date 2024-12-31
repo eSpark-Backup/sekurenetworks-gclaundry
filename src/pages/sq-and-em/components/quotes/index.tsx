@@ -146,6 +146,7 @@ const Quotes = () => {
         toast(data.message, { type: "success" });
         setAssignLoading(false);
         setOpenSelectedKioksDialog(false);
+        setOpenAllKiosksConfirmationDialog(false);
         setSelectedKiosks([]);
         setSelectedQuotes([]);
       },
