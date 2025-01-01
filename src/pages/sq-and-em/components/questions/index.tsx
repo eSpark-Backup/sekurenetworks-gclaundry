@@ -46,6 +46,10 @@ const Questions = () => {
   const [selectedKiosks, setSelectedKiosks] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
   const [openAllKiosksConfirmationDialog, setOpenAllKiosksConfirmationDialog] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [kioksByCustomerId, setKiosksByCustomerId] = useState([]);
+  const [loadingKioksbyCustomerId, setLoadingKiosksByCustomerId] = useState(false);
 
 
   const fetchKiosksQustions = useCallback(async () => {
@@ -98,6 +102,7 @@ const Questions = () => {
         setOpenAllKiosksConfirmationDialog(false);
         setSelectedKiosks([]);
         setSelectedQuestions([]);
+        setSelectedCustomer(null);
       },
       onError: (error) => {
         console.error(error);
@@ -109,9 +114,10 @@ const Questions = () => {
   );
 
   const handleKiosksAssign = async () => {
+
     setAssignLoading(true);
     await assignToKiosk({
-      kioskIds: selectedKiosks.map((k) => k.macId),
+      kioskIds: selectedKiosks.length > 0 ? selectedKiosks.map((k) => k.macId) : kioksByCustomerId.map((k) => k.macId),
       dataIds: selectedQuestions.map((q) => q.id),
       type: "QUESTION",
     });
@@ -123,18 +129,26 @@ const Questions = () => {
     setAssignLoading(true);
     await assignToKiosk({
       kioskIds: kiosks.map((k) => k.macId),
-      dataIds: questions.map((q) => q.id),
+      dataIds: selectedQuestions.map((q) => q.id),
       type: "QUESTION",
     });
 
     fetchKiosksQustions();
   }
 
-
+  const { runAsync: getCustomers } = useRequest(
+    (query: any) => apiService.customer.get(query),
+    {
+      manual: true,
+      debounceWait: 1000,
+      onSuccess: ({ data }) => setCustomers(data.data),
+    }
+  );
 
 
   useEffect(() => {
     fetchKiosksQustions();
+    getCustomers({});
   }, [fetchKiosksQustions]);
 
   // const fetchKiosks = async () => {
@@ -154,7 +168,15 @@ const Questions = () => {
   //     fetchKiosks();
   // }, []);
 
+  const selectAllQuestions = () => {
+    setSelectedQuestions((prev) => {
+      if (prev.length === questions.length) return [];
+      return questions;
+    }
+    );
+  }
 
+  const isAllQuestionsSelected = selectedQuestions.length === questions.length;
 
   return (
     <Box>
@@ -166,35 +188,52 @@ const Questions = () => {
         >
           <Typography variant="h3">Manage Questions</Typography>
 
-          <Box sx={{
-            display: "flex",
-            gap: "1rem",
-            flexDirection: { xs: "column", md: "row" },
-            mt: { xs: "1rem", md: 0 },
-          }}>
-            <Button
-              variant="contained"
-              disabled={!selectedQuestions.length}
-              onClick={() => setOpenSelectedKioksDialog(true)}
+          <Box>
+            <Box sx={{
+              display: "flex",
+              gap: "1rem",
+              flexDirection: { xs: "column", md: "row" },
+              mt: { xs: "1rem", md: 0 },
+            }}>
 
-            >
-              Assign Questions
-            </Button>
-            <Button
-              variant="contained"
-              onClick={() => setOpenAllKiosksConfirmationDialog(true)}
-            >
-              Assign to All Kiosks
-            </Button>
-            <Button
-              variant="contained"
-              startIcon={<PlusOutlined />}
-              onClick={toggleQuestionsManipulator}
-            >
-              Add New Question
-            </Button>
+              <Button
+                variant="contained"
+                onClick={() => setOpenSelectedKioksDialog(true)}
+                disabled={selectedQuestions.length === 0}
+
+              >
+                Assign to Customer kiosks
+              </Button>
+              <Button
+                variant="contained"
+                disabled={selectedQuestions.length === 0}
+                onClick={() => setOpenAllKiosksConfirmationDialog(true)}
+              >
+                Assign to All Kiosks
+              </Button>
+              <Button
+                variant="contained"
+                startIcon={<PlusOutlined />}
+                onClick={toggleQuestionsManipulator}
+              >
+                Add New Question
+              </Button>
+            </Box>
+
           </Box>
+
         </Stack>
+
+        <Stack alignItems={"flex-end"} spacing={2}>
+          <Button
+            variant="contained"
+            onClick={selectAllQuestions}
+          >
+            {isAllQuestionsSelected ? "Deselect All" : "Select All"}
+          </Button>
+        </Stack>
+
+
       </Stack>
 
       <ApiLoader mt="1rem" isLoading={isLaoding}>
@@ -220,13 +259,24 @@ const Questions = () => {
 
         <KiosksAssigner
           open={openSelectedKioksDialog}
-          handleClose={() => setOpenSelectedKioksDialog(false)}
+          handleClose={() => {
+            setOpenSelectedKioksDialog(false);
+            setSelectedKiosks([]);
+            setSelectedCustomer(null);
+            setKiosksByCustomerId([]);
+          }
+          }
           selectedKiosks={selectedKiosks}
           setSelectedKiosks={setSelectedKiosks}
           onAssign={handleKiosksAssign}
           assignLoading={assignLoading}
-          kiosks={kiosks}
-          kiosksLoading={kiosksLoading}
+          kioksByCustomerId={kioksByCustomerId}
+          setKiosksByCustomerId={setKiosksByCustomerId}
+          loadingKioksbyCustomerId={loadingKioksbyCustomerId}
+          setLoadingKiosksByCustomerId={setLoadingKiosksByCustomerId}
+          setSelectedCustomer={setSelectedCustomer}
+          customers={customers}
+          selectedCustomer={selectedCustomer}
 
         />
 
@@ -234,7 +284,7 @@ const Questions = () => {
           open={openAllKiosksConfirmationDialog}
           handleClose={() => setOpenAllKiosksConfirmationDialog(false)}
           handleConfirm={handleAllKiosksAssign}
-          text="Are you sure, you want to Assign below Questions to All kiosks?"
+          text={`Are you sure, you want to Assign Selected Questions to All kiosks?`}
           okBtnText="Assign"
           assignLoading={assignLoading}
 

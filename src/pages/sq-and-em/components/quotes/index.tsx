@@ -49,6 +49,10 @@ const Quotes = () => {
   const [selectedKiosks, setSelectedKiosks] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
   const [openAllKiosksConfirmationDialog, setOpenAllKiosksConfirmationDialog] = useState(false);
+  const [customers, setCustomers] = useState([]);
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [kioksByCustomerId, setKiosksByCustomerId] = useState([]);
+  const [loadingKioksbyCustomerId, setLoadingKiosksByCustomerId] = useState(false);
 
   const isQuoteSelected = (id) =>
     selectedQuotes.some((qoutes) => qoutes.id === id);
@@ -149,6 +153,7 @@ const Quotes = () => {
         setOpenAllKiosksConfirmationDialog(false);
         setSelectedKiosks([]);
         setSelectedQuotes([]);
+        setSelectedCustomer(null);
       },
       onError: (error) => {
         console.error(error);
@@ -161,7 +166,7 @@ const Quotes = () => {
   const handleKiosksAssign = async () => {
     setAssignLoading(true);
     await assignToKiosk({
-      kioskIds: selectedKiosks.map((k) => k.macId),
+      kioskIds: selectedKiosks.length > 0 ? selectedKiosks.map((k) => k.macId) : kioksByCustomerId.map((k) => k.macId),
       dataIds: selectedQuotes.map((q) => q.id),
       type: "QUOTE",
     });
@@ -174,21 +179,46 @@ const Quotes = () => {
     setAssignLoading(true);
     await assignToKiosk({
       kioskIds: kiosks.map((k) => k.macId),
-      dataIds: quotes.map((q) => q.id),
+      dataIds: selectedQuotes.map((q) => q.id),
       type: "QUOTE",
     });
 
     await refreshAsync();
   }
 
+  const { runAsync: getCustomers } = useRequest(
+    (query: any) => apiService.customer.get(query),
+    {
+      manual: true,
+      debounceWait: 1000,
+      onSuccess: ({ data }) => setCustomers(data.data),
+    }
+  );
+
+  const selectAllQuotes = () => {
+    setSelectedQuotes((prev) => {
+      if (prev.length === quotes.length) return [];
+      return quotes;
+    }
+    );
+  }
+
+  
+  
   useEffect(() => {
     (async () => {
       await getQoutes(id);
+      await getCustomers({});
     })();
   }, [id]);
 
 
 
+
+
+
+
+ const isAllQuotesSelected = selectedQuotes.length === quotes.length;
 
   return (
     <Box>
@@ -208,17 +238,18 @@ const Quotes = () => {
           }}>
             <Button
               variant="contained"
-              disabled={!selectedQuotes.length}
+              disabled={selectedQuotes.length === 0}
               onClick={() => setOpenSelectedKioksDialog(true)}
 
             >
-              Assign EM's
+              Assign To Customer Kiosks
             </Button>
             <Button
               variant="contained"
+              disabled={selectedQuotes.length === 0}
               onClick={() => setOpenAllKiosksConfirmationDialog(true)}
             >
-              Assign to All Kiosks
+              Assign To All Kiosks
             </Button>
             <Button
               variant="contained"
@@ -228,6 +259,15 @@ const Quotes = () => {
               Add New EM
             </Button>
           </Box>
+        </Stack>
+
+        <Stack alignItems={"flex-end"} spacing={2}>
+          <Button
+            variant="contained"
+            onClick={selectAllQuotes}
+          >
+            {isAllQuotesSelected ? "Deselect All" : "Select All"}
+          </Button>
         </Stack>
       </Stack>
 
@@ -424,20 +464,31 @@ const Quotes = () => {
 
       <KiosksAssigner
         open={openSelectedKioksDialog}
-        handleClose={() => setOpenSelectedKioksDialog(false)}
+        handleClose={() => {
+          setOpenSelectedKioksDialog(false);
+          setSelectedKiosks([]);
+          setSelectedCustomer(null);
+          setKiosksByCustomerId([]);
+        }
+        }
         selectedKiosks={selectedKiosks}
         setSelectedKiosks={setSelectedKiosks}
         onAssign={handleKiosksAssign}
         assignLoading={assignLoading}
-        kiosks={kiosks}
-        kiosksLoading={kiosksLoading}
+        kioksByCustomerId={kioksByCustomerId}
+        setKiosksByCustomerId={setKiosksByCustomerId}
+        loadingKioksbyCustomerId={loadingKioksbyCustomerId}
+        setLoadingKiosksByCustomerId={setLoadingKiosksByCustomerId}
+        setSelectedCustomer={setSelectedCustomer}
+        customers={customers}
+        selectedCustomer={selectedCustomer}
       />
 
       <ConfirmationDailog
         open={openAllKiosksConfirmationDialog}
         handleClose={() => setOpenAllKiosksConfirmationDialog(false)}
         handleConfirm={handleAllKiosksAssign}
-        text="Are you sure, you want to Assign below Quotes to All kiosks?"
+        text={`Are you sure, you want to Assign Selected Quotes to All kiosks?`}
         okBtnText="Assign"
         assignLoading={assignLoading}
 

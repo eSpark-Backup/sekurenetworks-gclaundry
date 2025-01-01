@@ -1,6 +1,8 @@
 
+import apiService from '@/api/apiService';
 import { LoadingButton } from '@mui/lab';
 import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, Divider, TextField, Tooltip, Typography } from '@mui/material'
+import { useRequest } from 'ahooks';
 
 const KiosksAssigner = ({
     open,
@@ -9,10 +11,32 @@ const KiosksAssigner = ({
     setSelectedKiosks,
     onAssign,
     assignLoading,
-    kiosks,
-    kiosksLoading,
+    customers,
+    kioksByCustomerId,
+    setKiosksByCustomerId,
+    setLoadingKiosksByCustomerId,
+    loadingKioksbyCustomerId,
+    setSelectedCustomer,
+    selectedCustomer
 
 }) => {
+
+
+    const { runAsync: getKiosks } = useRequest(
+
+        (query) => apiService.kisok.getKiosks(query),
+        {
+            manual: true,
+            debounceWait: 1000,
+            onSuccess: ({ data }) => {
+                setKiosksByCustomerId(data.data);
+                setLoadingKiosksByCustomerId(false);
+            },
+            onError: () => {
+                setLoadingKiosksByCustomerId(false);
+            },
+        }
+    );
 
 
     return (
@@ -25,27 +49,68 @@ const KiosksAssigner = ({
         >
 
             <DialogContent>
-                <Typography variant="h4" gutterBottom>Select Kiosks to Assign</Typography>
-                <br/>
+                <Typography variant="h4" gutterBottom>Select Customer Kiosks</Typography>
+                <br />
+
+                <Autocomplete
+                    sx={{ mb: 2 }}
+                    fullWidth
+                    options={customers}
+                    value={selectedCustomer}
+                    getOptionLabel={(option) => option.schoolName}
+                    clearIcon={null}
+                    onChange={async (_: any, customer) => {
+                        console.log(customer)
+                        setSelectedCustomer(customer);
+                        // if (!selectedCustomer) {
+                        //     setKiosksByCustomerId([]);
+                        //     return;
+                        // }
+                        if (!customer) {
+                            setKiosksByCustomerId([]);
+                            return;
+                        }
+                        setSelectedKiosks([]);
+                        setLoadingKiosksByCustomerId(true);
+                        await getKiosks({ customerId: customer.id });
+                    }}
+                    renderInput={(params) => (
+                        <TextField {...params} placeholder="Select Customer" />
+                    )}
+                />
+
+
                 <Autocomplete
                     multiple
                     id="tags-outlined"
-                    options={kiosks}
-                    loading={kiosksLoading}
-                    disabled={kiosksLoading}
+                    options={kioksByCustomerId}
+                    loading={loadingKioksbyCustomerId}
+                    disabled={loadingKioksbyCustomerId}
                     getOptionLabel={(option) => option.name}
                     filterSelectedOptions
-                    value={selectedKiosks} 
-                    onChange={(event, newValue) => setSelectedKiosks(newValue)} 
+                    value={selectedKiosks}
+                    onChange={(event, newValue) => setSelectedKiosks(newValue)}
                     renderInput={(params) => (
                         <TextField
                             {...params}
                             variant="outlined"
-                            label="Kiosks"
-                            placeholder={"Select Kiosks"}
+                            placeholder={loadingKioksbyCustomerId ? "Loading Kiosks" : "Select Kiosks"}
                         />
                     )}
                 />
+
+                <br />
+
+                <Typography color="error">{
+                    "Please Note if kioks not selected, it will be assign to all Customer Kiosks"
+                }</Typography>
+
+
+
+
+
+
+
 
                 <Box type="A" component="ol">
 
@@ -64,11 +129,11 @@ const KiosksAssigner = ({
                         <LoadingButton
                             variant="contained"
                             sx={{ fontWeight: 600 }}
-                          onClick={onAssign}
-                          disabled={kiosks.length === 0 || assignLoading}
-                          loading={assignLoading}
+                            onClick={onAssign}
+                            disabled={kioksByCustomerId.length === 0 || assignLoading || !selectedCustomer}
+                            loading={assignLoading}
                         >
-                            
+
                             Assign
                         </LoadingButton>
                     </div>
