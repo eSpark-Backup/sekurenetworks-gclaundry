@@ -50,6 +50,8 @@ const Questions = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [kioksByCustomerId, setKiosksByCustomerId] = useState([]);
   const [loadingKioksbyCustomerId, setLoadingKiosksByCustomerId] = useState(false);
+  const [openAllKiosksUnAssignConfirmationDialog, setOpenAllKiosksUnAssignConfirmationDialog] = useState(false);
+  const [unassingLoading, setUnassignLoading] = useState(false);
 
 
   const fetchKiosksQustions = useCallback(async () => {
@@ -113,6 +115,26 @@ const Questions = () => {
     }
   );
 
+  const { runAsync: unassignFromKiosk } = useRequest(
+    (data) => apiService.kisok.unassignToKiosk(data),
+    {
+      manual: true,
+      onSuccess: ({ data }: any) => {
+        toast(data.message, { type: "success" });
+        setUnassignLoading(false);
+        setOpenAllKiosksUnAssignConfirmationDialog(false);
+        setSelectedQuestions([]);
+      },
+      onError: (error) => {
+        console.error(error);
+        toast("An error occured while unassigning questions", { type: "error" });
+        setUnassignLoading(false);
+        setOpenAllKiosksUnAssignConfirmationDialog(false);
+        setSelectedQuestions([]);
+      },
+    }
+  );
+
   const handleKiosksAssign = async () => {
 
     setAssignLoading(true);
@@ -129,6 +151,32 @@ const Questions = () => {
     setAssignLoading(true);
     await assignToKiosk({
       kioskIds: kiosks.map((k) => k.macId),
+      dataIds: selectedQuestions.map((q) => q.id),
+      type: "QUESTION",
+    });
+
+    fetchKiosksQustions();
+  }
+
+  const handleAllKiosksUnAssign = async () => {
+    const hasNoKiosks = selectedQuestions.some(question => question.kiosks.length === 0);
+
+    if (hasNoKiosks) {
+      toast("Some of the selected questions are not assigned to any kiosk", { type: "error" });
+      setOpenAllKiosksUnAssignConfirmationDialog(false);
+      return;
+    }
+
+    const kioskIds = questions
+      .map(question => question.kiosks.map(kiosk => kiosk.kioskId)) // Extract kioskId arrays
+      .flat(); // Flatten the arrays into a single array
+
+    const uniqueKioskIds = [...new Set(kioskIds)]; // Remove duplicates
+
+
+    setUnassignLoading(true);
+    await unassignFromKiosk({
+      kioskIds: uniqueKioskIds,
       dataIds: selectedQuestions.map((q) => q.id),
       type: "QUESTION",
     });
@@ -213,18 +261,34 @@ const Questions = () => {
               </Button>
               <Button
                 variant="contained"
-                startIcon={<PlusOutlined />}
-                onClick={toggleQuestionsManipulator}
+                disabled={selectedQuestions.length === 0}
+                onClick={() => setOpenAllKiosksUnAssignConfirmationDialog(true)}
               >
-                Add New Question
+                UnAssign from All Kiosks
               </Button>
+
             </Box>
 
           </Box>
 
         </Stack>
 
-        <Stack alignItems={"flex-end"} spacing={2}>
+        <Stack
+          sx={{
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+            gap: "1rem",
+          }}
+        >
+          <Button
+            variant="contained"
+            startIcon={<PlusOutlined />}
+            onClick={toggleQuestionsManipulator}
+          >
+            Add New Question
+          </Button>
+
           <Button
             variant="contained"
             onClick={selectAllQuestions}
@@ -287,6 +351,16 @@ const Questions = () => {
           text={`Are you sure, you want to Assign Selected Questions to All kiosks?`}
           okBtnText="Assign"
           assignLoading={assignLoading}
+
+        />
+
+        <ConfirmationDailog
+          open={openAllKiosksUnAssignConfirmationDialog}
+          handleClose={() => setOpenAllKiosksUnAssignConfirmationDialog(false)}
+          handleConfirm={handleAllKiosksUnAssign}
+          text={`Are you sure, you want to UnAssign Selected Questions From All kiosks?`}
+          okBtnText="UnAssign"
+          assignLoading={unassingLoading}
 
         />
 

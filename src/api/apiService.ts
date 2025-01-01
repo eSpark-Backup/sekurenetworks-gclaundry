@@ -9,6 +9,7 @@ export class ApiService {
         update: (macId: string,body:any) => axiosService.patch(`/kiosk/${macId}`,body),
         delete: (macId: string) => axiosService.delete(`/kiosk/${macId}`),
         assignToKiosk: (body:any) => axiosService.post(`/kiosk/assign`,body),
+        unassignToKiosk: (body:any) => axiosService.post(`/kiosk/unassign`,body),
         unAssignItem: (id:any) => axiosService.delete(`/kiosk/unassign/${id}`),
     };
 

@@ -102,13 +102,8 @@ const KiosksAssigner = ({
                 <br />
 
                 <Typography color="error">{
-                    "Please Note if kioks not selected, it will be assign to all Customer Kiosks"
+                    "Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
                 }</Typography>
-
-
-
-
-
 
 
 

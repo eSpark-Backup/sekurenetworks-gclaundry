@@ -53,6 +53,8 @@ const Quotes = () => {
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [kioksByCustomerId, setKiosksByCustomerId] = useState([]);
   const [loadingKioksbyCustomerId, setLoadingKiosksByCustomerId] = useState(false);
+  const [openAllKiosksUnAssignConfirmationDialog, setOpenAllKiosksUnAssignConfirmationDialog] = useState(false);
+  const [unassingLoading, setUnassignLoading] = useState(false);
 
   const isQuoteSelected = (id) =>
     selectedQuotes.some((qoutes) => qoutes.id === id);
@@ -163,6 +165,27 @@ const Quotes = () => {
     }
   );
 
+
+  const { runAsync: unassignFromKiosk } = useRequest(
+    (data) => apiService.kisok.unassignToKiosk(data),
+    {
+      manual: true,
+      onSuccess: ({ data }: any) => {
+        toast(data.message, { type: "success" });
+        setUnassignLoading(false);
+        setOpenAllKiosksUnAssignConfirmationDialog(false);
+        setSelectedQuotes([]);
+      },
+      onError: (error) => {
+        console.error(error);
+        toast("An error occured while unassigning questions", { type: "error" });
+        setUnassignLoading(false);
+        setOpenAllKiosksUnAssignConfirmationDialog(false);
+        setSelectedQuotes([]);
+      },
+    }
+  );
+
   const handleKiosksAssign = async () => {
     setAssignLoading(true);
     await assignToKiosk({
@@ -179,6 +202,33 @@ const Quotes = () => {
     setAssignLoading(true);
     await assignToKiosk({
       kioskIds: kiosks.map((k) => k.macId),
+      dataIds: selectedQuotes.map((q) => q.id),
+      type: "QUOTE",
+    });
+
+    await refreshAsync();
+  }
+
+
+  const handleAllKiosksUnAssign = async () => {
+    const hasNoKiosks = selectedQuotes.some(quotes => quotes.kiosks.length === 0);
+
+    if (hasNoKiosks) {
+      toast("Some of the selected quotes are not assigned to any kiosk", { type: "error" });
+      setOpenAllKiosksUnAssignConfirmationDialog(false);
+      return;
+    }
+
+    const kioskIds = quotes
+      .map(quote => quote.kiosks.map(kiosk => kiosk.kioskId)) // Extract kioskId arrays
+      .flat(); // Flatten the arrays into a single array
+
+    const uniqueKioskIds = [...new Set(kioskIds)]; // Remove duplicates
+
+
+    setUnassignLoading(true);
+    await unassignFromKiosk({
+      kioskIds: uniqueKioskIds,
       dataIds: selectedQuotes.map((q) => q.id),
       type: "QUOTE",
     });
@@ -203,8 +253,8 @@ const Quotes = () => {
     );
   }
 
-  
-  
+
+
   useEffect(() => {
     (async () => {
       await getQoutes(id);
@@ -218,7 +268,7 @@ const Quotes = () => {
 
 
 
- const isAllQuotesSelected = selectedQuotes.length === quotes.length;
+  const isAllQuotesSelected = selectedQuotes.length === quotes.length;
 
   return (
     <Box>
@@ -253,15 +303,29 @@ const Quotes = () => {
             </Button>
             <Button
               variant="contained"
-              startIcon={<PlusOutlined />}
-              onClick={() => setEditDailog(true)}
+              disabled={selectedQuotes.length === 0}
+              onClick={() => setOpenAllKiosksUnAssignConfirmationDialog(true)}
             >
-              Add New EM
+              UnAssign from All Kiosks
             </Button>
           </Box>
         </Stack>
 
-        <Stack alignItems={"flex-end"} spacing={2}>
+        <Stack
+          sx={{
+            flexDirection: { xs: "column", md: "row" },
+            alignItems: "flex-end",
+            justifyContent: "flex-end",
+            gap: "1rem",
+          }}
+        >
+          <Button
+            variant="contained"
+            startIcon={<PlusOutlined />}
+            onClick={() => setEditDailog(true)}
+          >
+            Add New EM
+          </Button>
           <Button
             variant="contained"
             onClick={selectAllQuotes}
@@ -493,6 +557,17 @@ const Quotes = () => {
         assignLoading={assignLoading}
 
       />
+
+      <ConfirmationDailog
+        open={openAllKiosksUnAssignConfirmationDialog}
+        handleClose={() => setOpenAllKiosksUnAssignConfirmationDialog(false)}
+        handleConfirm={handleAllKiosksUnAssign}
+        text={`Are you sure, you want to UnAssign Selected Quotes From All kiosks?`}
+        okBtnText="UnAssign"
+        assignLoading={unassingLoading}
+
+      />
+
 
     </Box>
   );
