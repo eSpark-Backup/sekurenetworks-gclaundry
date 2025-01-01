@@ -398,6 +398,67 @@ export class KioskService {
     return { message: "Unassigned Successfully", statusCode: 200 };
   }
 
+
+
+  async unassignFromKiosks(data: any) {
+    const { kioskIds, dataIds, type } = data;
+  
+    // Fetch existing relations that match the provided kioskIds, dataIds, and type
+    const existingRelations = await this.prisma.kioskRelation.findMany({
+      where: {
+        kioskId: { in: kioskIds },
+        type,
+        ...(type === "QUESTION" ? { questionId: { in: dataIds } } : { quoteId: { in: dataIds } }),
+      },
+      select: {
+        id: true,
+        kioskId: true,
+        ...(type === "QUESTION" ? { questionId: true } : { quoteId: true }),
+      },
+    });
+  
+    // Delete the relations
+    const relationIds = existingRelations.map((relation) => relation.id);
+    if (relationIds.length > 0) {
+      await this.prisma.kioskRelation.deleteMany({
+        where: { id: { in: relationIds } },
+      });
+    }
+  
+    // Group remaining questions or quotes by kiosk
+    const questionsOrQuotesByKiosk = new Map();
+  
+    for (const kioskId of kioskIds) {
+      const kioskRelations = await this.prisma.kioskRelation.findMany({
+        where: { kioskId },
+        include: { question: true, quote: true },
+      });
+  
+      const remainingQuestionsOrQuotes = kioskRelations
+        .map((rel) => (type === "QUESTION" ? rel.question : rel.quote))
+        .filter((rel) => rel?.isActive === true)
+        .filter(Boolean);
+  
+      if (remainingQuestionsOrQuotes.length > 0) {
+        questionsOrQuotesByKiosk.set(kioskId, remainingQuestionsOrQuotes);
+      } else {
+        questionsOrQuotesByKiosk.set(kioskId, []); // No active relations left
+      }
+    }
+  
+    // Publish updated lists to kiosks
+    for (const [kioskId, questionsOrQuotes] of questionsOrQuotesByKiosk) {
+      
+      const topic = `survey/${kioskId}`;
+      this.mqttService.publish(topic, JSON.stringify(questionsOrQuotes));
+    }
+  
+    return { message: "Unassigned Successfully", statusCode: 200 };
+  }
+
 }
+
+
+
 
 

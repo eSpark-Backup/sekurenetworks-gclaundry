@@ -294,11 +294,13 @@ export class ReportService {
           transaction.status,
           transaction.error || "N/A",
           new Date(transaction.time).toLocaleString("en-US", {hour12: true}),
-          transaction.question?.question || "N/A",
+          // transaction.question?.question || "N/A",
+          transaction.questionId || "N/A",
           (transaction.question?.options?.map((e, index) => `${index + 1}. ${e.option}`).join(", ")) || "None",
           transaction.question?.options.find(e => e.is_valid)?.option || "None",
           transaction.selectedAnswer,
-          transaction.quote?.quote || "N/A"
+          // transaction.quote?.quote || "N/A"
+          transaction.quoteId || "N/A"
         ]);
     
         // Add the table
@@ -320,11 +322,11 @@ export class ReportService {
             3: { cellWidth: 20 },
             4: { cellWidth: 20 },
             5: { cellWidth: 30 },
-            6: { cellWidth: 'auto' },
+            6: { cellWidth: 20 },
             7: { cellWidth: 'auto' },
             8: { cellWidth: 'auto' },
             9: { cellWidth: 'auto' },
-            10: { cellWidth: 'auto' }
+            10: { cellWidth: 20 }
           },
           headStyles: { fillColor: [255, 7, 25], textColor: 255 },
           willDrawCell: (data) => {

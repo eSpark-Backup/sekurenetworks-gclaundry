@@ -92,8 +92,8 @@ export class QuotesService {
   async delete(id: string) {
     const quote = await this.prisma.quote.findFirst({ where: { id } })
     if (!quote) throw new NotFoundException('Quote not found!');
-    const count = await this.prisma.quote.count({ where: { kioskId: quote.kioskId } })
-    if (count <= 1) throw new BadRequestException("Atleast 1 qoute is required")
+    // const count = await this.prisma.quote.count({ where: { kioskId: quote.kioskId } })
+    // if (count <= 1) throw new BadRequestException("Atleast 1 qoute is required")
 
     let quotesRelations = await this.prisma.kioskRelation.findMany({ where: { quoteId: id } });
 

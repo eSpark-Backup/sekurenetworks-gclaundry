@@ -69,8 +69,8 @@ export class QuestionsService {
     const question = await this.prisma.question.findFirst({ where: { id } });
     
     if (!question) throw new NotFoundException('Question not found!');
-    const count = await this.prisma.question.count({ where: { kioskId: question.kioskId } });
-    if (count <= 1) throw new BadRequestException("Atleast 1 Question is required")
+    // const count = await this.prisma.question.count({ where: { kioskId: question.kioskId } });
+    // if (count <= 1) throw new BadRequestException("Atleast 1 Question is required")
 
     let questionsRelations = await this.prisma.kioskRelation.findMany({ where: { questionId: id } });
 

@@ -72,6 +72,15 @@ export class KioskController {
     return this.kioskService.assignToKiosks(data);
   }
 
+  @Post('/unassign')
+  unassignFromKiosks(@Body() data: {
+    kioskIds: string[],
+    dataIds: string[],
+    type: string,
+  }) {
+    return this.kioskService.unassignFromKiosks(data);
+  }
+
   @Delete('/unassign/:id')
   unassignItem(@Param('id') id: string) {
     return this.kioskService.unassignItem(id);
