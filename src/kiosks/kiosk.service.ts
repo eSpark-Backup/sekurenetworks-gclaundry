@@ -55,7 +55,7 @@ export class KioskService {
       // const survey = getDefaultSurvey(macId)
 
       // await this.prisma.$transaction([
-      //   this.prisma.question.createMany({ data: survey }),
+        // this.prisma.question.createMany({ data: survey }),
       //   this.prisma.quote.createMany({ data: qoutes })
       // ])
 
@@ -347,9 +347,8 @@ export class KioskService {
       });
 
 
-      const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(rel => rel.isActive === true).filter(Boolean); 
-
-
+      const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean); 
+   
       if (QuestionsOrQuotes.length > 0) {
         const topic = `survey/${kioskId}`;
         this.mqttService.publish(topic, JSON.stringify(QuestionsOrQuotes));
