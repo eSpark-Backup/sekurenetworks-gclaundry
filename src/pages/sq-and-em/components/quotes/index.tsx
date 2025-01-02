@@ -177,6 +177,7 @@ const Quotes = () => {
         setOpenAllKiosksUnAssignConfirmationDialog(false);
         setOpenSelectedUnAssignKioksDialog(false);
         setSelectedQuotes([]);
+        setSelectedCustomer(null);
       },
       onError: (error) => {
         console.error(error);
@@ -185,6 +186,7 @@ const Quotes = () => {
         setOpenAllKiosksUnAssignConfirmationDialog(false);
         setOpenSelectedUnAssignKioksDialog(false);
         setSelectedQuotes([]);
+        setSelectedCustomer(null);
       },
     }
   );

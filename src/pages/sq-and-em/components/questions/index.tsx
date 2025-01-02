@@ -111,7 +111,6 @@ const Questions = () => {
         console.error(error);
         toast("An error occured while assigning questions", { type: "error" });
         setAssignLoading(false);
-        setOpenSelectedKioksDialog(false);
       },
     }
   );
@@ -124,16 +123,14 @@ const Questions = () => {
         toast(data.message, { type: "success" });
         setUnassignLoading(false);
         setOpenAllKiosksUnAssignConfirmationDialog(false);
-        setOpenSelectedUnAssignKioksDialog(false);
         setSelectedQuestions([]);
+        setOpenSelectedUnAssignKioksDialog(false);
+        setSelectedCustomer(null);
       },
       onError: (error) => {
         console.error(error);
         toast("An error occured while unassigning questions", { type: "error" });
         setUnassignLoading(false);
-        setOpenAllKiosksUnAssignConfirmationDialog(false);
-        setOpenSelectedUnAssignKioksDialog(false);
-        setSelectedQuestions([]);
       },
     }
   );
