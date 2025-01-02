@@ -17,7 +17,10 @@ const KiosksAssigner = ({
     setLoadingKiosksByCustomerId,
     loadingKioksbyCustomerId,
     setSelectedCustomer,
-    selectedCustomer
+    selectedCustomer,
+    heading,
+    info,
+    buttonLabel
 
 }) => {
 
@@ -49,7 +52,7 @@ const KiosksAssigner = ({
         >
 
             <DialogContent>
-                <Typography variant="h4" gutterBottom>Select Customer Kiosks</Typography>
+                <Typography variant="h4" gutterBottom>{heading}</Typography>
                 <br />
 
                 <Autocomplete
@@ -101,9 +104,9 @@ const KiosksAssigner = ({
 
                 <br />
 
-                <Typography color="error">{
-                    "Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
-                }</Typography>
+                <Typography color="error">
+                    {info}
+                </Typography>
 
 
 
@@ -129,7 +132,7 @@ const KiosksAssigner = ({
                             loading={assignLoading}
                         >
 
-                            Assign
+                            {buttonLabel}
                         </LoadingButton>
                     </div>
                 </Tooltip>

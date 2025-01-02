@@ -43,6 +43,7 @@ const Questions = () => {
   });
   const [selectedQuestions, setSelectedQuestions] = useState([]);
   const [openSelectedKioksDialog, setOpenSelectedKioksDialog] = useState(false);
+  const [openSelectedUnAssignKioksDialog, setOpenSelectedUnAssignKioksDialog] = useState(false);
   const [selectedKiosks, setSelectedKiosks] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
   const [openAllKiosksConfirmationDialog, setOpenAllKiosksConfirmationDialog] = useState(false);
@@ -123,6 +124,7 @@ const Questions = () => {
         toast(data.message, { type: "success" });
         setUnassignLoading(false);
         setOpenAllKiosksUnAssignConfirmationDialog(false);
+        setOpenSelectedUnAssignKioksDialog(false);
         setSelectedQuestions([]);
       },
       onError: (error) => {
@@ -130,6 +132,7 @@ const Questions = () => {
         toast("An error occured while unassigning questions", { type: "error" });
         setUnassignLoading(false);
         setOpenAllKiosksUnAssignConfirmationDialog(false);
+        setOpenSelectedUnAssignKioksDialog(false);
         setSelectedQuestions([]);
       },
     }
@@ -151,6 +154,25 @@ const Questions = () => {
     setAssignLoading(true);
     await assignToKiosk({
       kioskIds: kiosks.map((k) => k.macId),
+      dataIds: selectedQuestions.map((q) => q.id),
+      type: "QUESTION",
+    });
+
+    fetchKiosksQustions();
+  }
+
+  const handleKiosksUnAssign = async () => {
+    const hasNoKiosks = selectedQuestions.some(question => question.kiosks.length === 0);
+
+    if (hasNoKiosks) {
+      toast("Some of the selected questions are not assigned to any kiosk", { type: "error" });
+      setOpenSelectedUnAssignKioksDialog(false);
+      return;
+    }
+
+    setUnassignLoading(true);
+    await unassignFromKiosk({
+      kioskIds: selectedKiosks.length > 0 ? selectedKiosks.map((k) => k.macId) : kioksByCustomerId.map((k) => k.macId),
       dataIds: selectedQuestions.map((q) => q.id),
       type: "QUESTION",
     });
@@ -246,25 +268,17 @@ const Questions = () => {
 
               <Button
                 variant="contained"
-                onClick={() => setOpenSelectedKioksDialog(true)}
-                disabled={selectedQuestions.length === 0}
+                startIcon={<PlusOutlined />}
+                onClick={toggleQuestionsManipulator}
+              >
+                Add New Question
+              </Button>
 
-              >
-                Assign to Customer kiosks
-              </Button>
               <Button
                 variant="contained"
-                disabled={selectedQuestions.length === 0}
-                onClick={() => setOpenAllKiosksConfirmationDialog(true)}
+                onClick={selectAllQuestions}
               >
-                Assign to All Kiosks
-              </Button>
-              <Button
-                variant="contained"
-                disabled={selectedQuestions.length === 0}
-                onClick={() => setOpenAllKiosksUnAssignConfirmationDialog(true)}
-              >
-                UnAssign from All Kiosks
+                {isAllQuestionsSelected ? "Deselect All" : "Select All"}
               </Button>
 
             </Box>
@@ -281,19 +295,37 @@ const Questions = () => {
             gap: "1rem",
           }}
         >
-          <Button
-            variant="contained"
-            startIcon={<PlusOutlined />}
-            onClick={toggleQuestionsManipulator}
-          >
-            Add New Question
-          </Button>
+
 
           <Button
             variant="contained"
-            onClick={selectAllQuestions}
+            onClick={() => setOpenSelectedKioksDialog(true)}
+            disabled={selectedQuestions.length === 0}
+
           >
-            {isAllQuestionsSelected ? "Deselect All" : "Select All"}
+            Assign to Customer kiosks
+          </Button>
+          <Button
+            variant="contained"
+            onClick={() => setOpenSelectedUnAssignKioksDialog(true)}
+            disabled={selectedQuestions.length === 0}
+
+          >
+            Unassign to Customer kiosks
+          </Button>
+          <Button
+            variant="contained"
+            disabled={selectedQuestions.length === 0}
+            onClick={() => setOpenAllKiosksConfirmationDialog(true)}
+          >
+            Assign to All Kiosks
+          </Button>
+          <Button
+            variant="contained"
+            disabled={selectedQuestions.length === 0}
+            onClick={() => setOpenAllKiosksUnAssignConfirmationDialog(true)}
+          >
+            Unassign from All Kiosks
           </Button>
         </Stack>
 
@@ -341,7 +373,34 @@ const Questions = () => {
           setSelectedCustomer={setSelectedCustomer}
           customers={customers}
           selectedCustomer={selectedCustomer}
+          heading="Assign Questions to Customer Kiosks"
+          info="Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
+          buttonLabel="Assign"
+        />
 
+        <KiosksAssigner
+          open={openSelectedUnAssignKioksDialog}
+          handleClose={() => {
+            setOpenSelectedUnAssignKioksDialog(false);
+            setSelectedKiosks([]);
+            setSelectedCustomer(null);
+            setKiosksByCustomerId([]);
+          }
+          }
+          selectedKiosks={selectedKiosks}
+          setSelectedKiosks={setSelectedKiosks}
+          onAssign={handleKiosksUnAssign}
+          assignLoading={unassingLoading}
+          kioksByCustomerId={kioksByCustomerId}
+          setKiosksByCustomerId={setKiosksByCustomerId}
+          loadingKioksbyCustomerId={loadingKioksbyCustomerId}
+          setLoadingKiosksByCustomerId={setLoadingKiosksByCustomerId}
+          setSelectedCustomer={setSelectedCustomer}
+          customers={customers}
+          selectedCustomer={selectedCustomer}
+          heading="Unassign Questions to Customer Kiosks"
+          info="Please Note if kiosk not selected, it will be Unassign to all Customer Kiosks"
+          buttonLabel="Unassign"
         />
 
         <ConfirmationDailog

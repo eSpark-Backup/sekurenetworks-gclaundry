@@ -46,6 +46,7 @@ const Quotes = () => {
   const [quotes, setQuotes] = useState<IEnviromentalMessage[]>([]);
   const [selectedQuotes, setSelectedQuotes] = useState([]);
   const [openSelectedKioksDialog, setOpenSelectedKioksDialog] = useState(false);
+  const [openSelectedUnAssignKioksDialog, setOpenSelectedUnAssignKioksDialog] = useState(false);
   const [selectedKiosks, setSelectedKiosks] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
   const [openAllKiosksConfirmationDialog, setOpenAllKiosksConfirmationDialog] = useState(false);
@@ -174,13 +175,15 @@ const Quotes = () => {
         toast(data.message, { type: "success" });
         setUnassignLoading(false);
         setOpenAllKiosksUnAssignConfirmationDialog(false);
+        setOpenSelectedUnAssignKioksDialog(false);
         setSelectedQuotes([]);
       },
       onError: (error) => {
         console.error(error);
-        toast("An error occured while unassigning questions", { type: "error" });
+        toast("An error occured while unassigning quotes", { type: "error" });
         setUnassignLoading(false);
         setOpenAllKiosksUnAssignConfirmationDialog(false);
+        setOpenSelectedUnAssignKioksDialog(false);
         setSelectedQuotes([]);
       },
     }
@@ -229,6 +232,25 @@ const Quotes = () => {
     setUnassignLoading(true);
     await unassignFromKiosk({
       kioskIds: uniqueKioskIds,
+      dataIds: selectedQuotes.map((q) => q.id),
+      type: "QUOTE",
+    });
+
+    await refreshAsync();
+  }
+
+  const handleKiosksUnAssign = async () => {
+    const hasNoKiosks = selectedQuotes.some(quotes => quotes.kiosks.length === 0);
+
+    if (hasNoKiosks) {
+      toast("Some of the selected quotes are not assigned to any kiosk", { type: "error" });
+      setOpenAllKiosksUnAssignConfirmationDialog(false);
+      return;
+    }
+
+    setUnassignLoading(true);
+    await unassignFromKiosk({
+      kioskIds: selectedKiosks.length > 0 ? selectedKiosks.map((k) => k.macId) : kioksByCustomerId.map((k) => k.macId),
       dataIds: selectedQuotes.map((q) => q.id),
       type: "QUOTE",
     });
@@ -286,28 +308,21 @@ const Quotes = () => {
             flexDirection: { xs: "column", md: "row" },
             mt: { xs: "1rem", md: 0 },
           }}>
-            <Button
-              variant="contained"
-              disabled={selectedQuotes.length === 0}
-              onClick={() => setOpenSelectedKioksDialog(true)}
 
+            <Button
+              variant="contained"
+              startIcon={<PlusOutlined />}
+              onClick={() => setEditDailog(true)}
             >
-              Assign To Customer Kiosks
+              Add New EM
             </Button>
             <Button
               variant="contained"
-              disabled={selectedQuotes.length === 0}
-              onClick={() => setOpenAllKiosksConfirmationDialog(true)}
+              onClick={selectAllQuotes}
             >
-              Assign To All Kiosks
+              {isAllQuotesSelected ? "Deselect All" : "Select All"}
             </Button>
-            <Button
-              variant="contained"
-              disabled={selectedQuotes.length === 0}
-              onClick={() => setOpenAllKiosksUnAssignConfirmationDialog(true)}
-            >
-              UnAssign from All Kiosks
-            </Button>
+
           </Box>
         </Stack>
 
@@ -319,18 +334,39 @@ const Quotes = () => {
             gap: "1rem",
           }}
         >
+
+
           <Button
             variant="contained"
-            startIcon={<PlusOutlined />}
-            onClick={() => setEditDailog(true)}
+            disabled={selectedQuotes.length === 0}
+            onClick={() => setOpenSelectedKioksDialog(true)}
+
           >
-            Add New EM
+            Assign To Customer Kiosks
+          </Button>
+
+          <Button
+            variant="contained"
+            onClick={() => setOpenSelectedUnAssignKioksDialog(true)}
+            disabled={selectedQuotes.length === 0}
+
+          >
+            Unassign to Customer kiosks
+          </Button>
+
+          <Button
+            variant="contained"
+            disabled={selectedQuotes.length === 0}
+            onClick={() => setOpenAllKiosksConfirmationDialog(true)}
+          >
+            Assign To All Kiosks
           </Button>
           <Button
             variant="contained"
-            onClick={selectAllQuotes}
+            disabled={selectedQuotes.length === 0}
+            onClick={() => setOpenAllKiosksUnAssignConfirmationDialog(true)}
           >
-            {isAllQuotesSelected ? "Deselect All" : "Select All"}
+            UnAssign from All Kiosks
           </Button>
         </Stack>
       </Stack>
@@ -546,6 +582,34 @@ const Quotes = () => {
         setSelectedCustomer={setSelectedCustomer}
         customers={customers}
         selectedCustomer={selectedCustomer}
+        heading="Assign Quotes to Customer Kiosks"
+        info="Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
+        buttonLabel="Assign"
+      />
+
+      <KiosksAssigner
+        open={openSelectedUnAssignKioksDialog}
+        handleClose={() => {
+          setOpenSelectedUnAssignKioksDialog(false);
+          setSelectedKiosks([]);
+          setSelectedCustomer(null);
+          setKiosksByCustomerId([]);
+        }
+        }
+        selectedKiosks={selectedKiosks}
+        setSelectedKiosks={setSelectedKiosks}
+        onAssign={handleKiosksUnAssign}
+        assignLoading={unassingLoading}
+        kioksByCustomerId={kioksByCustomerId}
+        setKiosksByCustomerId={setKiosksByCustomerId}
+        loadingKioksbyCustomerId={loadingKioksbyCustomerId}
+        setLoadingKiosksByCustomerId={setLoadingKiosksByCustomerId}
+        setSelectedCustomer={setSelectedCustomer}
+        customers={customers}
+        selectedCustomer={selectedCustomer}
+        heading="Unassign Quotes to Customer Kiosks"
+        info="Please Note if kiosk not selected, it will be Unassign to all Customer Kiosks"
+        buttonLabel="Unassign"
       />
 
       <ConfirmationDailog
