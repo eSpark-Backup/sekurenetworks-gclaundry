@@ -26,9 +26,10 @@ import { IEnviromentalMessage } from "@/types/IEnviromentalMessage";
 import { useRequest } from "ahooks";
 import { useFormik } from "formik";
 import { toast } from "react-toastify";
-import * as yup from "yup";
+
 import KiosksAssigner from "../questions/shared/kiosks-assigner";
 import useFetchKiosks from "@/hooks/useFetchKiosks";
+import QuoteDialog from "./QuoteDialog";
 
 const Quotes = () => {
   const { id } = useParams();
@@ -56,6 +57,13 @@ const Quotes = () => {
   const [loadingKioksbyCustomerId, setLoadingKiosksByCustomerId] = useState(false);
   const [openAllKiosksUnAssignConfirmationDialog, setOpenAllKiosksUnAssignConfirmationDialog] = useState(false);
   const [unassingLoading, setUnassignLoading] = useState(false);
+
+  const [initialValues, setInitialValues] = useState({
+    quote: "",
+    id: "",
+    isActive: true,
+    kiosks: [],
+  });
 
   const isQuoteSelected = (id) =>
     selectedQuotes.some((qoutes) => qoutes.id === id);
@@ -95,6 +103,13 @@ const Quotes = () => {
         setEditDailog(false);
         await refreshAsync();
         toast("Qoute create successfully", { type: "success" });
+        setInitialValues({
+          quote: "",
+          id: "",
+          isActive: true,
+          kiosks: [],
+        });
+
       },
     }
   );
@@ -107,29 +122,30 @@ const Quotes = () => {
       onSuccess: async () => {
         setEditDailog(false);
         await refreshAsync();
-        toast("Qoute create successfully", { type: "success" });
+        toast("Qoute update successfully", { type: "success" });
+        setInitialValues({
+          quote: "",
+          id: "",
+          isActive: true,
+          kiosks: [],
+        });
       },
     }
   );
 
   // EM schema for formik form
-  const quoteSchema = yup.object({
-    quote: yup.string().required("quote is required").max(100).trim(),
-    id: yup.string().optional(),
-    isActive: yup.boolean(),
-  });
 
-  const formik = useFormik({
-    initialValues: { quote: "", isActive: true },
-    validationSchema: quoteSchema,
-    onSubmit: async (values: any) => {
-      if (values.id) await updateQoute(values.id, values);
-      else await createGeneral({ ...values, kioskId: id });
-    },
-  });
+
+  // const formik = useFormik({
+  //   initialValues: { quote: "", isActive: true },
+  //   validationSchema: quoteSchema,
+  //   onSubmit: async (values: any) => {
+  //     if (values.id) await updateQoute(values.id, values);
+  //     else await createGeneral({ ...values, kioskId: id });
+  //   },
+  // });
 
   const handleClose = () => {
-    formik.resetForm();
     setEditDailog(false);
   };
 
@@ -451,7 +467,12 @@ const Quotes = () => {
                             <IconButton
                               disabled={isDeleteLoading}
                               onClick={() => {
-                                formik.setValues(message);
+                                setInitialValues({
+                                  id: message.id,
+                                  quote: message.quote,
+                                  isActive: message.isActive,
+                                  kiosks: message.kiosks ?? [],
+                                });
                                 setEditDailog(true);
                               }}
                             >
@@ -501,66 +522,16 @@ const Quotes = () => {
             text="Are you sure, you want to Delete this Quote?"
           />
         </Box>
-
-        <form onSubmit={formik.handleSubmit}>
-          <Dialog
+      {
+        editDailog && (
+          <QuoteDialog
             open={editDailog}
-            onClose={handleClose}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-            fullWidth
-          >
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                p: "1rem 1rem",
-              }}
-            >
-              <Typography variant="h4" fontWeight={600}>
-                {!formik.values.id ? "Create New" : "Update"} EM
-              </Typography>
-
-              <Chip
-                onClick={() =>
-                  formik.setFieldValue("isActive", !formik.values.isActive)
-                }
-                size="small"
-                label={formik.values.isActive ? "Active" : "inactive"}
-                color={formik.values.isActive ? "success" : "default"}
-              />
-            </Box>
-
-            <DialogContent>
-              <CustomFormField
-                name={"quote"}
-                formik={formik}
-                isMultiLine={true}
-                label={"EM"}
-                accessorName="quote"
-              />
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleClose}>Cancel</Button>
-
-              <Tooltip
-                title={!formik.values.quote ? "Please Fill EM  Field" : ""}
-              >
-                <div>
-                  <Button
-                    variant="contained"
-                    sx={{ fontWeight: 600 }}
-                    onClick={formik.submitForm}
-                    disabled={!formik.values.quote}
-                  >
-                    {!formik.values.id ? "Create" : "Update"}
-                  </Button>
-                </div>
-              </Tooltip>
-            </DialogActions>
-          </Dialog>
-        </form>
+            initialValues={initialValues}
+            handleClose={handleClose}
+            updateQuote={updateQoute}
+            createGeneral={createGeneral}
+          />)
+      }
       </ApiLoader>
 
 

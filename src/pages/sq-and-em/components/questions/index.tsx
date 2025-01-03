@@ -124,6 +124,7 @@ const Questions = () => {
         setUnassignLoading(false);
         setOpenAllKiosksUnAssignConfirmationDialog(false);
         setSelectedQuestions([]);
+        setSelectedKiosks([]);
         setOpenSelectedUnAssignKioksDialog(false);
         setSelectedCustomer(null);
       },
