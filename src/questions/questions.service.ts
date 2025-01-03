@@ -50,7 +50,7 @@ export class QuestionsService {
         include: { question: true },
       });
 
-      const Questions = kioskRelations.map((rel) => (rel.question)).filter(rel => rel.isActive === true).filter(Boolean);
+      const Questions = kioskRelations.map((rel) => (rel.question)).filter(rel => rel?.isActive === true).filter(Boolean);
 
       const topic = `survey/${kioskId}`;
       this.mqttService.publish(topic, JSON.stringify(Questions)); 
@@ -88,7 +88,7 @@ export class QuestionsService {
         include: { question: true },
       });
 
-      const Questions = kioskRelations.map((rel) => (rel.question)).filter(rel => rel.isActive === true).filter(Boolean);
+      const Questions = kioskRelations.map((rel) => (rel.question)).filter(rel => rel?.isActive === true).filter(Boolean);
 
 
       const topic = `survey/${kioskId}`;

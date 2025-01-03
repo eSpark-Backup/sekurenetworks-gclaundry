@@ -60,24 +60,28 @@ export class QuotesService {
     }
 
     const kiosks = data.kiosks
-    
+
     delete data.kiosks
 
     const updatedQoute = await this.prisma.quote.update({ data, where: { id } });
 
-    const kioskIds = kiosks.map((kiosk) => kiosk.kioskId) 
 
-    for (const kioskId of kioskIds) {
-      const kioskRelations = await this.prisma.kioskRelation.findMany({
-        where: { kioskId: kioskId },
-        include: { quote: true },
-      });
+    
 
-      const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(rel => rel.isActive === true).filter(Boolean);
+      const kioskIds = kiosks?.map((kiosk) => kiosk.kioskId)
 
-      const topic = `survey/${kioskId}`;
-      this.mqttService.publish(topic, JSON.stringify(Quotes)); 
-    }
+      for (const kioskId of kioskIds) {
+        const kioskRelations = await this.prisma.kioskRelation.findMany({
+          where: { kioskId: kioskId },
+          include: { quote: true },
+        });
+
+        const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean);
+
+        const topic = `survey/${kioskId}`;
+        this.mqttService.publish(topic, JSON.stringify(Quotes));
+      }
+ 
 
 
     // await this.publishQoutes(quote.kioskId)
@@ -103,7 +107,7 @@ export class QuotesService {
 
     await this.prisma.quote.delete({ where: { id } })
 
-    const kioskIds = quotesRelations.map((kiosk) => kiosk.kioskId) 
+    const kioskIds = quotesRelations.map((kiosk) => kiosk.kioskId)
 
     for (const kioskId of kioskIds) {
       const kioskRelations = await this.prisma.kioskRelation.findMany({
@@ -111,11 +115,11 @@ export class QuotesService {
         include: { quote: true },
       });
 
-      const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(rel => rel.isActive === true).filter(Boolean);
+      const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean);
 
 
       const topic = `survey/${kioskId}`;
-      this.mqttService.publish(topic, JSON.stringify(Quotes)); 
+      this.mqttService.publish(topic, JSON.stringify(Quotes));
     }
 
 
@@ -149,12 +153,12 @@ export class QuotesService {
     const quotes = await this.prisma.quote.findMany({
       include: { relations: true },
     });
-  
+
     // Step 2: Extract unique kiosk IDs from relations
     const kioskIds = [
       ...new Set(quotes.flatMap((quote) => quote.relations.map((relation) => relation.kioskId))),
     ];
-  
+
     // Step 3: Fetch kiosk details for the extracted IDs
     const kiosks = await this.prisma.kiosk.findMany({
       where: {
@@ -165,10 +169,10 @@ export class QuotesService {
         name: true,
       },
     });
-  
+
     // Step 4: Map kiosk details by ID for quick lookup
     const kioskMap = Object.fromEntries(kiosks.map((kiosk) => [kiosk.macId, kiosk]));
-  
+
     // Step 5: Attach kiosk details to quotes
     const quotesWithKioskDetails = quotes.map((quote) => ({
       id: quote.id,
@@ -179,7 +183,7 @@ export class QuotesService {
         kioskName: kioskMap[relation.kioskId]?.name || null,
       })),
     }));
-  
+
     return quotesWithKioskDetails;
   }
 
