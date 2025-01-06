@@ -39,11 +39,13 @@ jobs:
         echo "MQTT_PORT=${{ secrets.MQTT_PORT }}" >> .env
         echo "MQTT_USERNAME=${{ secrets.MQTT_USERNAME }}" >> .env
         echo "MQTT_PASSWORD=${{ secrets.MQTT_PASSWORD }}" >> .env
-        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env       
+        echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env
+        echo "POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}" >> .env
+        echo "POSTGRES_USER=${{ secrets.POSTGRES_USER }}" >> .env
+        echo "POSTGRES_DB=${{ secrets.POSTGRES_DB }}" >> .env
 
     - name: Deploy Docker Container     
       run: |
-        docker stop genco-be-stg || true
-        docker rm genco-be-stg || true
-        docker build . -t genco-backend-stg:latest
-        docker run -d -p 3001:3000 --name genco-be-stg genco-backend-stg:latest
+        docker compose -f docker-compose.dev.yml build
+        docker compose -f docker-compose.stg.yml -p "stg_genco_stack" down -v
+        docker compose -f docker-compose.stg.yml -p "stg_genco_stack" up -d
