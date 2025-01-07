@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   NotFoundException
 } from '@nestjs/common';
@@ -12,13 +14,20 @@ import { adjectives, colors, starWars, uniqueNamesGenerator } from 'unique-names
 import { getDefaultMsgs, getDefaultSurvey } from './dto/const';
 import { log } from './dto/logs';
 import { StatusDto } from './dto/status.schema';
+import { MqttService } from 'src/mqtt/mqtt.service';
 
 @Injectable()
 export class KioskService {
   private prisma: PrismaClient;
-  constructor() {
+
+  constructor(
+    @Inject(forwardRef(() => MqttService))
+    private mqttService: MqttService
+  ) {
     this.prisma = new PrismaClient()
   }
+
+
 
   async getKioskData(macId: string) {
 
@@ -42,13 +51,13 @@ export class KioskService {
 
       kiosk = await this.prisma.kiosk.create({ data })
 
-      const qoutes = getDefaultMsgs(macId)
-      const survey = getDefaultSurvey(macId)
+      // const qoutes = getDefaultMsgs(macId)
+      // const survey = getDefaultSurvey(macId)
 
-      await this.prisma.$transaction([
-        this.prisma.question.createMany({ data: survey }),
-        this.prisma.quote.createMany({ data: qoutes })
-      ])
+      // await this.prisma.$transaction([
+        // this.prisma.question.createMany({ data: survey }),
+      //   this.prisma.quote.createMany({ data: qoutes })
+      // ])
 
       await this.prisma.log.create({ data: { type: 'INFO', kioskId: macId, detail: log.created, createdAt: new Date() } })
 
@@ -270,4 +279,186 @@ export class KioskService {
     await this.prisma.kiosk.update({ where: { macId }, data: { ...value, lastSeen: new Date() } })
   }
 
+  async findAllKiosks() {
+    return await this.prisma.kiosk.findMany({ where: { isDeleted: false }, select: { macId: true, name: true } });
+  }
+
+
+  async assignToKiosks(data: any) {
+    const { kioskIds, dataIds, type } = data;
+
+    // Build the relations array
+    const relations = [];
+    kioskIds.forEach((kioskId) => {
+      dataIds.forEach((dataId) => {
+        relations.push({
+          kioskId,
+          ...(type === "QUESTION" ? { questionId: dataId } : { quoteId: dataId }),
+          type,
+        });
+      });
+    });
+
+    // Fetch existing relations from the database
+    const existingRelations = await this.prisma.kioskRelation.findMany({
+      where: {
+        kioskId: { in: kioskIds },
+        type,
+        ...(type === "QUESTION" ? { questionId: { in: dataIds } } : { quoteId: { in: dataIds } }),
+      },
+      select: {
+        kioskId: true,
+        ...(type === "QUESTION" ? { questionId: true } : { quoteId: true }),
+      },
+    });
+
+    // Create a Set of existing relations for quick lookup
+    const existingSet = new Set(
+      existingRelations.map((relation) =>
+        `${relation.kioskId}-${type === "QUESTION" ? (relation as any).questionId : (relation as any).quoteId}`
+      )
+    );
+
+    // Filter out duplicates
+    const filteredRelations = relations.filter(
+      (relation) =>
+        !existingSet.has(`${relation.kioskId}-${type === "QUESTION" ? relation.questionId : relation.quoteId}`)
+    );
+
+    // Create new relations
+    if (filteredRelations.length > 0) {
+      await this.prisma.kioskRelation.createMany({
+        data: filteredRelations,
+      });
+    }
+
+
+    const questionsByKiosk = new Map<string, any[]>();
+    for (const relation of filteredRelations) {
+      if (!questionsByKiosk.has(relation.kioskId)) {
+        questionsByKiosk.set(relation.kioskId, []);
+      }
+    }
+
+    for (const [kioskId] of questionsByKiosk) {
+      const kioskRelations = await this.prisma.kioskRelation.findMany({
+        where: { kioskId: kioskId },
+        include: { question: true, quote: true },
+      });
+
+
+      const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean); 
+   
+      if (QuestionsOrQuotes.length > 0) {
+        const topic = `survey/${kioskId}`;
+        this.mqttService.publish(topic, JSON.stringify(QuestionsOrQuotes));
+      }
+    }
+
+    return { message: "Assigned Successfully", statusCode: 200 };
+  }
+
+
+  async unassignItem(id: string) {
+    // Fetch and validate the relation
+    const relation = await this.prisma.kioskRelation.findFirst({ where: { id } });
+    if (!relation) throw new NotFoundException("Item not found");
+
+    // Delete the relation
+    await this.prisma.kioskRelation.delete({ where: { id } });
+
+    // Fetch all remaining relations for the kiosk
+    const kioskRelations = await this.prisma.kioskRelation.findMany({
+      where: { kioskId: relation.kioskId },
+      include: { question: true, quote: true },
+    });
+
+    // If no more relations exist for the kiosk, return early
+    if (!kioskRelations.length) {
+      return { message: "Unassigned Successfully", statusCode: 200 };
+    }
+
+    // Determine the type of data to publish (quotes or questions)
+    const topic = `survey/${relation.kioskId}`;
+
+    if (relation.quoteId) {
+      // Extract and publish quotes
+      const quotes = kioskRelations.map((rel) => rel.quote).filter(rel => rel.isActive === true).filter(Boolean);
+      this.mqttService.publish(topic, JSON.stringify(quotes));
+
+    }
+
+    if (relation.questionId) {
+      // Extract and publish questions
+      const questions = kioskRelations.map((rel) => rel.question).filter(rel => rel.isActive === true).filter(Boolean);
+      this.mqttService.publish(topic, JSON.stringify(questions));
+
+    }
+
+    return { message: "Unassigned Successfully", statusCode: 200 };
+  }
+
+
+
+  async unassignFromKiosks(data: any) {
+    const { kioskIds, dataIds, type } = data;
+  
+    // Fetch existing relations that match the provided kioskIds, dataIds, and type
+    const existingRelations = await this.prisma.kioskRelation.findMany({
+      where: {
+        kioskId: { in: kioskIds },
+        type,
+        ...(type === "QUESTION" ? { questionId: { in: dataIds } } : { quoteId: { in: dataIds } }),
+      },
+      select: {
+        id: true,
+        kioskId: true,
+        ...(type === "QUESTION" ? { questionId: true } : { quoteId: true }),
+      },
+    });
+  
+    // Delete the relations
+    const relationIds = existingRelations.map((relation) => relation.id);
+    if (relationIds.length > 0) {
+      await this.prisma.kioskRelation.deleteMany({
+        where: { id: { in: relationIds } },
+      });
+    }
+  
+    // Group remaining questions or quotes by kiosk
+    const questionsOrQuotesByKiosk = new Map();
+  
+    for (const kioskId of kioskIds) {
+      const kioskRelations = await this.prisma.kioskRelation.findMany({
+        where: { kioskId },
+        include: { question: true, quote: true },
+      });
+  
+      const remainingQuestionsOrQuotes = kioskRelations
+        .map((rel) => (type === "QUESTION" ? rel.question : rel.quote))
+        .filter((rel) => rel?.isActive === true)
+        .filter(Boolean);
+  
+      if (remainingQuestionsOrQuotes.length > 0) {
+        questionsOrQuotesByKiosk.set(kioskId, remainingQuestionsOrQuotes);
+      } else {
+        questionsOrQuotesByKiosk.set(kioskId, []); // No active relations left
+      }
+    }
+  
+    // Publish updated lists to kiosks
+    for (const [kioskId, questionsOrQuotes] of questionsOrQuotesByKiosk) {
+      
+      const topic = `survey/${kioskId}`;
+      this.mqttService.publish(topic, JSON.stringify(questionsOrQuotes));
+    }
+  
+    return { message: "Unassigned Successfully", statusCode: 200 };
+  }
+
 }
+
+
+
+
+

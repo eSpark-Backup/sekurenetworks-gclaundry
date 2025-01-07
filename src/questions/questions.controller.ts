@@ -24,8 +24,17 @@ export class QuestionsController {
   delete(@Param('id') id: string) {
     return this.questionService.delete(id);
   }
+  @Get('/all')
+  getAllQuestions() {
+    return this.questionService.getAllQuestions();
+  }
   @Get(':id')
-  findAll(@Param('id') id: string) {
-    return this.questionService.getAllQuestions(id);
+  getAllQuestionsbyId(@Param('id') id: string) {
+    return this.questionService.getAllQuestionsbyId(id);
+  }
+
+  @Post('create-general')
+  createGeneral(@Body() data: any) {
+    return this.questionService.createGeneral(data);
   }
 }

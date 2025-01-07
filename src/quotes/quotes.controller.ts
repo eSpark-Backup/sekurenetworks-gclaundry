@@ -16,8 +16,16 @@ export class QuotesController {
   delete(@Param('id') id: string) {
     return this.quoteService.delete(id);
   }
+  @Get('/all')
+  getAllQuotes() {
+    return this.quoteService.getAllQuotes();
+  }
   @Get(':id')
-  findAll(@Param('id') id: string) {
-    return this.quoteService.getAllQuotes(id);
+  getAllQuotesbyId(@Param('id') id: string) {
+    return this.quoteService.getAllQuotesbyId(id);
+  }
+  @Post('create-general')
+  createGeneral(@Body() data: any) {
+    return this.quoteService.createGeneral(data);
   }
 }
