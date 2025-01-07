@@ -47,5 +47,5 @@ jobs:
     - name: Deploy Docker Container     
       run: |
         docker-compose -f docker-compose.stg.yml build
-        docker-compose -f docker-compose.stg.yml -p "stg_genco_stack" down -v
+        docker-compose -f docker-compose.stg.yml -p "stg_genco_stack" down
         docker-compose -f docker-compose.stg.yml -p "stg_genco_stack" up -d
