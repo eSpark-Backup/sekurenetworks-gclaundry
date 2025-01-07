@@ -2,9 +2,8 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { toast } from "react-toastify";
 import { Box, Typography } from "@mui/material";
-
 import QuestionCard from "./card";
-import { deleteQuestion } from "@/api/kiosk";
+import { deleteQuestion, unAssignQuestion } from "@/api/kiosk";
 import DeleteQuestionConfirmation from "../delete-confirmation";
 import ConfirmationDailog from "@/components/ConfirmDailog";
 
@@ -14,6 +13,7 @@ const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
     isLoading: false,
   });
   const [deleteQuestionId, setDeleteQuestionId] = useState(null);
+  const [deleteRelationId, setDeleteRelationId] = useState(null);
   const isDeleteDialogOpen = !!deleteQuestionId;
 
   const toggleQuestionDialog = ({ id = null } = {}) => {
@@ -31,9 +31,9 @@ const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
     try {
       toggleQuestionDialog();
       updateDeleteQuestionLoading(true, deleteQuestionId);
-      await deleteQuestion(deleteQuestionId);
+      await unAssignQuestion(deleteRelationId);
       onDelete(deleteQuestionId);
-      toast("Question Deleted Successfully!", {
+      toast("Question Unassign Successfully!", {
         type: "success",
       });
     } catch (error) {
@@ -65,6 +65,7 @@ const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
                   isDeleteLoading={isDeleteLoading}
                   onEditClick={onEditClick}
                   onDeleteClick={deleteCOnfirmationHandler}
+                  setDeleteRelationId={setDeleteRelationId}
                 />
               </Box>
             );
@@ -82,7 +83,7 @@ const QuestionsList = ({ questions = [], onEditClick, onDelete }) => {
         open={isDeleteDialogOpen}
         handleClose={toggleQuestionDialog}
         handleConfirm={deleteQuestionHandler}
-        text="Are you sure, you want to Delete this Question?"
+        text="Are you sure, you want to remove this Question?"
         okBtnText="Delete"
       />
     </Box>

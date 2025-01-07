@@ -8,6 +8,13 @@ export const getKioskData = () =>
     .then((response) => response.data)
     .catch((error) => console.log("error", error));
 
+export const getAllKioskData = () =>
+  axios
+    .get("/kiosk/kiosk-list")
+    .then((response) => response.data)
+    .catch((error) => console.log("error", error));
+    
+
 export const getKioskDataById = (id) =>
   axios
     .get(`/kiosk/${id}`)
@@ -34,14 +41,26 @@ export const deleteKioskData = (id) =>
 //   return response;
 // };
 
+
 export const getKioskQuestions = async (kisokId) => {
   const response = await axios.get("/questions/" + kisokId);
 
   return response;
 };
 
+export const getGeneralQuestions = async () => {
+  const response = await axios.get("/questions/all");
+
+  return response;
+};
+
 export const addQuestion = async ({ data }) => {
   const response = await axios.post("/questions", data);
+  return response;
+};
+
+export const addGeneralQuestion = async ({ data }) => {
+  const response = await axios.post("/questions/create-general", data);
   return response;
 };
 
@@ -52,6 +71,11 @@ export const updateQuestion = async ({ data, id }) => {
 
 export const deleteQuestion = async (id) => {
   const response = await axios.delete("/questions/" + id);
+  return response;
+};
+
+export const unAssignQuestion = async (id) => {
+  const response = await axios.delete("/kiosk/unassign/" + id);
   return response;
 };
 

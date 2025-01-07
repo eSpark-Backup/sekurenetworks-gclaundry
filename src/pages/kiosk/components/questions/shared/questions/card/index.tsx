@@ -17,12 +17,13 @@ const QuestionCard = ({
   onEditClick,
   onDeleteClick,
   isDeleteLoading = false,
+  setDeleteRelationId,
 }) => {
   const question = `Q${index + 1}. ${questionDetails.question}`;
 
   return (
     <MainCard>
-      <Box
+      {/* <Box
         sx={{
           display: "flex",
           justifyContent: "flex-end",
@@ -34,18 +35,18 @@ const QuestionCard = ({
         ) : (
           <Chip size="small" label="inactive" />
         )}
-      </Box>
+      </Box> */}
 
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
         <Typography variant="h5">{question}</Typography>
 
         <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
-          <IconButton
+          {/* <IconButton
             disabled={isDeleteLoading}
             onClick={() => onEditClick({ details: questionDetails })}
           >
             <EditOutlined />
-          </IconButton>
+          </IconButton> */}
 
           {isDeleteLoading ? (
             <Box
@@ -60,7 +61,10 @@ const QuestionCard = ({
           ) : (
             <IconButton
               color="error"
-              onClick={() => onDeleteClick(questionDetails.id)}
+              onClick={() => {
+                setDeleteRelationId(questionDetails.relationId);
+                onDeleteClick(questionDetails.id)
+              }}
             >
               <DeleteOutlined />
             </IconButton>
