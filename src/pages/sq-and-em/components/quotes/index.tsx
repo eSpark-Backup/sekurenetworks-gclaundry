@@ -558,6 +558,7 @@ const Quotes = () => {
         heading="Assign Quotes to Customer Kiosks"
         info="Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
         buttonLabel="Assign"
+        confirmText="Are you sure, you want to Assign Selected Quotes to Selected kiosks?"
       />
 
       <KiosksAssigner
@@ -583,6 +584,7 @@ const Quotes = () => {
         heading="Unassign Quotes to Customer Kiosks"
         info="Please Note if kiosk not selected, it will be Unassign to all Customer Kiosks"
         buttonLabel="Unassign"
+        confirmText="Are you sure, you want to UnAssign Selected Quotes From Selected kiosks?"
       />
 
       <ConfirmationDailog

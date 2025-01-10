@@ -164,7 +164,7 @@ const Questions = () => {
 
     if (hasNoKiosks) {
       toast("Some of the selected questions are not assigned to any kiosk", { type: "error" });
-      setOpenSelectedUnAssignKioksDialog(false);
+      setOpenAllKiosksUnAssignConfirmationDialog(false);
       return;
     }
 
@@ -374,6 +374,7 @@ const Questions = () => {
           heading="Assign Questions to Customer Kiosks"
           info="Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
           buttonLabel="Assign"
+          confirmText="Are you sure, you want to Assign Selected Questions to Selected kiosks?"
         />
 
         <KiosksAssigner
@@ -399,6 +400,7 @@ const Questions = () => {
           heading="Unassign Questions to Customer Kiosks"
           info="Please Note if kiosk not selected, it will be Unassign to all Customer Kiosks"
           buttonLabel="Unassign"
+          confirmText="Are you sure, you want to UnAssign Selected Questions to Selected kiosks?"
         />
 
         <ConfirmationDailog

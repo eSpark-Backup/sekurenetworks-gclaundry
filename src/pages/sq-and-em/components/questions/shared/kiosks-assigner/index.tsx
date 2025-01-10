@@ -1,8 +1,10 @@
 
 import apiService from '@/api/apiService';
+import ConfirmationDailog from '@/components/ConfirmDailog';
 import { LoadingButton } from '@mui/lab';
 import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, Divider, TextField, Tooltip, Typography } from '@mui/material'
 import { useRequest } from 'ahooks';
+import { useState } from 'react';
 
 const KiosksAssigner = ({
     open,
@@ -20,9 +22,12 @@ const KiosksAssigner = ({
     selectedCustomer,
     heading,
     info,
-    buttonLabel
+    buttonLabel,
+    confirmText
 
 }) => {
+
+    const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
 
 
     const { runAsync: getKiosks } = useRequest(
@@ -43,6 +48,7 @@ const KiosksAssigner = ({
 
 
     return (
+        <>
         <Dialog
             open={open}
             onClose={handleClose}
@@ -127,9 +133,8 @@ const KiosksAssigner = ({
                         <LoadingButton
                             variant="contained"
                             sx={{ fontWeight: 600 }}
-                            onClick={onAssign}
+                            onClick={() => setOpenConfirmationDialog(true)}
                             disabled={kioksByCustomerId.length === 0 || assignLoading || !selectedCustomer}
-                            loading={assignLoading}
                         >
 
                             {buttonLabel}
@@ -138,6 +143,19 @@ const KiosksAssigner = ({
                 </Tooltip>
             </DialogActions>
         </Dialog>
+
+
+        <ConfirmationDailog
+          open={openConfirmationDialog}
+          handleClose={() =>  setOpenConfirmationDialog(false)}
+          handleConfirm={() => { onAssign(); setOpenConfirmationDialog(false); }}
+          text={confirmText}
+          okBtnText="Confirm"
+          assignLoading={assignLoading}
+
+        />
+        
+        </>
     )
 }
 
