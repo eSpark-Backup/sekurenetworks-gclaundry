@@ -27,14 +27,31 @@ export class ReportService {
     const totalCustomers = await this.prisma.customer.count();
     const totalClients = await this.prisma.users.count();
 
+    const transactions = await this.prisma.transaction.findMany({
+      where: { status: "SUCCESS" },
+      select: { quantity: true },
+    });
+
+    const totalSuccessSheets = transactions.reduce((sum, t) => sum + (t.quantity || 0), 0);
+
+    const totalWaterSaved = totalSuccessSheets * 4.78;
+    const totalCarbonDioxideAvoided = totalSuccessSheets * 0.14;
+    const totalPlasticSheetsEliminated = totalSuccessSheets * 0.031;
+
+
     return {
       kiosk: { total, online, offline },
       totalClients,
       totalCustomers,
       totalLowInventoryKiosk,
+      totalSheetsUsed: totalSuccessSheets,
+      totalWaterSaved,
+      totalCarbonDioxideAvoided,
+      totalPlasticSheetsEliminated
     };
 
   }
+
 
   async analytics({
     from,
@@ -259,9 +276,9 @@ export class ReportService {
     }
 
 
-    
 
-    const doc = new jsPDF({orientation: 'landscape'});  // Create a new PDF document
+
+    const doc = new jsPDF({ orientation: 'landscape' });  // Create a new PDF document
 
     let isFirstPage = true;
 
@@ -271,16 +288,16 @@ export class ReportService {
       doc.text('Transactions Report', doc.internal.pageSize.width / 2, 15, { align: 'center' });
       isFirstPage = false;
     }
-    
+
     let yPosition = 30;  // Start from this Y-position for the body
-    
+
     // Iterate through the reports for each kiosk
     reports.forEach((report) => {
       // Add kiosk name as a subtitle
       doc.setFontSize(14);
       doc.text(`Kiosk: ${report.kiosk.name}`, doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
       yPosition += 10;
-    
+
       if (report.transactions.length === 0) {
         doc.setFontSize(12);
         doc.text('No transactions found', doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
@@ -293,7 +310,7 @@ export class ReportService {
           transaction.tissueType,
           transaction.status,
           transaction.error || "N/A",
-          new Date(transaction.time).toLocaleString("en-US", {hour12: true}),
+          new Date(transaction.time).toLocaleString("en-US", { hour12: true }),
           // transaction.question?.question || "N/A",
           transaction.questionId || "N/A",
           (transaction.question?.options?.map((e, index) => `${index + 1}. ${e.option}`).join(", ")) || "None",
@@ -302,7 +319,7 @@ export class ReportService {
           // transaction.quote?.quote || "N/A"
           transaction.quoteId || "N/A"
         ]);
-    
+
         // Add the table
         autoTable(doc, {
           startY: yPosition,
@@ -336,24 +353,24 @@ export class ReportService {
             }
           },
         });
-    
+
         // Update yPosition for the next kiosk's data
         yPosition = (doc as any).lastAutoTable.finalY + 15;
       }
-    
+
       // Add a page break if there's not enough space for the next kiosk's data
       if (yPosition > doc.internal.pageSize.height - 20) {
         doc.addPage();
         yPosition = 30;
       }
     });
-    
+
     // Send the PDF as a downloadable file
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename=transactions-report.pdf',
     });
-    
+
     res.send(doc.output());
 
   }
