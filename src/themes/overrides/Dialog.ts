@@ -8,9 +8,9 @@ export default function Dialog() {
     MuiDialog: {
       styleOverrides: {
         root: {
-          '& .MuiBackdrop-root': {
-            backgroundColor: alpha('#000', 0.7)
-          }
+          // '& .MuiBackdrop-root': {
+          //   backgroundColor: alpha('#000', 0.7)
+          // }
         }
       }
     }

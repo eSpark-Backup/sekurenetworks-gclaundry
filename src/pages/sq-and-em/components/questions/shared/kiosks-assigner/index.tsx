@@ -1,8 +1,10 @@
 
 import apiService from '@/api/apiService';
+import ConfirmationDailog from '@/components/ConfirmDailog';
 import { LoadingButton } from '@mui/lab';
-import { Autocomplete, Box, Button, Dialog, DialogActions, DialogContent, Divider, TextField, Tooltip, Typography } from '@mui/material'
+import { Autocomplete, Box, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, Divider, MenuItem, TextField, Tooltip, Typography } from '@mui/material'
 import { useRequest } from 'ahooks';
+import { useState } from 'react';
 
 const KiosksAssigner = ({
     open,
@@ -20,9 +22,12 @@ const KiosksAssigner = ({
     selectedCustomer,
     heading,
     info,
-    buttonLabel
+    buttonLabel,
+    confirmText
 
 }) => {
+
+    const [openConfirmationDialog, setOpenConfirmationDialog] = useState(false);
 
 
     const { runAsync: getKiosks } = useRequest(
@@ -32,7 +37,9 @@ const KiosksAssigner = ({
             manual: true,
             debounceWait: 1000,
             onSuccess: ({ data }) => {
-                setKiosksByCustomerId(data.data);
+                const kioskswithCustomer = data?.data.filter(kiosk => kiosk?.customer !== null);
+
+                setKiosksByCustomerId(kioskswithCustomer);
                 setLoadingKiosksByCustomerId(false);
             },
             onError: () => {
@@ -41,103 +48,172 @@ const KiosksAssigner = ({
         }
     );
 
+    const handleSelectAll = (isSelectAllChecked) => {
+        if (isSelectAllChecked) {
+            setSelectedKiosks(kioksByCustomerId);
+        } else {
+            setSelectedKiosks([]);
+        }
+    };
+
 
     return (
-        <Dialog
-            open={open}
-            onClose={handleClose}
-            aria-labelledby="alert-dialog-title"
-            aria-describedby="alert-dialog-description"
-            fullWidth
-        >
+        <>
+            <Dialog
+                open={open}
+                // onClose={handleClose}
+                aria-labelledby="alert-dialog-title"
+                aria-describedby="alert-dialog-description"
+                fullWidth
+            >
 
-            <DialogContent>
-                <Typography variant="h4" gutterBottom>{heading}</Typography>
-                <br />
+                <DialogContent>
+                    <Typography variant="h4" gutterBottom>{heading}</Typography>
+                    <br />
 
-                <Autocomplete
-                    sx={{ mb: 2 }}
-                    fullWidth
-                    options={customers}
-                    value={selectedCustomer}
-                    getOptionLabel={(option) => option.schoolName}
-                    clearIcon={null}
-                    onChange={async (_: any, customer) => {
-                        console.log(customer)
-                        setSelectedCustomer(customer);
-                        // if (!selectedCustomer) {
-                        //     setKiosksByCustomerId([]);
-                        //     return;
-                        // }
-                        if (!customer) {
-                            setKiosksByCustomerId([]);
-                            return;
-                        }
-                        setSelectedKiosks([]);
-                        setLoadingKiosksByCustomerId(true);
-                        await getKiosks({ customerId: customer.id });
-                    }}
-                    renderInput={(params) => (
-                        <TextField {...params} placeholder="Select Customer" />
-                    )}
-                />
+                    <Autocomplete
+                        sx={{ mb: 2 }}
+                        fullWidth
+                        options={[{ id: "all", schoolName: "Select All" }, ...customers]}
+                        value={selectedCustomer}
+                        getOptionLabel={(option) => option.schoolName}
+                        clearIcon={null}
+                        onChange={async (_: any, customer) => {
+                            console.log(customer)
+                            setSelectedCustomer(customer);
+                            // if (!selectedCustomer) {
+                            //     setKiosksByCustomerId([]);
+                            //     return;
+                            // }
+                            if (!customer) {
+                                setKiosksByCustomerId([]);
+                                return;
+                            }
+                            setSelectedKiosks([]);
+                            setLoadingKiosksByCustomerId(true);
+                            if (customer.id === "all") {
+                                await getKiosks({});
+                            }
+                            else {
+                                await getKiosks({ customerId: customer.id });
 
-
-                <Autocomplete
-                    multiple
-                    id="tags-outlined"
-                    options={kioksByCustomerId}
-                    loading={loadingKioksbyCustomerId}
-                    disabled={loadingKioksbyCustomerId}
-                    getOptionLabel={(option) => option.name}
-                    filterSelectedOptions
-                    value={selectedKiosks}
-                    onChange={(event, newValue) => setSelectedKiosks(newValue)}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="outlined"
-                            placeholder={loadingKioksbyCustomerId ? "Loading Kiosks" : "Select Kiosks"}
-                        />
-                    )}
-                />
-
-                <br />
-
-                <Typography color="error">
-                    {info}
-                </Typography>
+                            }
+                        }}
+                        renderInput={(params) => (
+                            <TextField {...params} placeholder="Select Customer" />
+                        )}
+                    />
 
 
+                    <Autocomplete
+                        multiple
+                        id="tags-outlined"
+                        options={kioksByCustomerId.length > 0
+                            ? [{ id: "all", name: "Select All" }, ...kioksByCustomerId]
+                            : []}
+                        loading={loadingKioksbyCustomerId}
+                        disabled={loadingKioksbyCustomerId || kioksByCustomerId.length === 0}
+                        getOptionLabel={(option) => option.name}
+                        disableCloseOnSelect
+                        // filterSelectedOptions
+                        value={selectedKiosks}
+                        onChange={(event, newValue) => {
+                            // Handle "Select All" logic
+                            const isSelectAllIncluded = newValue?.some((item) => item?.id === "all");
+                            if (isSelectAllIncluded) {
+                                handleSelectAll(newValue[0]?.id === "all");
+                            } else {
+                                setSelectedKiosks(newValue);
+                            }
+                        }}
+                        renderOption={(props, option, { selected }) => (
+                            <MenuItem {...props}>
+                                {/* <Checkbox
+                                    checked={option.id === "all" ? selectedKiosks.length === kioksByCustomerId.length : selected}
+                                /> */}
+                                <input
+                                    type="checkbox"
+                                    checked={option?.id === "all" ? selectedKiosks.length === kioksByCustomerId.length : selected}
+                                    style={{ marginRight: "1rem", cursor: "pointer", width: "1rem", height: "1rem", accentColor: "red" }}
+                                />
+                                {option.name}
+                            </MenuItem>
+                        )}
+                        renderInput={(params) => (
+                            <TextField
+                                {...params}
+                                variant="outlined"
+                                placeholder={loadingKioksbyCustomerId ? "Loading Kiosks" : "Select Kiosks"}
+                            />
+                        )}
+                        renderTags={(value, getTagProps) => {
+                            const visibleTags = 3; // Number of tags to show before skipping
+                            const totalTags = value.length;
 
-                <Box type="A" component="ol">
+                            const displayedTags = value.slice(0, visibleTags).map((option, index) => (
+                                <Chip key={option?.name} {...getTagProps({ index })} label={option.name} />
+                            ));
+                            if (totalTags > visibleTags) {
+                                displayedTags.push(
+                                    <Chip
+                                        key={`more-${totalTags - visibleTags}`}
+                                        {...getTagProps({ index: totalTags - 1 })}
+                                        label={`${value[totalTags - 1]?.name} +${totalTags - visibleTags}`}
+                                    />
+                                );
+                            }
+                            return displayedTags;
+                        }}
+                    />
 
-                    <Box sx={{ mt: "0.5rem" }}>
-                        <Divider sx={{ width: "100%" }} />
+                    <br />
+
+                    <Typography color="error">
+                        {info}
+                    </Typography>
 
 
+
+                    <Box type="A" component="ol">
+
+                        <Box sx={{ mt: "0.5rem" }}>
+                            <Divider sx={{ width: "100%" }} />
+
+
+                        </Box>
                     </Box>
-                </Box>
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={handleClose}>Cancel</Button>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose}>Cancel</Button>
 
-                <Tooltip title={"disabledMessage"}>
-                    <div>
-                        <LoadingButton
-                            variant="contained"
-                            sx={{ fontWeight: 600 }}
-                            onClick={onAssign}
-                            disabled={kioksByCustomerId.length === 0 || assignLoading || !selectedCustomer}
-                            loading={assignLoading}
-                        >
+                    <Tooltip title={"disabledMessage"}>
+                        <div>
+                            <LoadingButton
+                                variant="contained"
+                                sx={{ fontWeight: 600 }}
+                                onClick={() => setOpenConfirmationDialog(true)}
+                                disabled={kioksByCustomerId.length === 0 || assignLoading || !selectedCustomer || selectedKiosks.length === 0}
+                            >
 
-                            {buttonLabel}
-                        </LoadingButton>
-                    </div>
-                </Tooltip>
-            </DialogActions>
-        </Dialog>
+                                {buttonLabel}
+                            </LoadingButton>
+                        </div>
+                    </Tooltip>
+                </DialogActions>
+            </Dialog>
+
+
+            <ConfirmationDailog
+                open={openConfirmationDialog}
+                handleClose={() => setOpenConfirmationDialog(false)}
+                handleConfirm={() => { onAssign(); setOpenConfirmationDialog(false); }}
+                text={confirmText}
+                okBtnText="Confirm"
+                assignLoading={assignLoading}
+
+            />
+
+        </>
     )
 }
 
