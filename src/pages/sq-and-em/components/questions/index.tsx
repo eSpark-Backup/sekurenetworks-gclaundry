@@ -46,12 +46,10 @@ const Questions = () => {
   const [openSelectedUnAssignKioksDialog, setOpenSelectedUnAssignKioksDialog] = useState(false);
   const [selectedKiosks, setSelectedKiosks] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
-  const [openAllKiosksConfirmationDialog, setOpenAllKiosksConfirmationDialog] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [kioksByCustomerId, setKiosksByCustomerId] = useState([]);
   const [loadingKioksbyCustomerId, setLoadingKiosksByCustomerId] = useState(false);
-  const [openAllKiosksUnAssignConfirmationDialog, setOpenAllKiosksUnAssignConfirmationDialog] = useState(false);
   const [unassingLoading, setUnassignLoading] = useState(false);
 
 
@@ -102,7 +100,6 @@ const Questions = () => {
         toast(data.message, { type: "success" });
         setAssignLoading(false);
         setOpenSelectedKioksDialog(false);
-        setOpenAllKiosksConfirmationDialog(false);
         setSelectedKiosks([]);
         setSelectedQuestions([]);
         setSelectedCustomer(null);
@@ -122,7 +119,6 @@ const Questions = () => {
       onSuccess: ({ data }: any) => {
         toast(data.message, { type: "success" });
         setUnassignLoading(false);
-        setOpenAllKiosksUnAssignConfirmationDialog(false);
         setSelectedQuestions([]);
         setSelectedKiosks([]);
         setOpenSelectedUnAssignKioksDialog(false);
@@ -148,55 +144,18 @@ const Questions = () => {
     fetchKiosksQustions();
   }
 
-  const handleAllKiosksAssign = async () => {
-    setAssignLoading(true);
-    await assignToKiosk({
-      kioskIds: kiosks.map((k) => k.macId),
-      dataIds: selectedQuestions.map((q) => q.id),
-      type: "QUESTION",
-    });
-
-    fetchKiosksQustions();
-  }
-
   const handleKiosksUnAssign = async () => {
     const hasNoKiosks = selectedQuestions.some(question => question.kiosks.length === 0);
 
     if (hasNoKiosks) {
       toast("Some of the selected questions are not assigned to any kiosk", { type: "error" });
-      setOpenAllKiosksUnAssignConfirmationDialog(false);
+      // setOpenAllKiosksUnAssignConfirmationDialog(false);
       return;
     }
 
     setUnassignLoading(true);
     await unassignFromKiosk({
       kioskIds: selectedKiosks.length > 0 ? selectedKiosks.map((k) => k.macId) : kioksByCustomerId.map((k) => k.macId),
-      dataIds: selectedQuestions.map((q) => q.id),
-      type: "QUESTION",
-    });
-
-    fetchKiosksQustions();
-  }
-
-  const handleAllKiosksUnAssign = async () => {
-    const hasNoKiosks = selectedQuestions.some(question => question.kiosks.length === 0);
-
-    if (hasNoKiosks) {
-      toast("Some of the selected questions are not assigned to any kiosk", { type: "error" });
-      setOpenAllKiosksUnAssignConfirmationDialog(false);
-      return;
-    }
-
-    const kioskIds = questions
-      .map(question => question.kiosks.map(kiosk => kiosk.kioskId)) // Extract kioskId arrays
-      .flat(); // Flatten the arrays into a single array
-
-    const uniqueKioskIds = [...new Set(kioskIds)]; // Remove duplicates
-
-
-    setUnassignLoading(true);
-    await unassignFromKiosk({
-      kioskIds: uniqueKioskIds,
       dataIds: selectedQuestions.map((q) => q.id),
       type: "QUESTION",
     });
@@ -266,6 +225,23 @@ const Questions = () => {
 
               <Button
                 variant="contained"
+                onClick={() => setOpenSelectedKioksDialog(true)}
+                disabled={selectedQuestions.length === 0}
+
+              >
+                Assign to kiosks
+              </Button>
+              <Button
+                variant="contained"
+                onClick={() => setOpenSelectedUnAssignKioksDialog(true)}
+                disabled={selectedQuestions.length === 0}
+
+              >
+                Unassign to kiosks
+              </Button>
+
+              <Button
+                variant="contained"
                 startIcon={<PlusOutlined />}
                 onClick={toggleQuestionsManipulator}
               >
@@ -285,47 +261,7 @@ const Questions = () => {
 
         </Stack>
 
-        <Stack
-          sx={{
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: "flex-end",
-            justifyContent: "flex-end",
-            gap: "1rem",
-          }}
-        >
 
-
-          <Button
-            variant="contained"
-            onClick={() => setOpenSelectedKioksDialog(true)}
-            disabled={selectedQuestions.length === 0}
-
-          >
-            Assign to Customer kiosks
-          </Button>
-          <Button
-            variant="contained"
-            onClick={() => setOpenSelectedUnAssignKioksDialog(true)}
-            disabled={selectedQuestions.length === 0}
-
-          >
-            Unassign to Customer kiosks
-          </Button>
-          <Button
-            variant="contained"
-            disabled={selectedQuestions.length === 0}
-            onClick={() => setOpenAllKiosksConfirmationDialog(true)}
-          >
-            Assign to All Kiosks
-          </Button>
-          <Button
-            variant="contained"
-            disabled={selectedQuestions.length === 0}
-            onClick={() => setOpenAllKiosksUnAssignConfirmationDialog(true)}
-          >
-            Unassign from All Kiosks
-          </Button>
-        </Stack>
 
 
       </Stack>
@@ -372,7 +308,6 @@ const Questions = () => {
           customers={customers}
           selectedCustomer={selectedCustomer}
           heading="Assign Questions to Customer Kiosks"
-          info="Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
           buttonLabel="Assign"
           confirmText="Are you sure, you want to Assign Selected Questions to Selected kiosks?"
         />
@@ -398,29 +333,8 @@ const Questions = () => {
           customers={customers}
           selectedCustomer={selectedCustomer}
           heading="Unassign Questions to Customer Kiosks"
-          info="Please Note if kiosk not selected, it will be Unassign to all Customer Kiosks"
           buttonLabel="Unassign"
           confirmText="Are you sure, you want to UnAssign Selected Questions to Selected kiosks?"
-        />
-
-        <ConfirmationDailog
-          open={openAllKiosksConfirmationDialog}
-          handleClose={() => setOpenAllKiosksConfirmationDialog(false)}
-          handleConfirm={handleAllKiosksAssign}
-          text={`Are you sure, you want to Assign Selected Questions to All kiosks?`}
-          okBtnText="Assign"
-          assignLoading={assignLoading}
-
-        />
-
-        <ConfirmationDailog
-          open={openAllKiosksUnAssignConfirmationDialog}
-          handleClose={() => setOpenAllKiosksUnAssignConfirmationDialog(false)}
-          handleConfirm={handleAllKiosksUnAssign}
-          text={`Are you sure, you want to UnAssign Selected Questions From All kiosks?`}
-          okBtnText="UnAssign"
-          assignLoading={unassingLoading}
-
         />
 
       </ApiLoader>

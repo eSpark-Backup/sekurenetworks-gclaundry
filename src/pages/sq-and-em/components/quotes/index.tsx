@@ -50,12 +50,10 @@ const Quotes = () => {
   const [openSelectedUnAssignKioksDialog, setOpenSelectedUnAssignKioksDialog] = useState(false);
   const [selectedKiosks, setSelectedKiosks] = useState([]);
   const [assignLoading, setAssignLoading] = useState(false);
-  const [openAllKiosksConfirmationDialog, setOpenAllKiosksConfirmationDialog] = useState(false);
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [kioksByCustomerId, setKiosksByCustomerId] = useState([]);
   const [loadingKioksbyCustomerId, setLoadingKiosksByCustomerId] = useState(false);
-  const [openAllKiosksUnAssignConfirmationDialog, setOpenAllKiosksUnAssignConfirmationDialog] = useState(false);
   const [unassingLoading, setUnassignLoading] = useState(false);
 
   const [initialValues, setInitialValues] = useState({
@@ -169,7 +167,6 @@ const Quotes = () => {
         toast(data.message, { type: "success" });
         setAssignLoading(false);
         setOpenSelectedKioksDialog(false);
-        setOpenAllKiosksConfirmationDialog(false);
         setSelectedKiosks([]);
         setSelectedQuotes([]);
         setSelectedCustomer(null);
@@ -190,8 +187,8 @@ const Quotes = () => {
       onSuccess: ({ data }: any) => {
         toast(data.message, { type: "success" });
         setUnassignLoading(false);
-        setOpenAllKiosksUnAssignConfirmationDialog(false);
         setOpenSelectedUnAssignKioksDialog(false);
+        setSelectedKiosks([]);
         setSelectedQuotes([]);
         setSelectedCustomer(null);
       },
@@ -199,10 +196,6 @@ const Quotes = () => {
         console.error(error);
         toast("An error occured while unassigning quotes", { type: "error" });
         setUnassignLoading(false);
-        setOpenAllKiosksUnAssignConfirmationDialog(false);
-        setOpenSelectedUnAssignKioksDialog(false);
-        setSelectedQuotes([]);
-        setSelectedCustomer(null);
       },
     }
   );
@@ -219,50 +212,13 @@ const Quotes = () => {
 
   }
 
-  const handleAllKiosksAssign = async () => {
-    setAssignLoading(true);
-    await assignToKiosk({
-      kioskIds: kiosks.map((k) => k.macId),
-      dataIds: selectedQuotes.map((q) => q.id),
-      type: "QUOTE",
-    });
-
-    await refreshAsync();
-  }
-
-
-  const handleAllKiosksUnAssign = async () => {
-    const hasNoKiosks = selectedQuotes.some(quotes => quotes.kiosks.length === 0);
-
-    if (hasNoKiosks) {
-      toast("Some of the selected quotes are not assigned to any kiosk", { type: "error" });
-      setOpenAllKiosksUnAssignConfirmationDialog(false);
-      return;
-    }
-
-    const kioskIds = quotes
-      .map(quote => quote.kiosks.map(kiosk => kiosk.kioskId)) // Extract kioskId arrays
-      .flat(); // Flatten the arrays into a single array
-
-    const uniqueKioskIds = [...new Set(kioskIds)]; // Remove duplicates
-
-
-    setUnassignLoading(true);
-    await unassignFromKiosk({
-      kioskIds: uniqueKioskIds,
-      dataIds: selectedQuotes.map((q) => q.id),
-      type: "QUOTE",
-    });
-
-    await refreshAsync();
-  }
 
   const handleKiosksUnAssign = async () => {
     const hasNoKiosks = selectedQuotes.some(quotes => quotes.kiosks.length === 0);
 
     if (hasNoKiosks) {
       toast("Some of the selected quotes are not assigned to any kiosk", { type: "error" });
-      setOpenAllKiosksUnAssignConfirmationDialog(false);
+      // setOpenAllKiosksUnAssignConfirmationDialog(false);
       return;
     }
 
@@ -329,6 +285,24 @@ const Quotes = () => {
 
             <Button
               variant="contained"
+              disabled={selectedQuotes.length === 0}
+              onClick={() => setOpenSelectedKioksDialog(true)}
+
+            >
+              Assign To Kiosks
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={() => setOpenSelectedUnAssignKioksDialog(true)}
+              disabled={selectedQuotes.length === 0}
+
+            >
+              Unassign To kiosks
+            </Button>
+
+            <Button
+              variant="contained"
               startIcon={<PlusOutlined />}
               onClick={() => setEditDailog(true)}
             >
@@ -344,49 +318,6 @@ const Quotes = () => {
           </Box>
         </Stack>
 
-        <Stack
-          sx={{
-            flexDirection: { xs: "column", md: "row" },
-            alignItems: "flex-end",
-            justifyContent: "flex-end",
-            gap: "1rem",
-          }}
-        >
-
-
-          <Button
-            variant="contained"
-            disabled={selectedQuotes.length === 0}
-            onClick={() => setOpenSelectedKioksDialog(true)}
-
-          >
-            Assign To Customer Kiosks
-          </Button>
-
-          <Button
-            variant="contained"
-            onClick={() => setOpenSelectedUnAssignKioksDialog(true)}
-            disabled={selectedQuotes.length === 0}
-
-          >
-            Unassign to Customer kiosks
-          </Button>
-
-          <Button
-            variant="contained"
-            disabled={selectedQuotes.length === 0}
-            onClick={() => setOpenAllKiosksConfirmationDialog(true)}
-          >
-            Assign To All Kiosks
-          </Button>
-          <Button
-            variant="contained"
-            disabled={selectedQuotes.length === 0}
-            onClick={() => setOpenAllKiosksUnAssignConfirmationDialog(true)}
-          >
-            UnAssign from All Kiosks
-          </Button>
-        </Stack>
       </Stack>
 
       <ApiLoader mt="1rem" isLoading={loading}>
@@ -522,16 +453,16 @@ const Quotes = () => {
             text="Are you sure, you want to Delete this Quote?"
           />
         </Box>
-      {
-        editDailog && (
-          <QuoteDialog
-            open={editDailog}
-            initialValues={initialValues}
-            handleClose={handleClose}
-            updateQuote={updateQoute}
-            createGeneral={createGeneral}
-          />)
-      }
+        {
+          editDailog && (
+            <QuoteDialog
+              open={editDailog}
+              initialValues={initialValues}
+              handleClose={handleClose}
+              updateQuote={updateQoute}
+              createGeneral={createGeneral}
+            />)
+        }
       </ApiLoader>
 
 
@@ -556,7 +487,7 @@ const Quotes = () => {
         customers={customers}
         selectedCustomer={selectedCustomer}
         heading="Assign Quotes to Customer Kiosks"
-        info="Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
+        // info="Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
         buttonLabel="Assign"
         confirmText="Are you sure, you want to Assign Selected Quotes to Selected kiosks?"
       />
@@ -582,29 +513,9 @@ const Quotes = () => {
         customers={customers}
         selectedCustomer={selectedCustomer}
         heading="Unassign Quotes to Customer Kiosks"
-        info="Please Note if kiosk not selected, it will be Unassign to all Customer Kiosks"
+        // info="Please Note if kiosk not selected, it will be Unassign to all Customer Kiosks"
         buttonLabel="Unassign"
         confirmText="Are you sure, you want to UnAssign Selected Quotes From Selected kiosks?"
-      />
-
-      <ConfirmationDailog
-        open={openAllKiosksConfirmationDialog}
-        handleClose={() => setOpenAllKiosksConfirmationDialog(false)}
-        handleConfirm={handleAllKiosksAssign}
-        text={`Are you sure, you want to Assign Selected Quotes to All kiosks?`}
-        okBtnText="Assign"
-        assignLoading={assignLoading}
-
-      />
-
-      <ConfirmationDailog
-        open={openAllKiosksUnAssignConfirmationDialog}
-        handleClose={() => setOpenAllKiosksUnAssignConfirmationDialog(false)}
-        handleConfirm={handleAllKiosksUnAssign}
-        text={`Are you sure, you want to UnAssign Selected Quotes From All kiosks?`}
-        okBtnText="UnAssign"
-        assignLoading={unassingLoading}
-
       />
 
 
