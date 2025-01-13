@@ -17,6 +17,10 @@ interface KioskStatus {
   totalClients: number;
   totalCustomers: number;
   totalLowInventoryKiosk: number;
+  totalSheetsUsed: number;
+  totalWaterSaved: number;
+  totalCarbonDioxideAvoided: number;
+  totalPlasticSheetsEliminated: number;
 }
 
 const DashboardDefault = () => {
@@ -77,6 +81,34 @@ const DashboardDefault = () => {
             title="Total Clients (Kiosk User)"
             to="/clients"
             count={`${data.totalClients}`}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4} lg={4}>
+          <AnalyticEcommerce
+            title="Total Sheets Used (SUCCESS)"
+            // to="/clients"
+            count={`${data.totalSheetsUsed}`}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4} lg={4}>
+          <AnalyticEcommerce
+            title="Total Water Saved (grams)"
+            // to="/clients"
+            count={`${data.totalWaterSaved.toFixed(2)}`}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4} lg={4}>
+          <AnalyticEcommerce
+            title="Total Carbon Dioxide Avoided (kilograms)"
+            // to="/clients"
+            count={`${data.totalCarbonDioxideAvoided.toFixed(2)}`}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={4} lg={4}>
+          <AnalyticEcommerce
+            title="Total Plastic Sheets Eliminated"
+            // to="/clients"
+            count={`${data.totalPlasticSheetsEliminated.toFixed(2)}`}
           />
         </Grid>
       </Grid>
