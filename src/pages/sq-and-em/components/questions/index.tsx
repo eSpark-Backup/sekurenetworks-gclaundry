@@ -149,7 +149,6 @@ const Questions = () => {
 
     if (hasNoKiosks) {
       toast("Some of the selected questions are not assigned to any kiosk", { type: "error" });
-      // setOpenAllKiosksUnAssignConfirmationDialog(false);
       return;
     }
 

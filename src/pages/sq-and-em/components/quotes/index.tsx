@@ -218,7 +218,6 @@ const Quotes = () => {
 
     if (hasNoKiosks) {
       toast("Some of the selected quotes are not assigned to any kiosk", { type: "error" });
-      // setOpenAllKiosksUnAssignConfirmationDialog(false);
       return;
     }
 
