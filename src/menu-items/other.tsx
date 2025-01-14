@@ -53,14 +53,14 @@ const other = {
     },
     {
       id: 'report',
-      title: <FormattedMessage id="Kiosk Report" />,
+      title: <FormattedMessage id="kiosk-report" />,
       type: 'item',
       url: '/report',
       icon: icons.BarChartOutlined
     },
     {
       id: 'sq-and-em',
-      title: <FormattedMessage id="SQ & EM" />,
+      title: <FormattedMessage id="sq-&-em" />,
       type: 'item',
       url: '/sq-and-em',
       icon: icons.QuestionCircleOutlined

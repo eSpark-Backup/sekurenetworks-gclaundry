@@ -77,7 +77,7 @@ function GencoTable<TData extends IGencoTable>({
       size: 65,
       header: () => "More Details",
       cell: ({ row }) => (
-        <TableCell sx={{ width: 65, padding: "0px 4px" }}>
+        <Box sx={{ width: 65, padding: "0px 4px" }}>
           <IconButton
             aria-label="expand row"
             size="small"
@@ -88,7 +88,7 @@ function GencoTable<TData extends IGencoTable>({
           >
             {expandedRows[row.id] ? <CaretUpOutlined /> : <CaretDownOutlined />}
           </IconButton>
-        </TableCell>
+        </Box>
       ),
     };
 
