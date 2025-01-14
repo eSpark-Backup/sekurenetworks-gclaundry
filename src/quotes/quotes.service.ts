@@ -78,7 +78,7 @@ export class QuotesService {
 
         const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean);
 
-        const topic = `survey/${kioskId}`;
+        const topic = `message/${kioskId}`;
         this.mqttService.publish(topic, JSON.stringify(Quotes));
       }
  
@@ -118,7 +118,7 @@ export class QuotesService {
       const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean);
 
 
-      const topic = `survey/${kioskId}`;
+      const topic = `message/${kioskId}`;
       this.mqttService.publish(topic, JSON.stringify(Quotes));
     }
 
