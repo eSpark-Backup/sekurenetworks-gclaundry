@@ -350,7 +350,7 @@ export class KioskService {
       const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean); 
    
       if (QuestionsOrQuotes.length > 0) {
-        const topic = `survey/${kioskId}`;
+        const topic = type === "QUESTION" ? `survey/${kioskId}` : `message/${kioskId}`;
         this.mqttService.publish(topic, JSON.stringify(QuestionsOrQuotes));
       }
     }
@@ -379,7 +379,7 @@ export class KioskService {
     }
 
     // Determine the type of data to publish (quotes or questions)
-    const topic = `survey/${relation.kioskId}`;
+    const topic = relation.questionId ? `survey/${relation.kioskId}` : `message/${relation.kioskId}`;
 
     if (relation.quoteId) {
       // Extract and publish quotes
@@ -449,7 +449,7 @@ export class KioskService {
     // Publish updated lists to kiosks
     for (const [kioskId, questionsOrQuotes] of questionsOrQuotesByKiosk) {
       
-      const topic = `survey/${kioskId}`;
+      const topic = type === "QUESTION" ? `survey/${kioskId}` : `message/${kioskId}`;
       this.mqttService.publish(topic, JSON.stringify(questionsOrQuotes));
     }
   
