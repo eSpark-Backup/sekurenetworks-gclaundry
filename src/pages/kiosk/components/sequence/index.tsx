@@ -121,7 +121,7 @@ const Sequence = () => {
         return (
           <>
             <DraggableItem
-              item={{ screen: "SQfollowedbyEM", text: "Sequence Question" }}
+              item={{ screen: "SQfollowedbyEM", text: "Survey Question" }}
               index={3}
               isDragDisabled={true}
             />
@@ -136,12 +136,12 @@ const Sequence = () => {
         return (
           <>
             <DraggableItem
-              item={{ screen: "SQ1followedbySQ2", text: "Sequence Question 1" }}
+              item={{ screen: "SQ1followedbySQ2", text: "Survey Question 1" }}
               index={3}
               isDragDisabled={true}
             />
             <DraggableItem
-              item={{ screen: "SQ1followedbySQ2", text: "Sequence Question 2" }}
+              item={{ screen: "SQ1followedbySQ2", text: "Survey Question 2" }}
               index={4}
               isDragDisabled={true}
             />
@@ -149,7 +149,7 @@ const Sequence = () => {
         )
       case SEQUENCE[5]:
         return (
-          <DraggableItem item={{ screen: "OnlySQ1", text: "Sequence Question 1" }} index={3} isDragDisabled={true} />
+          <DraggableItem item={{ screen: "OnlySQ1", text: "Survey Question 1" }} index={3} isDragDisabled={true} />
         )
       default:
         return null
