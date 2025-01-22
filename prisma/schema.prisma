@@ -39,7 +39,7 @@ model Kiosk {
   name                   String
   sheets_per_transaction Int            @default(5)
   answer_required        Boolean        @default(false)
-  screen_sequence        Json           @default("[\"WelcomeScreen\", \"LoginScreen\", \"SelectScreen\", \"SurveyScreen\", \"QuotesScreen\"]")
+  screen_sequence        Json           @default("[\"WelcomeScreen\", \"LoginScreen\", \"SelectScreen\", \"SQfollowedbyEM\"]")
   machineInfo            Json           @default("{}")
   location               Json           @default("{}")
   scented                Int            @default(0)
