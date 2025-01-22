@@ -6,7 +6,7 @@ import {
   IconButton,
   Typography,
 } from "@mui/material";
-import { DeleteOutlined, EditOutlined,CheckOutlined } from "@ant-design/icons";
+import { DeleteOutlined, EditOutlined, CheckOutlined } from "@ant-design/icons";
 
 import MainCard from "@/components/MainCard";
 import { StyledoptionWrapper } from "./ui";
@@ -38,7 +38,13 @@ const QuestionCard = ({
       </Box> */}
 
       <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h5">{question}</Typography>
+        <Typography variant="h5"
+          sx={{
+            wordWrap: "break-word",
+            wordBreak: "break-all",
+            whiteSpace: "wrap",
+          }}
+        >{question}</Typography>
 
         <Box sx={{ display: "flex", gap: "0.3rem", alignItems: "center" }}>
           {/* <IconButton
@@ -76,7 +82,13 @@ const QuestionCard = ({
         {questionDetails.options.map((optionDetails, i) => {
           return (
             <StyledoptionWrapper is_valid={optionDetails.is_valid} key={i}>
-              <Typography fontWeight={500} component="li">
+              <Typography
+                sx={{
+                  wordWrap: "break-word",
+                  wordBreak: "break-all",
+                  whiteSpace: "wrap",
+                }}
+                fontWeight={500} component="li">
                 {optionDetails.option}
               </Typography>
 

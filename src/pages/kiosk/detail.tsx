@@ -262,7 +262,11 @@ const Detail = () => {
                   <Grid item xs={12} md={6}>
                     <Stack spacing={0.5} alignItems="end" direction="column">
                       {kiosk.errors.map((error) => (
-                        <Alert key={error} severity="warning" color={"error"}>
+                        <Alert
+                        sx={{
+                          textTransform: "uppercase",
+                        }}
+                        key={error} severity="warning" color={"error"}>
                           {error}
                         </Alert>
                       ))}

@@ -44,7 +44,7 @@ const TabItems = [
     element: <Quotes />,
   },
   {
-    label: "SQ / EN",
+    label: "Survey Question – Environmental Message",
     element: <Sequence />,
   },
 ];

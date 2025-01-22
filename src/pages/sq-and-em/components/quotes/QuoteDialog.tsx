@@ -16,7 +16,7 @@ import * as yup from "yup";
 const QuoteDialog = ({ open, initialValues, handleClose, updateQuote, createGeneral }) => {
 
     const quoteSchema = yup.object({
-        quote: yup.string().required("quote is required").trim(),
+        quote: yup.string().required("quote is required").trim().max(200),
         id: yup.string().optional(),
         isActive: yup.boolean(),
       });
