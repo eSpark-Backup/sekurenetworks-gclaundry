@@ -1,9 +1,0 @@
-[Desktop Entry]
-Name=Onboard
-Comment=Flexible onscreen keyboard
-Exec=onboard -d Droid
-Icon=onboard
-Type=Application
-NoDisplay=false
-X-Ubuntu-Gettext-Domain=onboard
-X-GNOME-AutoRestart=true
