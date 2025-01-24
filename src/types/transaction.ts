@@ -20,4 +20,5 @@ export interface Transaction {
     time: Date;
     kioskId: string;
     error?:string;
+    questionsWithAnswers? : any;
 }

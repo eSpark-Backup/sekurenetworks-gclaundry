@@ -30,6 +30,7 @@ model Transaction {
   kiosk          Kiosk      @relation(fields: [kioskId], references: [macId])
   question       Question?  @relation(fields: [questionId], references: [id])
   quote          Quote?     @relation(fields: [quoteId], references: [id])
+  questions      TransactionQuestion[]
 }
 
 model Kiosk {
@@ -73,8 +74,19 @@ model Question {
   kioskId       String?
   kiosk         Kiosk?         @relation(fields: [kioskId], references: [macId])
   questionAsked Transaction[]
-
+  questionAskedTransaction TransactionQuestion[]
   relations KioskRelation[]
+}
+
+model TransactionQuestion {
+  id             String       @id @default(uuid())
+  transactionId  String
+  questionId     String
+  answer         String?      @db.Text
+  transaction    Transaction  @relation(fields: [transactionId], references: [id])
+  question       Question     @relation(fields: [questionId], references: [id])
+
+  @@unique([transactionId, questionId])
 }
 
 model Quote {

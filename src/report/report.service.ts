@@ -91,7 +91,7 @@ export class ReportService {
       where: { customerId, isDeleted: false },
     });
 
-    if (!ids.length) {
+    if (!ids?.length) {
       return { data: [], count };
     }
 
@@ -103,21 +103,28 @@ export class ReportService {
 
     const transactions = await this.prisma.transaction.findMany({
       where: { kioskId: { in: ids }, time },
-      select: {
-        kioskId: true,
-        tissueType: true,
-        status: true,
-        quoteId: true,
-        questionId: true,
-        selectedAnswer: true,
-        quantity: true,
+      // select: {
+      //   kioskId: true,
+      //   tissueType: true,
+      //   status: true,
+      //   quoteId: true,
+      //   questionId: true,
+      //   selectedAnswer: true,
+      //   quantity: true,
+      // },
+      include: {
+        questions: {
+          include: {
+            question: true,
+          }
+        }
       },
     });
 
-    const questionsMap = await this.prisma.question.findMany({
-      where: { id: { in: transactions.map((t) => t.questionId).filter(Boolean) } },
-      select: { id: true, question: true },
-    });
+    // const questionsMap = await this.prisma.question.findMany({
+    //   where: { id: { in: transactions.map((t) => t.questionId).filter(Boolean) } },
+    //   select: { id: true, question: true },
+    // });
 
     const quotesMap = await this.prisma.quote.findMany({
       where: { id: { in: transactions.map((t) => t.quoteId).filter(Boolean) } },
@@ -130,6 +137,47 @@ export class ReportService {
 
       let SCENTED = "scented";
       let UNSCENTED = "unscented";
+
+
+      //Questions and Answers
+      const KioksQuestion = kioskTransactions.map((t) => t.questions?.map((e) => {
+        return {
+          question: e.question,
+          selectedAnswer: e.answer
+        }
+      }))
+
+      // Flatten the array
+      const flatKioksQuestion = KioksQuestion.flatMap(e => e)
+
+
+      // Transform the data for the survey
+      const surveys = Object.values(
+        flatKioksQuestion.reduce((acc, { question, selectedAnswer }) => {
+          const { id, question: questionText } = question;
+
+          if (!acc[id]) {
+            acc[id] = {
+              question: questionText,
+              count: 0,
+              answers: {}
+            };
+          }
+
+          acc[id].count += 1;
+          acc[id].answers[selectedAnswer] = (acc[id].answers[selectedAnswer] || 0) + 1;
+
+          return acc;
+        }, {})
+      ).map(({ question, count, answers }) => ({
+        question,
+        count,
+        answers: Object.entries(answers).map(([answer, count]) => ({
+          answer,
+          count
+        }))
+      }));
+
 
 
       // Aggregations
@@ -156,34 +204,39 @@ export class ReportService {
         }, []);
 
       // Surveys
-      const surveys = kioskTransactions
-        .filter((t) => t.questionId)
-        .reduce((acc, t) => {
-          const question = questionsMap.find((q) => q.id === t.questionId);
-          if (question) {
-            let survey = acc.find((s) => s.question === question.question);
-            if (!survey) {
-              survey = { question: question.question, count: 0, answers: [] };
-              acc.push(survey);
-            }
-            survey.count += 1;
-            if (t.selectedAnswer) {
-              const answer = survey.answers.find((a) => a.answer === t.selectedAnswer);
-              if (answer) answer.count += 1;
-              else survey.answers.push({ answer: t.selectedAnswer, count: 1 });
-            }
-          }
-          return acc;
-        }, []);
+      // const surveys = kioskTransactions
+      //   .filter((t) => t.questionId)
+      //   .reduce((acc, t) => {
+      //     const question = questionsMap.find((q) => q.id === t.questionId);
+
+
+      //     if (question) {
+      //       let survey = acc.find((s) => s.question === question.question);
+      //       if (!survey) {
+      //         survey = { question: question.question, count: 0, answers: [] };
+      //         acc.push(survey);
+      //       }
+      //       survey.count += 1;
+      //       if (t.selectedAnswer) {
+      //         const answer = survey.answers.find((a) => a.answer === t.selectedAnswer);
+      //         if (answer) answer.count += 1;
+      //         else survey.answers.push({ answer: t.selectedAnswer, count: 1 });
+      //       }
+      //     }
+      //     return acc;
+      //   }, []);
+
+
 
       return {
+        id: kiosk.macId,
         name: kiosk.name,
         scented,
         unscented,
         success,
         failed,
         env: envMsg,
-        surveys,
+        surveys
       };
     });
 
@@ -246,10 +299,26 @@ export class ReportService {
         where: { kioskId, time },
         include: {
           kiosk: true,
-          question: true,
+          questions: {
+            include: {
+              question: true
+            }
+          },
           quote: true,
         },
       });
+
+      //Questions and Answers
+      // const KioksQuestion = transactions.map((t) => t.questions?.map((e) => {
+      //   return {
+      //     question: e.question.question,
+      //     selectedAnswer: e.answer
+      //   }
+      // }))
+
+      // console.log(KioksQuestion.flatMap(e => e));
+      
+
 
       const data = {
         kiosk: {
@@ -261,13 +330,14 @@ export class ReportService {
           quantity: transaction.quantity,
           tissueType: transaction.tissueType,
           status: transaction.status,
-          selectedAnswer: transaction.selectedAnswer,
           error: transaction.error,
-          questionId: transaction.questionId,
+          question1: transaction.questions?.map((e) => e.question.id)[0] || "N/A",
+          selectedAnswer1: transaction.questions?.map((e) => e.answer)[0] || "N/A",
+          question2: transaction.questions?.map((e) => e.question.id)[1] || "N/A",
+          selectedAnswer2: transaction.questions?.map((e) => e.answer)[1] || "N/A",
           quoteId: transaction.quoteId,
           time: transaction.time,
           kioskId: transaction.kioskId,
-          question: transaction.question,
           quote: transaction.quote,
         })),
       };
@@ -298,7 +368,7 @@ export class ReportService {
       doc.text(`Kiosk: ${report.kiosk.name}`, doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
       yPosition += 10;
 
-      if (report.transactions.length === 0) {
+      if (report.transactions?.length === 0) {
         doc.setFontSize(12);
         doc.text('No transactions found', doc.internal.pageSize.width / 2, yPosition, { align: 'center' });
         yPosition += 15;
@@ -312,10 +382,12 @@ export class ReportService {
           transaction.error || "N/A",
           new Date(transaction.time).toLocaleString("en-US", { hour12: true }),
           // transaction.question?.question || "N/A",
-          transaction.questionId || "N/A",
-          (transaction.question?.options?.map((e, index) => `${index + 1}. ${e.option}`).join(", ")) || "None",
-          transaction.question?.options.find(e => e.is_valid)?.option || "None",
-          transaction.selectedAnswer,
+          transaction.question1 || "N/A",
+          // (transaction.question?.options?.map((e, index) => `${index + 1}. ${e.option}`).join(", ")) || "None",
+          // transaction.question?.options.find(e => e.is_valid)?.option || "None",
+          transaction.selectedAnswer1 || "N/A",
+          transaction.question2 || "N/A",
+          transaction.selectedAnswer2 || "N/A",
           // transaction.quote?.quote || "N/A"
           transaction.quoteId || "N/A"
         ]);
@@ -323,7 +395,7 @@ export class ReportService {
         // Add the table
         autoTable(doc, {
           startY: yPosition,
-          head: [['ID', 'Quantity', 'Type', 'Status', 'Error', 'Time', 'Question', 'Options', 'Valid Answer', 'Selected Answer', 'Quote']],
+          head: [['ID', 'Quantity', 'Type', 'Status', 'Error', 'Time', 'Question 1', 'Selected Answer 1', 'Question 2', 'Selected Answer 2', 'Quote']],
           body: tableData,
           didDrawPage: (data) => {
             // Re-add the title on each new page
@@ -333,17 +405,17 @@ export class ReportService {
           },
           styles: { fontSize: 8, cellPadding: 1.5 },
           columnStyles: {
-            0: { cellWidth: 20 },
+            0: { cellWidth: 25 },
             1: { cellWidth: 15 },
             2: { cellWidth: 20 },
             3: { cellWidth: 20 },
             4: { cellWidth: 20 },
             5: { cellWidth: 30 },
-            6: { cellWidth: 20 },
-            7: { cellWidth: 'auto' },
-            8: { cellWidth: 'auto' },
-            9: { cellWidth: 'auto' },
-            10: { cellWidth: 20 }
+            6: { cellWidth: 25 },
+            7: { cellWidth: "auto" },
+            8: { cellWidth: 25 },
+            9: { cellWidth: "auto" },
+            10: { cellWidth: 25 },
           },
           headStyles: { fillColor: [255, 7, 25], textColor: 255 },
           willDrawCell: (data) => {

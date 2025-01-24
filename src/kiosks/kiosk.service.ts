@@ -82,14 +82,64 @@ export class KioskService {
   }
 
   async addTransaction(data: Transaction[]) {
-    for await (const transaction of data) {
-      // Logging errors of trasaction if any
-      if (transaction.error) await this.prisma.log.create({ data: { type: 'ERROR', kioskId: transaction.kioskId, detail: transaction.error, createdAt: new Date() } })
+    const results = []
+
+    // if any transaction has for then two questions then  return error
+    if(data.some((transaction) => transaction.questionsWithAnswers.length > 2)) {
+      return { error: "Transaction has more than two questions", statusCode: 400 }
+    }
+
+
+    for (const transaction of data) {
+      // Logging errors of transaction if any
+      if (transaction.error) {
+        await this.prisma.log.create({
+          data: {
+            type: "ERROR",
+            kioskId: transaction.kioskId,
+            detail: transaction.error,
+            createdAt: new Date(),
+          },
+        })
+      }
+
       // converting datetime unix into datetime
       transaction.time = fromUnixTime(transaction.time as any)
+
       // creating data into database
-      await this.prisma.transaction.create({ data: transaction });
+      try {
+        const { questionsWithAnswers, ...rest } = transaction
+
+        const currentTransaction = await this.prisma.transaction.create({ data: rest })
+
+        await this.prisma.transactionQuestion.createMany({
+          data: questionsWithAnswers.map((qa) => ({
+            transactionId: currentTransaction.id,
+            questionId: qa.questionId,
+            answer: qa.answer,
+          })),
+        })
+
+        const transactionWithQuestions = await this.prisma.transaction.findUnique({
+          where: { id: currentTransaction.id },
+          include: {
+            questions: {
+              include: {
+                question: true,
+              },
+            },
+          },
+        })
+
+        results.push(transactionWithQuestions)
+      } catch (error) {
+        console.error("Error creating transaction with answers:", error)
+        // Instead of throwing the error, we'll log it and continue processing other transactions
+        results.push({ error: error.message, transaction })
+      }
     }
+
+    return results
   }
 
   async verisionInfo(macId: string, data: MachineInfo) {
