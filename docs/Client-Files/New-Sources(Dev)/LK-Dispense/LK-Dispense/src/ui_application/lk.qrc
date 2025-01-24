@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="loading">
+        <file>ls.gif</file>
+        <file>load.gif</file>
+        <file>loading.gif</file>
+        <file>loading.gif</file>
+    </qresource>
+    <qresource prefix="newPrefix"/>
+    <qresource prefix="newPrefix"/>
+</RCC>
