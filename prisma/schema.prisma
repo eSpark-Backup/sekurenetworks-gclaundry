@@ -21,14 +21,14 @@ model Transaction {
   quantity       Int
   tissueType     TissueType
   status         Status
-  selectedAnswer String?    @db.Text
+  // selectedAnswer String?    @db.Text
   error          String?    @db.Text
-  questionId     String?
+  // questionId     String?
   quoteId        String?
   time           DateTime   @default(now())
   kioskId        String
   kiosk          Kiosk      @relation(fields: [kioskId], references: [macId])
-  question       Question?  @relation(fields: [questionId], references: [id])
+  // question       Question?  @relation(fields: [questionId], references: [id])
   quote          Quote?     @relation(fields: [quoteId], references: [id])
   questions      TransactionQuestion[]
 }
@@ -73,7 +73,7 @@ model Question {
   isActive      Boolean       @default(true)
   kioskId       String?
   kiosk         Kiosk?         @relation(fields: [kioskId], references: [macId])
-  questionAsked Transaction[]
+  // questionAsked Transaction[]
   questionAskedTransaction TransactionQuestion[]
   relations KioskRelation[]
 }
