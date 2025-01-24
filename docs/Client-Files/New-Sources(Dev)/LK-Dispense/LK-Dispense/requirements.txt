@@ -1,0 +1,10 @@
+peewee>=3.17.6
+getmac~=0.9.4
+python-dotenv~=1.0.1
+
+requests~=2.32.2
+ipython~=8.25.0
+paho-mqtt~=2.1.0
+screeninfo~=0.8.1
+pyserial~=3.5
+concurrent-log-handler~=0.9.25

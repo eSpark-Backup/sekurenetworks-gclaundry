@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>DispenseScreen</class>
+    <widget class="QWidget" name="DispenseScreen">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1280</width>
+                <height>800</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>Dispense</string>
+        </property>
+        <widget class="QLabel" name="img">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>1280</width>
+                    <height>800</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string/>
+            </property>
+            <property name="pixmap">
+                <pixmap resource="../lk.qrc">:/img/img/background.jpg</pixmap>
+            </property>
+        </widget>
+        <widget class="QLabel" name="label">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>50</y>
+                    <width>1280</width>
+                    <height>700</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                    <family>Owners XNarrow</family>
+                    <pointsize>50</pointsize>
+                    <weight>75</weight>
+                    <bold>true</bold>
+                </font>
+            </property>
+            <property name="styleSheet">
+                <string notr="true">color: rgb(238, 51, 48);</string>
+            </property>
+            <property name="text">
+                <string>If 62% of students refill sheets
+                    then we could avoid 45% of CO2
+                    emissions from landry detergent.
+
+                    If every industry achieved a 45% of CO2 reduction,
+                    we could meet the IPCC goals of 1.5°C
+                </string>
+            </property>
+            <property name="alignment">
+                <set>Qt::AlignCenter</set>
+            </property>
+            <property name="wordWrap">
+                <bool>true</bool>
+            </property>
+        </widget>
+    </widget>
+    <resources>
+        <include location="../lk.qrc"/>
+    </resources>
+    <connections/>
+</ui>
