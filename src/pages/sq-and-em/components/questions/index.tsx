@@ -306,6 +306,7 @@ const Questions = () => {
           setSelectedCustomer={setSelectedCustomer}
           customers={customers}
           selectedCustomer={selectedCustomer}
+          selectedItems={selectedQuestions}
           heading="Assign Questions to Customer Kiosks"
           buttonLabel="Assign"
           confirmText="Are you sure, you want to Assign Selected Questions to Selected kiosks?"

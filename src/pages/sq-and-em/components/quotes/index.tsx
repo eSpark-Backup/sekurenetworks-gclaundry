@@ -485,6 +485,7 @@ const Quotes = () => {
         setSelectedCustomer={setSelectedCustomer}
         customers={customers}
         selectedCustomer={selectedCustomer}
+        selectedItems={selectedQuotes}
         heading="Assign Quotes to Customer Kiosks"
         // info="Please Note if kiosk not selected, it will be assign to all Customer Kiosks"
         buttonLabel="Assign"

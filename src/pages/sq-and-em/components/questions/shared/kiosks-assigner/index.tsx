@@ -20,6 +20,7 @@ const KiosksAssigner = ({
     loadingKioksbyCustomerId,
     setSelectedCustomer,
     selectedCustomer,
+    selectedItems,
     heading,
     info,
     buttonLabel,
@@ -50,10 +51,31 @@ const KiosksAssigner = ({
 
     const handleSelectAll = (isSelectAllChecked) => {
         if (isSelectAllChecked) {
-            setSelectedKiosks(kioksByCustomerId);
+            // setSelectedKiosks(kioksByCustomerId);
+            const kiosks = kioksByCustomerId.filter(option => !selectedItems?.every(item => item.kiosks.map(kiosk => kiosk.kioskId).includes(option.macId)));
+            setSelectedKiosks(kiosks);
         } else {
             setSelectedKiosks([]);
         }
+    };
+
+    const handleDisableOption = (option) => {
+
+        if (option.macId === "all") return areAllOptionsDisabled();
+
+        //FOR SINGLE SELECTION IF MACID is included in the selected item then disable it otherwise not
+        if (selectedItems?.length === 1) {
+            return selectedItems[0]?.kiosks.map(kiosk => kiosk?.kioskId).includes(option.macId)
+        }
+
+        //FOR MULTIPLE SELECTION IF MACID is included in all of the selected items then disable it otherwise not
+        if (selectedItems?.length > 1) {
+            return selectedItems?.every(item => item.kiosks.map(kiosk => kiosk?.kioskId).includes(option.macId))
+        }
+    };
+
+    const areAllOptionsDisabled = () => {
+        return kioksByCustomerId.every(option => handleDisableOption(option));
     };
 
 
@@ -79,7 +101,6 @@ const KiosksAssigner = ({
                         getOptionLabel={(option) => option.schoolName}
                         clearIcon={null}
                         onChange={async (_: any, customer) => {
-                            console.log(customer)
                             setSelectedCustomer(customer);
                             // if (!selectedCustomer) {
                             //     setKiosksByCustomerId([]);
@@ -109,7 +130,7 @@ const KiosksAssigner = ({
                         multiple
                         id="tags-outlined"
                         options={kioksByCustomerId.length > 0
-                            ? [{ id: "all", name: "Select All" }, ...kioksByCustomerId]
+                            ? [{ macId: "all", name: "Select All" }, ...kioksByCustomerId]
                             : []}
                         loading={loadingKioksbyCustomerId}
                         disabled={loadingKioksbyCustomerId || kioksByCustomerId.length === 0}
@@ -118,22 +139,21 @@ const KiosksAssigner = ({
                         // filterSelectedOptions
                         value={selectedKiosks}
                         onChange={(event, newValue) => {
-                            // Handle "Select All" logic
-                            const isSelectAllIncluded = newValue?.some((item) => item?.id === "all");
+                            const isSelectAllIncluded = newValue?.some((item) => item?.macId === "all");
                             if (isSelectAllIncluded) {
-                                handleSelectAll(newValue[0]?.id === "all");
+                                handleSelectAll(newValue[0]?.macId === "all");
                             } else {
                                 setSelectedKiosks(newValue);
                             }
                         }}
                         renderOption={(props, option, { selected }) => (
                             <MenuItem {...props}>
-                                {/* <Checkbox
-                                    checked={option.id === "all" ? selectedKiosks.length === kioksByCustomerId.length : selected}
-                                /> */}
                                 <input
                                     type="checkbox"
-                                    checked={option?.id === "all" ? selectedKiosks.length === kioksByCustomerId.length : selected}
+                                    checked={option?.macId === "all" ?
+                                        kioksByCustomerId.some((kiosk) => !handleDisableOption(kiosk)) &&
+                                        selectedKiosks.length === kioksByCustomerId?.filter((kiosk) => !handleDisableOption(kiosk))?.length
+                                        : selected}
                                     style={{ marginRight: "1rem", cursor: "pointer", width: "1rem", height: "1rem", accentColor: "red" }}
                                 />
                                 {option.name}
@@ -158,12 +178,13 @@ const KiosksAssigner = ({
                                     <Chip
                                         key={`more-${totalTags - visibleTags}`}
                                         {...getTagProps({ index: totalTags - 1 })}
-                                        label={`${value[totalTags - 1]?.name} +${totalTags - visibleTags}`}
+                                        label={`${value[totalTags - 1]?.name} ${totalTags - visibleTags - 1 ? `+${totalTags - visibleTags - 1}` : ""}`}
                                     />
                                 );
                             }
                             return displayedTags;
                         }}
+                        getOptionDisabled={(option) => handleDisableOption(option)}
                     />
 
                     <br />
