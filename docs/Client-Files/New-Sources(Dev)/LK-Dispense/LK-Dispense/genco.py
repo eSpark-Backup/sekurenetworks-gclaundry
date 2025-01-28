@@ -59,11 +59,11 @@ class Kiosk:
         StatusSyncService().start()
 
         # Todo : To remove in phase 2 of project.
-        # AliveService().start()
+        AliveService().start()
         # StatusSyncServiceOld().start()
 
         # AUTO Updater
-        OtaService().start()
+        # OtaService().start()
 
         # thread = threading.Thread(target=check_usb)
         # thread.daemon = True
@@ -71,7 +71,7 @@ class Kiosk:
         # verify_service.start()
 
         # try to connect at the time of application start
-        ctrl().try_connect_board()
+        # ctrl().try_connect_board()
 
         logger.log("Starting QT application")
         qt_app = QApplication(sys.argv)

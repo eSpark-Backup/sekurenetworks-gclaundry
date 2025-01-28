@@ -30,6 +30,8 @@ def replace_survey(data: list[dict[str, Any]]):
     logger.debug(f"Updated survey")
 
 
+
+
 def replace_quotes(data: list[dict[str, Any]]):
     Quotes_V4.delete().execute()
     for qoute in data:
@@ -46,6 +48,8 @@ def replace_users(users):
             id=user["id"],
             email=user["email"],
             password=user["password"],
+            student_id = "1234",                   #student_id = user["student_id"],
+            phone_number = "123456789",            #phone_number = user["phone_number"],
         ).on_conflict_replace().execute()
     logger.debug(f"Updated user")
         
