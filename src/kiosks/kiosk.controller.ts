@@ -86,4 +86,9 @@ export class KioskController {
     return this.kioskService.unassignItem(id);
   }
 
+  @Post('/add-transaction') 
+  addTransaction(@Body() data: any) {
+    return this.kioskService.addTransaction(data);
+  }
+
 }

@@ -78,6 +78,12 @@ export class QuestionsService {
       await this.prisma.kioskRelation.deleteMany({ where: { questionId: id } });
     }
 
+    let questionsTransactions = await this.prisma.transactionQuestion.findMany({ where: { questionId: id } });
+
+    if (questionsTransactions.length > 0) {
+      await this.prisma.transactionQuestion.deleteMany({ where: { questionId: id } });
+    }
+
     let questions = await this.prisma.question.delete({ where: { id } })
 
     const kioskIds = questionsRelations.map((kiosk) => kiosk.kioskId) 

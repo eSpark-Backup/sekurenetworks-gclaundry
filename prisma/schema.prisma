@@ -21,15 +21,16 @@ model Transaction {
   quantity       Int
   tissueType     TissueType
   status         Status
-  selectedAnswer String?    @db.Text
+  // selectedAnswer String?    @db.Text
   error          String?    @db.Text
-  questionId     String?
+  // questionId     String?
   quoteId        String?
   time           DateTime   @default(now())
   kioskId        String
   kiosk          Kiosk      @relation(fields: [kioskId], references: [macId])
-  question       Question?  @relation(fields: [questionId], references: [id])
+  // question       Question?  @relation(fields: [questionId], references: [id])
   quote          Quote?     @relation(fields: [quoteId], references: [id])
+  questions      TransactionQuestion[]
 }
 
 model Kiosk {
@@ -39,7 +40,7 @@ model Kiosk {
   name                   String
   sheets_per_transaction Int            @default(5)
   answer_required        Boolean        @default(false)
-  screen_sequence        Json           @default("[\"WelcomeScreen\", \"LoginScreen\", \"SelectScreen\", \"SurveyScreen\", \"QuotesScreen\"]")
+  screen_sequence        Json           @default("[\"WelcomeScreen\", \"LoginScreen\", \"SelectScreen\", \"SQfollowedbyEM\"]")
   machineInfo            Json           @default("{}")
   location               Json           @default("{}")
   scented                Int            @default(0)
@@ -72,9 +73,20 @@ model Question {
   isActive      Boolean       @default(true)
   kioskId       String?
   kiosk         Kiosk?         @relation(fields: [kioskId], references: [macId])
-  questionAsked Transaction[]
-
+  // questionAsked Transaction[]
+  questionAskedTransaction TransactionQuestion[]
   relations KioskRelation[]
+}
+
+model TransactionQuestion {
+  id             String       @id @default(uuid())
+  transactionId  String
+  questionId     String
+  answer         String?      @db.Text
+  transaction    Transaction  @relation(fields: [transactionId], references: [id])
+  question       Question     @relation(fields: [questionId], references: [id])
+
+  @@unique([transactionId, questionId])
 }
 
 model Quote {
