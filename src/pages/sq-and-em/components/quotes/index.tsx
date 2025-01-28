@@ -409,7 +409,7 @@ const Quotes = () => {
                               <EditOutlined />
                             </IconButton>
 
-                            {isDeleteLoading ? (
+                            {/* {isDeleteLoading ? (
                               <Box
                                 sx={{
                                   display: "flex",
@@ -419,7 +419,8 @@ const Quotes = () => {
                               >
                                 <CircularProgress size="1rem" />
                               </Box>
-                            ) : (
+                            ) :  */}
+                            {/* ( */}
                               <IconButton
                                 color="error"
                                 onClick={() =>
@@ -428,7 +429,8 @@ const Quotes = () => {
                               >
                                 <DeleteOutlined />
                               </IconButton>
-                            )}
+                            {/* ) */}
+                             {/* } */}
                           </Box>
                         </Box>
                       </MainCard>

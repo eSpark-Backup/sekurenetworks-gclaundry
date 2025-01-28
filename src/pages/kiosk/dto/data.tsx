@@ -84,9 +84,9 @@ export const columns: ColumnDef<KIOSK>[] = [
         <Tooltip
           title={
             errors.length ? (
-              <div style={{ whiteSpace: "pre-line" }}>{errors.join("\n")}</div>
+              <div style={{ whiteSpace: "pre-line", textTransform: "uppercase" }}>{errors.join("\n")}</div>
             ) : (
-              "No Error"
+              "NO ERROR"
             )
           }
           arrow

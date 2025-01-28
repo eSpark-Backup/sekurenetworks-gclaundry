@@ -229,7 +229,7 @@ const QuestionsManipulator = ({
                   startIcon={<PlusOutlined />}
                   onClick={addOptionHandler}
                   sx={{ mt: "0.5rem" }}
-                  disabled={isAnyOptionEmpty  || questionDetails.options.length > 5}
+                  disabled={isAnyOptionEmpty  || questionDetails.options.length > 4}
                 >
                   Add Option
                 </Button>
