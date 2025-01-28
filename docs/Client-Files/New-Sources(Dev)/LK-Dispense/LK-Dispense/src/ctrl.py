@@ -85,8 +85,8 @@ class Ctrl:
         result = self.perform_checks()
 
         if not result:
-            # trigger_status()
-            # router().show_out_of_order()
+            trigger_status()
+            router().show_out_of_order()
             return
 
         # added reset command here just to make sure that the board always send appropriate values after motor is
@@ -142,15 +142,15 @@ class Ctrl:
 
     def try_connect_board(self):
         "try to connect to board on boot othwise show out of order"
-        # if not config().hardware_attached:
-        #     return True
+        if not config().hardware_attached:
+            return True
 
-        # if not self.IS_BOARD_CONNECTED:
-        #     self.IS_BOARD_CONNECTED = self.board.connect()
+        if not self.IS_BOARD_CONNECTED:
+            self.IS_BOARD_CONNECTED = self.board.connect()
 
-        #     # run on connected
-        #     if not self.IS_BOARD_CONNECTED:
-        #         return False
+            # run on connected
+            if not self.IS_BOARD_CONNECTED:
+                return False
 
         return True
 

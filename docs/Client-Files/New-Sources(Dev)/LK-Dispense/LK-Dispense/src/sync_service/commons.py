@@ -48,8 +48,8 @@ def replace_users(users):
             id=user["id"],
             email=user["email"],
             password=user["password"],
-            student_id = "1234",                   #student_id = user["student_id"],
-            phone_number = "123456789",            #phone_number = user["phone_number"],
+            student_id = user["student_id"],       #student_id = "1234",                  
+            phone_number = user["phone_number"],   #phone_number = "123456789",         
         ).on_conflict_replace().execute()
     logger.debug(f"Updated user")
         

@@ -20,18 +20,18 @@ class Migration:
 
  #    new changes to the database schema, comment this field if update on database  
         
-        def add_column_if_not_exists(table_name, column_name, column_type):
-                query = f"PRAGMA table_info({table_name});"  # Use SQLite-specific syntax
-                existing_columns = [row[1] for row in User._meta.database.execute_sql(query)]
-                if column_name not in existing_columns:
-                    User._meta.database.execute_sql(
-                        f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type};"
-                    )
+        # def add_column_if_not_exists(table_name, column_name, column_type):
+        #         query = f"PRAGMA table_info({table_name});"  # Use SQLite-specific syntax
+        #         existing_columns = [row[1] for row in User._meta.database.execute_sql(query)]
+        #         if column_name not in existing_columns:
+        #             User._meta.database.execute_sql(
+        #                 f"ALTER TABLE {table_name} ADD COLUMN {column_name} {column_type};"
+        #             )
         
-        add_column_if_not_exists("user", "student_id", "TEXT")
-        add_column_if_not_exists("user", "phone_number", "TEXT")
-        add_column_if_not_exists("user", "AUTH", "TEXT")
-        logger.log("Migration has been done")
+        # add_column_if_not_exists("user", "student_id", "TEXT")
+        # add_column_if_not_exists("user", "phone_number", "TEXT")
+        # add_column_if_not_exists("user", "AUTH", "TEXT")
+        # logger.log("Migration has been done")
 
 #    end of new changes to the database schema
 
@@ -41,26 +41,26 @@ class Migration:
 
 #    new changes to the database schema, comment this field if update on database  
         
-        def remove_columns(table_name, columns_to_remove):
-            query = f"PRAGMA table_info({table_name});"  # SQLite-specific syntax
-            existing_columns = [row[1] for row in User._meta.database.execute_sql(query)]
+        # def remove_columns(table_name, columns_to_remove):
+        #     query = f"PRAGMA table_info({table_name});"  # SQLite-specific syntax
+        #     existing_columns = [row[1] for row in User._meta.database.execute_sql(query)]
             
-            # Keep only columns that are not being removed
-            columns_to_keep = [col for col in existing_columns if col not in columns_to_remove]
+        #     # Keep only columns that are not being removed
+        #     columns_to_keep = [col for col in existing_columns if col not in columns_to_remove]
             
-            # Build new table without the unwanted columns
-            columns_definition = ", ".join(columns_to_keep)
-            User._meta.database.execute_sql(
-                f"""
-                CREATE TABLE {table_name}_new AS SELECT {columns_definition} FROM {table_name};
-                DROP TABLE {table_name};
-                ALTER TABLE {table_name}_new RENAME TO {table_name};
-                """
-            )
+        #     # Build new table without the unwanted columns
+        #     columns_definition = ", ".join(columns_to_keep)
+        #     User._meta.database.execute_sql(
+        #         f"""
+        #         CREATE TABLE {table_name}_new AS SELECT {columns_definition} FROM {table_name};
+        #         DROP TABLE {table_name};
+        #         ALTER TABLE {table_name}_new RENAME TO {table_name};
+        #         """
+        #     )
         
         # Specify the columns to remove
-        remove_columns("user", ["student_id", "phone_number"])
-        logger.log("Columns removed and migration rolled back")     
+        # remove_columns("user", ["student_id", "phone_number"])
+        # logger.log("Columns removed and migration rolled back")     
 
 #    end of new changes to the database schema
         
