@@ -55,7 +55,7 @@ export class KioskService {
       // const survey = getDefaultSurvey(macId)
 
       // await this.prisma.$transaction([
-        // this.prisma.question.createMany({ data: survey }),
+      // this.prisma.question.createMany({ data: survey }),
       //   this.prisma.quote.createMany({ data: qoutes })
       // ])
 
@@ -72,10 +72,28 @@ export class KioskService {
 
     const config = { answer_required, type, sheets_per_transaction, screen_sequence, customerId }
 
-    const [survey, environmental_messages] = await this.prisma.$transaction([
-      this.prisma.question.findMany({ where: { kioskId: macId } }),
-      this.prisma.quote.findMany({ where: { kioskId: macId } })
+    const [qestions, quotes] = await this.prisma.$transaction([
+      this.prisma.kioskRelation.findMany({
+        where: { type: "QUESTION", kioskId: macId },
+        include: { question: true }
+      }),
+      this.prisma.kioskRelation.findMany({
+        where: { type: "QUOTE", kioskId: macId },
+        include: { quote: true }
+      }),
     ])
+
+    const survey = qestions.map((relation) => ({
+      ...relation.question,
+      relationId: relation.id,
+    }));
+
+    const environmental_messages = quotes.map((relation) => ({
+      ...relation.quote,
+      relationId: relation.id,
+    }));
+
+
     let users = []
     if (type === 'AUTH') users = await this.prisma.users.findMany({ where: { customerId } })
     return { config, survey, environmental_messages, users }
@@ -347,8 +365,8 @@ export class KioskService {
       });
 
 
-      const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean); 
-   
+      const QuestionsOrQuotes = kioskRelations.map((rel) => (type === "QUESTION" ? rel.question : rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean);
+
       if (QuestionsOrQuotes.length > 0) {
         const topic = type === "QUESTION" ? `survey/${kioskId}` : `message/${kioskId}`;
         this.mqttService.publish(topic, JSON.stringify(QuestionsOrQuotes));
@@ -402,7 +420,7 @@ export class KioskService {
 
   async unassignFromKiosks(data: any) {
     const { kioskIds, dataIds, type } = data;
-  
+
     // Fetch existing relations that match the provided kioskIds, dataIds, and type
     const existingRelations = await this.prisma.kioskRelation.findMany({
       where: {
@@ -416,7 +434,7 @@ export class KioskService {
         ...(type === "QUESTION" ? { questionId: true } : { quoteId: true }),
       },
     });
-  
+
     // Delete the relations
     const relationIds = existingRelations.map((relation) => relation.id);
     if (relationIds.length > 0) {
@@ -424,35 +442,35 @@ export class KioskService {
         where: { id: { in: relationIds } },
       });
     }
-  
+
     // Group remaining questions or quotes by kiosk
     const questionsOrQuotesByKiosk = new Map();
-  
+
     for (const kioskId of kioskIds) {
       const kioskRelations = await this.prisma.kioskRelation.findMany({
         where: { kioskId },
         include: { question: true, quote: true },
       });
-  
+
       const remainingQuestionsOrQuotes = kioskRelations
         .map((rel) => (type === "QUESTION" ? rel.question : rel.quote))
         .filter((rel) => rel?.isActive === true)
         .filter(Boolean);
-  
+
       if (remainingQuestionsOrQuotes.length > 0) {
         questionsOrQuotesByKiosk.set(kioskId, remainingQuestionsOrQuotes);
       } else {
         questionsOrQuotesByKiosk.set(kioskId, []); // No active relations left
       }
     }
-  
+
     // Publish updated lists to kiosks
     for (const [kioskId, questionsOrQuotes] of questionsOrQuotesByKiosk) {
-      
+
       const topic = type === "QUESTION" ? `survey/${kioskId}` : `message/${kioskId}`;
       this.mqttService.publish(topic, JSON.stringify(questionsOrQuotes));
     }
-  
+
     return { message: "Unassigned Successfully", statusCode: 200 };
   }
 
