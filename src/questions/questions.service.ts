@@ -25,7 +25,7 @@ export class QuestionsService {
         options: questionData.options,
       }
     });
-    await this.publishQuestion(kiosk.macId)
+    // await this.publishQuestion(kiosk.macId)
     return question
   }
   async update(data: any, id: string) {
@@ -53,7 +53,7 @@ export class QuestionsService {
       const Questions = kioskRelations.map((rel) => (rel.question)).filter(rel => rel?.isActive === true).filter(Boolean);
 
       const topic = `survey/${kioskId}`;
-      this.mqttService.publish(topic, JSON.stringify(Questions)); 
+      this.mqttService.publish(topic, JSON.stringify({status: "updated"})); 
     }
 
     return {
@@ -98,7 +98,7 @@ export class QuestionsService {
 
 
       const topic = `survey/${kioskId}`;
-      this.mqttService.publish(topic, JSON.stringify(Questions)); 
+      this.mqttService.publish(topic, JSON.stringify({status: "deleted"})); 
     }
     
 
@@ -128,10 +128,10 @@ export class QuestionsService {
   }
 
 
-  async publishQuestion(macId: string) {
-    let questions = await this.prisma.question.findMany({ where: { isActive: true, kioskId: macId } })
-    this.mqttService.publish(`survey/${macId}`, JSON.stringify(questions));
-  }
+  // async publishQuestion(macId: string) {
+  //   let questions = await this.prisma.question.findMany({ where: { isActive: true, kioskId: macId } })
+  //   this.mqttService.publish(`survey/${macId}`, JSON.stringify(questions));
+  // }
 
   async createGeneral(questionData: any) {
     const question = await this.prisma.question.create({
