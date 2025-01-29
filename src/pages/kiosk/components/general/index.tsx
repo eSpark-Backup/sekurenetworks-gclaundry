@@ -43,6 +43,7 @@ export default () => {
   const formik = useFormik({
     initialValues: {
       type: "",
+      auth_type: "",
       name: "",
       sheets_per_transaction: 0,
       answer_required: false,
@@ -113,6 +114,7 @@ export default () => {
       setKiosk(data);
       const {
         type,
+        auth_type,
         name,
         sheets_per_transaction,
         answer_required,
@@ -125,6 +127,7 @@ export default () => {
       setSelectedCustomer(selectedCustomer);
       formik.setValues({
         type,
+        auth_type,
         name,
         sheets_per_transaction,
         answer_required,
@@ -281,6 +284,7 @@ export default () => {
                       <>
                         <Autocomplete
                           fullWidth
+                          disableClearable
                           options={["AUTH", "OPEN"]}
                           getOptionLabel={(option) => option}
                           autoSelect={true}
@@ -342,6 +346,33 @@ export default () => {
                           />
                         </Grid>
                       </Grid>
+                    </Stack>
+
+                    <Typography variant="h3">Auth Config</Typography>
+                    <Divider />
+                    <Stack spacing={2} paddingY={1}>
+                      <>
+                        <Autocomplete
+                          fullWidth
+                          disableClearable  
+                          options={["Student ID", "Email", "Phone"]}
+                          getOptionLabel={(option) => option}
+                          autoSelect={true}
+                          onChange={(e, v) => {
+                            formik.setFieldValue("auth_type", v);
+                          }}
+                          value={formik.values?.auth_type}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              name="type"
+                              placeholder="Select Auth Type"
+                              error={formik?.errors.auth_type ? true : false}
+                              helperText={formik.errors.auth_type}
+                            />
+                          )}
+                        />
+                      </>
                     </Stack>
 
                     <Typography variant="h3">Customer Info</Typography>
