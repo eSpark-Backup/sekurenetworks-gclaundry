@@ -40,7 +40,7 @@ export class QuotesService {
         kioskId: quotesData.kioskId
       }
     });
-    await this.publishQoutes(quotesData.kioskId)
+    // await this.publishQoutes(quotesData.kioskId)
     return quote
   }
 
@@ -79,7 +79,7 @@ export class QuotesService {
         const Quotes = kioskRelations.map((rel) => (rel.quote)).filter(rel => rel?.isActive === true).filter(Boolean);
 
         const topic = `message/${kioskId}`;
-        this.mqttService.publish(topic, JSON.stringify(Quotes));
+        this.mqttService.publish(topic, JSON.stringify({status: "updated"}));
       }
  
 
@@ -119,7 +119,7 @@ export class QuotesService {
 
 
       const topic = `message/${kioskId}`;
-      this.mqttService.publish(topic, JSON.stringify(Quotes));
+      this.mqttService.publish(topic, JSON.stringify({status: "deleted"}));
     }
 
 
@@ -189,9 +189,9 @@ export class QuotesService {
 
 
 
-  async publishQoutes(macId: string) {
-    let questions = await this.prisma.quote.findMany({ where: { isActive: true, kioskId: macId } })
-    this.mqttService.publish(`message/${macId}`, JSON.stringify(questions));
-  }
+  // async publishQoutes(macId: string) {
+  //   let questions = await this.prisma.quote.findMany({ where: { isActive: true, kioskId: macId } })
+  //   this.mqttService.publish(`message/${macId}`, JSON.stringify(questions));
+  // }
 
 }

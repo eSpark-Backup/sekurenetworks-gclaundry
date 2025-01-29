@@ -419,7 +419,7 @@ export class KioskService {
 
       if (QuestionsOrQuotes.length > 0) {
         const topic = type === "QUESTION" ? `survey/${kioskId}` : `message/${kioskId}`;
-        this.mqttService.publish(topic, JSON.stringify(QuestionsOrQuotes));
+        this.mqttService.publish(topic, JSON.stringify({status: "assigned"}));
       }
     }
 
@@ -459,7 +459,7 @@ export class KioskService {
     if (relation.questionId) {
       // Extract and publish questions
       const questions = kioskRelations.map((rel) => rel.question).filter(rel => rel.isActive === true).filter(Boolean);
-      this.mqttService.publish(topic, JSON.stringify(questions));
+      this.mqttService.publish(topic, JSON.stringify({status: "unassigned"}));
 
     }
 
@@ -518,7 +518,7 @@ export class KioskService {
     for (const [kioskId, questionsOrQuotes] of questionsOrQuotesByKiosk) {
 
       const topic = type === "QUESTION" ? `survey/${kioskId}` : `message/${kioskId}`;
-      this.mqttService.publish(topic, JSON.stringify(questionsOrQuotes));
+      this.mqttService.publish(topic, JSON.stringify({ status: "unassigned" }));
     }
 
     return { message: "Unassigned Successfully", statusCode: 200 };
