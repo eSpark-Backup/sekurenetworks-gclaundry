@@ -261,6 +261,12 @@ export class KioskService {
     delete data.onSiteContact
     let kiosk = await this.prisma.kiosk.findFirst({ where: { macId, isDeleted: { not: true } } });
     if (!kiosk) throw new NotFoundException('Kiosk not found!');
+     
+
+    if (data.auth_type && !['Student ID', 'Email', 'Phone'].includes(data.auth_type)) {
+      return { error: "Invalid auth_type", statusCode: 400 }
+    }
+    
     kiosk = await this.prisma.kiosk.update({ data, where: { macId } })
     return { message: "Kiosk Update Successfully", data: kiosk, statusCode: 200 }
   }

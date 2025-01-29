@@ -47,8 +47,8 @@ export class KioskController {
   @Patch(':macId')
   async update(@Param('macId') macId: string, @Body() updateKioskDto: any) {
     const kiosk = await this.kioskService.update(macId, updateKioskDto);
-    const { answer_required, type, sheets_per_transaction, screen_sequence,customerId } = kiosk.data;
-    const config = { answer_required, type, sheets_per_transaction, screen_sequence,customerId }
+    const { answer_required, type, auth_type, sheets_per_transaction, screen_sequence,customerId } = kiosk.data;
+    const config = { answer_required, type, auth_type, sheets_per_transaction, screen_sequence,customerId }
     this.mqttService.publish(`config/${macId}`, JSON.stringify(config))
     return kiosk
   }

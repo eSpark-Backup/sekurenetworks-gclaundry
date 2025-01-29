@@ -36,6 +36,7 @@ model Transaction {
 model Kiosk {
   macId                  String         @id @unique
   type                   KioskType      @default(OPEN)
+  auth_type              String?        @default("Student ID")
   errors                 Json           @default("[]")
   name                   String
   sheets_per_transaction Int            @default(5)
@@ -177,9 +178,10 @@ enum SubscriptionTypes {
 }
 
 enum KioskType {
-  AUTH
+  AUTH 
   OPEN
 }
+
 
 enum LogType {
   ERROR
@@ -191,3 +193,6 @@ enum Status {
   SUCCESS
   FAILED
 }
+
+
+// auth_type OPTIONS Student ID | Email | Phone Number
