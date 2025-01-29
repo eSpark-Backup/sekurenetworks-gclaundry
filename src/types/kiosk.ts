@@ -26,6 +26,7 @@ export interface IMachineInfo {
 export interface KIOSK {
     macId: string;
     type: string;
+    auth_type: string;
     errors: string[];
     name: string;
     sheets_per_transaction: number;
