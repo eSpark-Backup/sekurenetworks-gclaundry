@@ -16,18 +16,19 @@ class CheckInService(Thread):
     def __init__(self) -> None:
         super().__init__(name="CheckInService", daemon=True)
 
+    def get_data(self):
+        try:
+            r = requests.get(Routes.complete_check_in)
+            r.raise_for_status()
+            response_data = r.json()
+            logger.debug("Data from the api:", str(response_data))
+            self.update_tables(response_data)
+        except Exception as e:
+            logger.error(f"Error Performing Check In {e=}")
+    
     def run(self):
         while 1:
-            try:
-                r = requests.get(Routes.complete_check_in)
-                r.raise_for_status()
-                response_data = r.json()
-                logger.debug("Data from the api:", str(response_data))
-
-                self.update_tables(response_data)
-            except Exception as e:
-                logger.error(f"Error Performing Check In {e=}")
-
+            self.get_data()
             time.sleep(FULL_CHECKIN_INTERVAL)
 
     def update_tables(self, data):

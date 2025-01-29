@@ -6,6 +6,7 @@ from src.logger import getLogger
 from src.sync_service.commons import replace_survey
 from src.sync_service.enums.topics import Topics
 from src.sync_service.base_listener_service import BaseListenerService
+from src.sync_service.check_in_service import CheckInService
 
 logger = getLogger(__name__)
 
@@ -20,6 +21,8 @@ class SurveyListenerService(BaseListenerService):
 
         try:
             data = json.loads(msg.payload.decode())
-            replace_survey(data)
+            # replace_survey(data)
+            CheckInService().get_data()
+
         except Exception as e:
             logger.error(f"Exception occurred, {msg.payload}, {e}")

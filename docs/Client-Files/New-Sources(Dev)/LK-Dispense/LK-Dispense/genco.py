@@ -63,7 +63,7 @@ class Kiosk:
         # StatusSyncServiceOld().start()
 
         # AUTO Updater
-        OtaService().start()
+        # OtaService().start()
 
         # thread = threading.Thread(target=check_usb)
         # thread.daemon = True

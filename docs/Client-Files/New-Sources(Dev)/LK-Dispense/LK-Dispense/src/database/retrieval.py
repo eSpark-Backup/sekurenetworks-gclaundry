@@ -40,6 +40,7 @@ def get_sheets_per_transaction() -> int:
 def get_screen_sequence() -> list[str]:
     return json.loads(KioskInfo_V4.select().first().screen_sequence)
 
+
 def is_answer_required()-> bool:
     return KioskInfo_V4.select().first().answer_required
 
@@ -48,6 +49,9 @@ def is_login_required()-> bool:
 
 def get_owner_id():
     return str(KioskInfo_V4.select().first().customer_id)
+
+# def get_auth_type():
+#     return KioskInfo_V4.select().first().auth_type
 
 def add_transaction_telemetry(
     qty,
