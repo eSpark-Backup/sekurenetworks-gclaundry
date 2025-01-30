@@ -17,20 +17,20 @@ model Log {
 }
 
 model Transaction {
-  id             String     @id @default(uuid())
-  quantity       Int
-  tissueType     TissueType
-  status         Status
+  id         String                @id @default(uuid())
+  quantity   Int
+  tissueType TissueType
+  status     Status
   // selectedAnswer String?    @db.Text
-  error          String?    @db.Text
+  error      String?               @db.Text
   // questionId     String?
-  quoteId        String?
-  time           DateTime   @default(now())
-  kioskId        String
-  kiosk          Kiosk      @relation(fields: [kioskId], references: [macId])
+  quoteId    String?
+  time       DateTime              @default(now())
+  kioskId    String
+  kiosk      Kiosk                 @relation(fields: [kioskId], references: [macId])
   // question       Question?  @relation(fields: [questionId], references: [id])
-  quote          Quote?     @relation(fields: [quoteId], references: [id])
-  questions      TransactionQuestion[]
+  quote      Quote?                @relation(fields: [quoteId], references: [id])
+  questions  TransactionQuestion[]
 }
 
 model Kiosk {
@@ -68,24 +68,24 @@ model Kiosk {
 }
 
 model Question {
-  id            String        @id @default(uuid())
-  question      String
-  options       Json
-  isActive      Boolean       @default(true)
-  kioskId       String?
-  kiosk         Kiosk?         @relation(fields: [kioskId], references: [macId])
+  id                       String                @id @default(uuid())
+  question                 String
+  options                  Json
+  isActive                 Boolean               @default(true)
+  kioskId                  String?
+  kiosk                    Kiosk?                @relation(fields: [kioskId], references: [macId])
   // questionAsked Transaction[]
   questionAskedTransaction TransactionQuestion[]
-  relations KioskRelation[]
+  relations                KioskRelation[]
 }
 
 model TransactionQuestion {
-  id             String       @id @default(uuid())
-  transactionId  String
-  questionId     String
-  answer         String?      @db.Text
-  transaction    Transaction  @relation(fields: [transactionId], references: [id])
-  question       Question     @relation(fields: [questionId], references: [id])
+  id            String      @id @default(uuid())
+  transactionId String
+  questionId    String
+  answer        String?     @db.Text
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  question      Question    @relation(fields: [questionId], references: [id])
 
   @@unique([transactionId, questionId])
 }
@@ -150,6 +150,8 @@ model Users {
   firstName  String
   lastName   String
   password   String   @db.Text
+  phone      String?
+  studentId  Int?   @unique
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
   createdAt  DateTime @default(now())
@@ -178,10 +180,9 @@ enum SubscriptionTypes {
 }
 
 enum KioskType {
-  AUTH 
+  AUTH
   OPEN
 }
-
 
 enum LogType {
   ERROR
@@ -193,6 +194,5 @@ enum Status {
   SUCCESS
   FAILED
 }
-
 
 // auth_type OPTIONS Student ID | Email | Phone Number
