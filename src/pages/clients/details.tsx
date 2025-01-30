@@ -85,15 +85,23 @@ const ClientDetail = () => {
             <MainCard>
               <Grid container spacing={3}>
                 <Grid item sm={5} md={6} lg={6}>
-                  <Stack spacing={0.5} paddingBottom={3} alignItems="start">
+                  <Stack spacing={0.5}   alignItems="start">
+                    <Typography variant="h4">Client</Typography>
+                    
+                    <Stack spacing={0.5} paddingTop={2} alignItems="start">
                     <Typography variant="h5">{`${client.firstName} ${client.lastName}`}</Typography>
+                    <Typography variant="h5">{`${client.studentId}`}</Typography>
                     <Typography variant="h5">{client.email}</Typography>
+                    <Typography variant="h5">
+                    {`+${client.phone?.slice(0, 1)} (${client.phone?.slice(1, 4)}) ${client.phone?.slice(4, 7)}-${client.phone?.slice(7, 11)}`}
+                    </Typography>
+                    </Stack>
                   </Stack>
                 </Grid>
                 <Grid item sm={5} md={6} lg={6}>
                   <Typography variant="h4">Customer</Typography>
 
-                  <Divider />
+                 
                   {client.customer ? (
                     <Stack spacing={0.5} paddingTop={2} alignItems="start">
                       <Typography variant="h5">{`${client.customer.firstName} ${client.customer.lastName}`}</Typography>

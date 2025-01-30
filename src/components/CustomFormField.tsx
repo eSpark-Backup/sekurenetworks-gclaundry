@@ -31,25 +31,21 @@ const CustomFormField: React.FC<CustomFormFieldProps> = ({
 
   if (type === "tel2") {
     return (
+      <>
       <PhoneInput
-        country="us"
+        country="ca"
         onlyCountries={["us", "ca"]}
+        countryCodeEditable={false}
         inputProps={{
           name: name,
           required: true,
           autoFocus: true,
         }}
         value={formik.values[accessorName]}
-        onChange={(phone) => formik.setFieldValue(accessorName, phone)}
-        isValid={(value, country) => {
-          if (value.match(/12345/)) {
-            return "Invalid value: " + value + ", " + country.name
-          } else if (value.match(/1234/)) {
-            return false
-          } else {
-            return true
-          }
+        onChange={(phone) => {
+          formik.setFieldValue(accessorName, phone)
         }}
+     
         inputStyle={{
           width: "100%",
           height: "42px",
@@ -63,6 +59,9 @@ const CustomFormField: React.FC<CustomFormFieldProps> = ({
           marginBottom: "8px",
         }}
       />
+   
+      {errorText && <p style={{ color: "#FF4528", fontSize:"0.75rem" }}>{errorText}</p>}
+      </>
     )
   }
 

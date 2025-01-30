@@ -1,4 +1,4 @@
-import { Autocomplete, Button, Grid, Stack, TextField } from "@mui/material";
+import { Autocomplete, Box, Button, Chip, Grid, Stack, TextField, Typography } from "@mui/material";
 import { useFormik } from "formik";
 import MainCard from "../../components/MainCard";
 
@@ -20,7 +20,12 @@ const validationSchema = yup.object({
   firstName: yup.string().required("First Name is required"),
   lastName: yup.string().required("Last Name is required"),
   email: yup.string().email().required("Email is required"),
-  customerId: yup.string().email().required("Customer is required"),
+  customerId: yup.string().required("Customer is required"),
+  studentId: yup.string().required("Student ID is required"),
+  phone: yup
+    .string()
+    .matches(/^\d{11}$/, "Phone number must be 11 digits")
+    .required("Phone number is required"),
 });
 
 const AddEditUser = () => {
@@ -38,13 +43,18 @@ const AddEditUser = () => {
       firstName: "",
       lastName: "",
       email: "",
-      studentId: "",
+      studentId: null,
       phone: "",
     },
     validationSchema,
-    onSubmit: () => { 
-      console.log('submit');
-      
+    onSubmit: async (values) => {
+      delete (values as any)?.customer;
+
+      if (isEditMode) {
+        await updateClient(user?.id, values)
+      }
+      else await createClient(values);
+
     },
   });
 
@@ -60,8 +70,15 @@ const AddEditUser = () => {
     (data) => apiService.user.create(data),
     {
       manual: true,
-      onSuccess: ({ data }: any) => toast(data.message, { type: "success" }),
-      onFinally: () => navigate("/clients"),
+      onSuccess: ({ data }: any) => {
+        if (data.statusCode === 400) {
+          toast(data.message, { type: "error" });
+        } else {
+          toast(data.message, { type: "success" });
+          navigate("/clients");
+        }
+      },
+      // onFinally: () => navigate("/clients"),
     }
   );
 
@@ -69,8 +86,15 @@ const AddEditUser = () => {
     (id, data) => apiService.user.update(id, data),
     {
       manual: true,
-      onSuccess: ({ data }: any) => toast(data.message, { type: "success" }),
-      onFinally: () => navigate("/clients"),
+        onSuccess: ({ data }: any) => {
+          if (data.statusCode === 400) {
+            toast(data.message, { type: "error" });
+          } else {
+            toast(data.message, { type: "success" });
+            navigate("/clients");
+          }
+        },
+      // onFinally: () => navigate("/clients"),
     }
   );
 
@@ -88,6 +112,8 @@ const AddEditUser = () => {
     }
   );
 
+
+
   const fetchClient = async (id: string): Promise<User> => {
     const { data } = await runAsync(id);
     setUser(data);
@@ -101,12 +127,19 @@ const AddEditUser = () => {
       const { data } = await getCustomers({ name: null });
       if (params.id) {
         const client = await fetchClient(params.id!);
+
+        formik.setValues({
+          ...client,
+          customerId: client.customerId,
+        });
         setSelectedCustomer(
           data.data.find((e: any) => e.id === client.customerId)
         );
+
       }
     })();
   }, [params.id]);
+
 
   return (
     <ApiLoader isLoading={loading}>
@@ -120,83 +153,85 @@ const AddEditUser = () => {
         }
         handleClose={() => setUpdateDialog(false)}
         handleConfirm={async () => {
-          const values = formik.values;
-          // @ts-ignore
-          // check email is valid if not show toast 
-          delete values.customer
-
-          console.log(values);
-          
-
-          if (!values.email.includes('@')) {
-            toast.error('Invalid Email');
-            return;
-          }
-
-          if (isEditMode) await updateClient(user?.id, values);
-          else await createClient(values);
           setUpdateDialog(false);
+
+          return formik.submitForm();
         }}
       />
       <MainCard>
         <form onSubmit={formik.handleSubmit} id="validation-forms">
           <Grid container spacing={2.5}>
-            <Grid item xs={12}>
+
+
+            <Grid item xs={12} >
+
+
               <MainCard>
-                <Stack spacing={2} paddingY={2}>
-                  <Autocomplete
-                    fullWidth
-                    onInputChange={async (e: any) => {
-                      // await getCustomers({ name: e.target.value });
-                    }}
-                    options={customers || []}
-                    getOptionLabel={(option) => option.schoolName}
-                    onChange={(e: any, newValue) => {
-                      formik.setFieldValue("customerId", newValue?.id);
-                      setSelectedCustomer(newValue);
-                    }}
-                    autoSelect={true}
-                    value={selectedCustomer ? selectedCustomer : null}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        placeholder="Select Customer"
-                      />
-                    )}
-                  />
-                </Stack>
-                <Grid container spacing={3}>
-                  <Grid item sm={5} md={6} lg={6}>
-                    <Stack spacing={2} paddingBottom={3} alignItems="start">
+
+                <Grid container spacing={2} >
+
+                  <Grid item xs={12} sm={12}>
+                    <Autocomplete
+                      fullWidth
+                      // onInputChange={async (e: any) => {
+                      //   await getCustomers({ name: e.target.value });
+                      // }}
+                      options={customers || []}
+                      getOptionLabel={(option) => option.schoolName}
+                      onChange={async (e: any, newValue) => {
+                        formik.setFieldValue("customerId", newValue?.id);
+
+                        setSelectedCustomer(newValue);
+                      }}
+                      autoSelect={true}
+                      value={selectedCustomer || null}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          placeholder="Select Customer"
+                          label="Customer *"
+                          error={Boolean(formik.touched.customerId && formik.errors.customerId)}
+                          helperText={formik.touched.customerId && formik.errors.customerId}
+
+                        />
+                      )}
+                    />
+                  </Grid>
+                </Grid>
+
+                <Box mt={2}>
+                  <Grid container spacing={2} >
+                    <Grid item xs={12} sm={6}>
                       <CustomFormField
                         formik={formik}
                         name="firstName"
                         label="First Name *"
                         accessorName="firstName"
                       />
-                      <CustomFormField
-                        name="studentId"
-                        label="Student ID *"
-                        formik={formik}
-                        accessorName="studentId"
-                      />
-                      <CustomFormField
-                        name="email"
-                        label="Email *"
-                        formik={formik}
-                        accessorName="email"
-                        type="email"
-                      />
-                    </Stack>
-                  </Grid>
-                  <Grid item sm={5} md={6} lg={6}>
-                    <Stack spacing={2} alignItems="start">
+
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
                       <CustomFormField
                         formik={formik}
                         name="lastName"
                         label="Last Name *"
                         accessorName="lastName"
                       />
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                <Box mt={2}>
+                  <Grid container spacing={2} >
+                    <Grid item xs={12} sm={6}>
+                      <CustomFormField
+                        name="studentId"
+                        label="ID *"
+                        formik={formik}
+                        accessorName="studentId"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
                       <CustomFormField
                         name="password"
                         label="Password *"
@@ -204,48 +239,56 @@ const AddEditUser = () => {
                         accessorName="password"
                         type="password"
                       />
+                    </Grid>
+                  </Grid>
+                </Box>
+                <Box mt={2}>
+                  <Grid container spacing={2} >
+                    <Grid item xs={12} sm={6}>
+                      <CustomFormField
+                        name="email"
+                        label="Email *"
+                        formik={formik}
+                        accessorName="email"
+                      />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
                       <CustomFormField
                         name="phone"
                         label="Phone *"
                         formik={formik}
                         accessorName="phone"
+                        isValid
                         type="tel2"
                       />
+                    </Grid>
+                  </Grid>
+                </Box>
+
+
+                <Box mt={2}>
+                  <Grid item xs={12} paddingTop={0}>
+                    <Stack direction="row" justifyContent="center">
+                      <AnimateButton>
+                        <Button
+                          variant="contained"
+                          sx={{ my: 3, ml: 1 }}
+                          type="button"
+                          disabled={!selectedCustomer}
+                          onClick={() => setUpdateDialog(true)}
+                        >
+                          {isEditMode ? "Update" : "Create"}
+                        </Button>
+                      </AnimateButton>
                     </Stack>
                   </Grid>
-
-                </Grid>
-
-
-
-                <Grid item xs={12} paddingTop={0}>
-                  <Stack direction="row" justifyContent="center">
-                    <AnimateButton>
-                      <Button
-                        variant="contained"
-                        sx={{ my: 3, ml: 1 }}
-                        type="button"
-                        onClick={() => setUpdateDialog(true)}
-                        // disable if fields are empty
-                        disabled={
-                          !formik.values.firstName ||
-                          !formik.values.lastName ||
-                          !formik.values.email ||
-                          !formik.values.studentId ||
-                          !formik.values.phone
-                        }
-                      >
-                        {isEditMode ? "Update" : "Create"}
-                      </Button>
-                    </AnimateButton>
-                  </Stack>
-                </Grid>
+                </Box>
               </MainCard>
             </Grid>
           </Grid>
         </form>
-      </MainCard>
-    </ApiLoader>
+      </MainCard >
+    </ApiLoader >
   );
 };
 

@@ -28,7 +28,9 @@ export const columns: ColumnDef<User>[] = [
     header: "Contact",
     cell: ({ row }) => (
       <Stack spacing={0}>
-        <Typography variant="subtitle1">{row.original.phone}</Typography>
+        <Typography variant="subtitle1">
+          {`+${row.original.phone.slice(0, 1)} (${row.original.phone?.slice(1, 4)}) ${row.original.phone?.slice(4, 7)}-${row.original.phone?.slice(7, 11)}`}
+          </Typography>
         <Typography variant="subtitle1" color="textSecondary">
           <Mailto email={row.original.email} />
         </Typography>
