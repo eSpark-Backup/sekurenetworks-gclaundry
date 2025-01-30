@@ -54,7 +54,7 @@ def replace_users(users):
             email=user["email"],
             password=user["password"],
             student_id = "1234",
-            # auth_type =  "1234", 
+            phone_number = "1234567890",
             # student_id = user["student_id"],                        
             # phone_number = user["phone_number"],        
         ).on_conflict_replace().execute()
@@ -69,6 +69,12 @@ def update_config(data: dict[str, Any]):
         answer_required=data["answer_required"],
         screen_sequence=json.dumps(data["screen_sequence"]),
         app_type=data["type"],
-        # auth_type = data["auth_type"],
+        auth_type = data.get("auth_type"),
         customer_id=data["customerId"],
     ).on_conflict_replace().execute()
+    print("Received data keys:", data.keys())  # Debugging
+    # Check if 'auth_type' is missing
+    if "auth_type" not in data:
+        print("Missing auth_type data")
+    else:
+        print("auth_type value:", data["auth_type"])

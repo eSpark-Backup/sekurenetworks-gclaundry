@@ -117,6 +117,7 @@ class LoginScreen(BaseScreen):
         logger.info(self.email)
 
         result , ctrl().user_id = verify_email_password(self.email, self.password)
+        # result = verify_email_password(self.email, self.password)
         
         if result == LoginResults.SuccessFullLogin:
             logger.log(f"Login successful !")
@@ -134,3 +135,7 @@ class LoginScreen(BaseScreen):
         elif result == LoginResults.Error:
             logger.error("Error during Email password verification")
             return self.container.to_out_of_order_screen()
+        elif result == LoginResults.WrongAuthorizationID:
+            logger.log("LoginResults.WrongAuthorizationID")
+            return self.show_error_message("Wrong Authorization ID")
+

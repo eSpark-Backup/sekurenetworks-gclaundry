@@ -12,7 +12,10 @@ import os
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 from constants import BASE_DIR
+from src.database.models.kiosk_info import KioskInfo_V4
+from src.logger import getLogger
 
+logger = getLogger(__name__)
 
 class Ui_Login(object):
     def setupUi(self, SurveyScreen):
@@ -87,7 +90,8 @@ class Ui_Login(object):
                                                 font: bold;
                                         """
         )
-        self.email_input.setPlaceholderText("Email / Student ID / Phone No.")
+        # self.email_input.setPlaceholderText("Email / Student ID / Phone No.")
+        self.update_placeholder_text()
         self.email_input.setObjectName("email_input")
         self.email_input.setFocus()
         self.verticalLayout_2.addWidget(self.email_input)
@@ -177,3 +181,26 @@ class Ui_Login(object):
         _translate = QtCore.QCoreApplication.translate
         SurveyScreen.setWindowTitle(_translate("Login", "Login"))
         self.btn_login.setText(_translate("Login", "SUBMIT"))
+
+    def update_placeholder_text(self):
+        try:
+            kiosk_info = KioskInfo_V4.select().limit(1).first()
+
+            if not kiosk_info:
+                logger.log("No KioskInfo found")
+                return
+
+            # Mapping auth_type to placeholder text
+            placeholder_map = {
+                "Email": "example@gmail.com",
+                "Student ID": "Enter Student ID",
+                "Phone": "1 (234) 567-8901"
+            }
+
+            # Set placeholder based on auth_type
+            placeholder_text = placeholder_map.get(kiosk_info.auth_type, "Email / Student ID / Phone No.")
+            self.email_input.setPlaceholderText(placeholder_text)
+            logger.log(f"Placeholder updated to: {placeholder_text}")
+
+        except Exception as e:
+            logger.log(f"Error updating placeholder: {str(e)}")

@@ -59,7 +59,7 @@ class Kiosk:
         StatusSyncService().start()
 
         # Todo : To remove in phase 2 of project.
-        # AliveService().start()
+        AliveService().start()
         # StatusSyncServiceOld().start()
 
         # AUTO Updater

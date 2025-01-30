@@ -10,3 +10,4 @@ class KioskInfo_V4(BaseModel):
     sheets_per_transaction= IntegerField(default=0)
     screen_sequence = TextField()
     customer_id = TextField(null=True)
+    auth_type = TextField(null=True)
