@@ -30,14 +30,14 @@ export class ClientsService {
     if (take) take = Number(take)
     if (skip) skip = Number(skip)
     const [data, count] = await this.prisma.$transaction([
-      this.prisma.users.findMany({ where: { email: { contains: email, mode: 'insensitive' } }, take, skip, select: { id: true, customer: true, firstName: true, lastName: true, email: true, } }),
+      this.prisma.users.findMany({ where: { email: { contains: email, mode: 'insensitive' } }, take, skip, select: { id: true, customer: true, firstName: true, lastName: true, email: true, phone: true, studentId: true} }),
       this.prisma.users.count({ where: { email: { contains: email, mode: 'insensitive' } } })
     ])
     return { data, count };
   }
 
   async findOne(id) {
-    const client = await this.prisma.users.findFirst({ where: { id }, select: { id: true, customer: true, firstName: true, lastName: true, email: true, customerId: true } });
+    const client = await this.prisma.users.findFirst({ where: { id }, select: { id: true, customer: true, firstName: true, lastName: true, email: true, customerId: true, phone: true, studentId: true } });
     if (!client) throw new NotFoundException('Client not found!')
     return client;
   }
