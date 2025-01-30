@@ -15,7 +15,9 @@ from src.ui_application.screens.out_of_order_screen import OutOfOrderScreen
 from src.ui_application.screens.quotes_screen import QuotesScreen
 from src.ui_application.screens.select_screen import SelectScreen
 from src.ui_application.screens.survey_screen import SurveyScreen
+from src.ui_application.screens.survey_screen_1 import SurveyScreen_1
 from src.ui_application.screens.welcome_screen import WelcomeScreen
+
 
 
 class Container(QMainWindow):
@@ -29,6 +31,7 @@ class Container(QMainWindow):
             "SelectScreen": self.to_select_screen,
             "LoginScreen": self.to_login_screen,
             "SurveyScreen": self.to_survey_screen,
+            "SurveyScreen_1": self.to_survey_screen_1,
             "QuotesScreen": self.to_quotes_screen,
             "OutOfOrderScreen": self.to_out_of_order_screen,
         }
@@ -46,23 +49,22 @@ class Container(QMainWindow):
         current_screen_idx = sequence.index(current_screen_name)  # finding idx
         logger.debug(sequence)
 
-
         #################screen logic###########################
         if current_screen_name == sequence[-1]:  # at Last screen
             next_screen_name = sequence[0]
             logger.debug(f"Going From Last Screen to first screen ")
-
+    
         # if next screen is login and login is not required skip it 
         elif sequence[current_screen_idx + 1] == "LoginScreen" and not is_login_required() :    
             next_screen_name = sequence[current_screen_idx + 2]
             logger.debug(f"Going From {current_screen_name} to {next_screen_name} instead of login screen as login is not required")
     
         else : # general case
-            next_screen_name = sequence[current_screen_idx + 1]
+            next_screen_name = sequence[current_screen_idx + 1]                
             logger.log(
                 f"Going From {current_screen_name} to {next_screen_name}"
             )
-    
+
         # call screen constructor
         self.screen_callback_map[next_screen_name]()
 
@@ -94,6 +96,9 @@ class Container(QMainWindow):
 
     def to_survey_screen(self):
         self.setCentralWidget(SurveyScreen(self))
+    
+    def to_survey_screen_1(self):
+        self.setCentralWidget(SurveyScreen_1(self))
 
     def to_out_of_order_screen(self, show_comm=False):
         logger.log("Showing out of order !")

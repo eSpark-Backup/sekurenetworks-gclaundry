@@ -3,6 +3,7 @@ import hashlib
 from src.database.models.user import User
 from src.database.models.kiosk_info import KioskInfo_V4
 from src.logger import getLogger
+import re
 
 logger = getLogger(__name__)
 
@@ -49,6 +50,10 @@ def verify_email_password(input_value: str, password: str) -> tuple[LoginResults
             "Student ID": User.student_id,
             "Phone": User.phone_number
         }
+
+        if kiosk_info.auth_type == "Phone":
+            # Extract only digits from the phone number
+            input_value = re.sub(r"\D", "", input_value)
 
         if kiosk_info.auth_type in auth_fields:
             try:

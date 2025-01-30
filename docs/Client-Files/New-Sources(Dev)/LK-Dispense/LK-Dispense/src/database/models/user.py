@@ -1,4 +1,4 @@
-from peewee import TextField, UUIDField, IntegerField
+from peewee import TextField, UUIDField, CharField
 from src.database.models.base_model import BaseModel
 
 
@@ -8,5 +8,5 @@ class User(BaseModel):
     email = TextField()
     password = TextField()
     student_id = TextField(null=True)
-    phone_number = TextField(null=True)
+    phone_number = CharField(null=True)
     # AUTH = TextField(null=True)

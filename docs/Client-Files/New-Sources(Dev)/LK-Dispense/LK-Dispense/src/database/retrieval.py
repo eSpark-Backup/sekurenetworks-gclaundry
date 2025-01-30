@@ -37,8 +37,24 @@ def get_sheets_per_transaction() -> int:
     
     return row[0].sheets_per_transaction
 
-def get_screen_sequence() -> list[str]:
+SQ1_followed_by_EM = json.loads('["WelcomeScreen","LoginScreen","SelectScreen", "SQfollowedbyEM"]')
+SQ1_followed_by_SQ2 = json.loads('["WelcomeScreen","LoginScreen", "SelectScreen", "SQ1followedbySQ2"]')
+only_SQ1 = json.loads('["WelcomeScreen","LoginScreen", "SelectScreen", "OnlySQ1"]')
+
+def screen_sequence() -> list[str]:
     return json.loads(KioskInfo_V4.select().first().screen_sequence)
+
+def get_screen_sequence() -> list[str]:
+    current_sequence = list(screen_sequence())
+    
+    if current_sequence == SQ1_followed_by_EM:
+        return ["WelcomeScreen","LoginScreen", "SelectScreen", "SurveyScreen", "QuotesScreen"]
+    elif current_sequence == SQ1_followed_by_SQ2:
+        return ["WelcomeScreen","LoginScreen", "SelectScreen", "SurveyScreen", "SurveyScreen_1"]
+    elif current_sequence == only_SQ1:
+        return ["WelcomeScreen","LoginScreen", "SelectScreen", "SurveyScreen"]
+    
+    return current_sequence  # Return as-is if no match found
 
 
 def is_answer_required()-> bool:
@@ -50,8 +66,6 @@ def is_login_required()-> bool:
 def get_owner_id():
     return str(KioskInfo_V4.select().first().customer_id)
 
-# def get_auth_type():
-#     return KioskInfo_V4.select().first().auth_type
 
 def add_transaction_telemetry(
     qty,

@@ -80,15 +80,23 @@ class TransactionSyncService(BaseSyncService):
         """
         Generate payload for server
         """
-        return {
+        payload = {
             "kioskId": mac_id,
             "tissueType": sheet_type,
             "quantity": no_of_sheets,
             "status": status,
-            "questionId": question_id,
-            "selectedAnswer": answer,
+            # "questionId": question_id,
+            # "selectedAnswer": answer,
             "quoteId": quote_id,
             "error": error,
             # "userId": user_id,
             "time": time.mktime(created_at.timetuple()),
+            "questionsWithAnswers":[],
         }
+        if question_id and answer:
+            payload["questionsWithAnswers"].append({
+                "questionId": question_id,
+                "selectedAnswer": answer,
+            })
+
+        return payload
