@@ -63,14 +63,14 @@ export class KioskService {
 
     }
 
-    const { answer_required, type, sheets_per_transaction, screen_sequence, isDeleted, customerId } = kiosk
+    const { answer_required, type, auth_type, sheets_per_transaction, screen_sequence, isDeleted, customerId } = kiosk
 
     if (isDeleted) {
       await this.prisma.kiosk.update({ data: { isDeleted: false }, where: { macId } })
       await this.prisma.log.create({ data: { type: 'INFO', kioskId: macId, detail: log.activate, createdAt: new Date() } })
     }
 
-    const config = { answer_required, type, sheets_per_transaction, screen_sequence, customerId }
+    const config = { answer_required, type, auth_type, sheets_per_transaction, screen_sequence, customerId }
 
     const [qestions, quotes] = await this.prisma.$transaction([
       this.prisma.kioskRelation.findMany({
