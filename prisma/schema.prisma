@@ -151,7 +151,7 @@ model Users {
   lastName   String
   password   String   @db.Text
   phone      String?
-  studentId  String?   @unique
+  studentId  Int?   @unique
   customerId String
   customer   Customer @relation(fields: [customerId], references: [id])
   createdAt  DateTime @default(now())
