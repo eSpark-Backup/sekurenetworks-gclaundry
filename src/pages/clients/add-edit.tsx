@@ -38,9 +38,14 @@ const AddEditUser = () => {
       firstName: "",
       lastName: "",
       email: "",
+      studentId: "",
+      phone: "",
     },
     validationSchema,
-    onSubmit: () => {},
+    onSubmit: () => { 
+      console.log('submit');
+      
+    },
   });
 
   const { loading, runAsync } = useRequest(
@@ -117,7 +122,17 @@ const AddEditUser = () => {
         handleConfirm={async () => {
           const values = formik.values;
           // @ts-ignore
+          // check email is valid if not show toast 
           delete values.customer
+
+          console.log(values);
+          
+
+          if (!values.email.includes('@')) {
+            toast.error('Invalid Email');
+            return;
+          }
+
           if (isEditMode) await updateClient(user?.id, values);
           else await createClient(values);
           setUpdateDialog(false);
@@ -128,28 +143,28 @@ const AddEditUser = () => {
           <Grid container spacing={2.5}>
             <Grid item xs={12}>
               <MainCard>
-                    <Stack spacing={2} paddingY={2}>
-                      <Autocomplete
-                        fullWidth
-                        onInputChange={async (e: any) => {
-                          await getCustomers({ name: e.target.value });
-                        }}
-                        options={customers || []}
-                        getOptionLabel={(option) => option.schoolName}
-                        onChange={(e: any, newValue) => {
-                          formik.setFieldValue("customerId", newValue?.id);
-                          setSelectedCustomer(newValue);
-                        }}
-                        autoSelect={true}
-                        value={selectedCustomer ? selectedCustomer : null}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            placeholder="Select Customer"
-                          />
-                        )}
+                <Stack spacing={2} paddingY={2}>
+                  <Autocomplete
+                    fullWidth
+                    onInputChange={async (e: any) => {
+                      // await getCustomers({ name: e.target.value });
+                    }}
+                    options={customers || []}
+                    getOptionLabel={(option) => option.schoolName}
+                    onChange={(e: any, newValue) => {
+                      formik.setFieldValue("customerId", newValue?.id);
+                      setSelectedCustomer(newValue);
+                    }}
+                    autoSelect={true}
+                    value={selectedCustomer ? selectedCustomer : null}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        placeholder="Select Customer"
                       />
-                    </Stack>
+                    )}
+                  />
+                </Stack>
                 <Grid container spacing={3}>
                   <Grid item sm={5} md={6} lg={6}>
                     <Stack spacing={2} paddingBottom={3} alignItems="start">
@@ -160,10 +175,17 @@ const AddEditUser = () => {
                         accessorName="firstName"
                       />
                       <CustomFormField
+                        name="studentId"
+                        label="Student ID *"
+                        formik={formik}
+                        accessorName="studentId"
+                      />
+                      <CustomFormField
                         name="email"
                         label="Email *"
                         formik={formik}
                         accessorName="email"
+                        type="email"
                       />
                     </Stack>
                   </Grid>
@@ -182,9 +204,19 @@ const AddEditUser = () => {
                         accessorName="password"
                         type="password"
                       />
+                      <CustomFormField
+                        name="phone"
+                        label="Phone *"
+                        formik={formik}
+                        accessorName="phone"
+                        type="tel2"
+                      />
                     </Stack>
                   </Grid>
+
                 </Grid>
+
+
 
                 <Grid item xs={12} paddingTop={0}>
                   <Stack direction="row" justifyContent="center">
@@ -194,6 +226,14 @@ const AddEditUser = () => {
                         sx={{ my: 3, ml: 1 }}
                         type="button"
                         onClick={() => setUpdateDialog(true)}
+                        // disable if fields are empty
+                        disabled={
+                          !formik.values.firstName ||
+                          !formik.values.lastName ||
+                          !formik.values.email ||
+                          !formik.values.studentId ||
+                          !formik.values.phone
+                        }
                       >
                         {isEditMode ? "Update" : "Create"}
                       </Button>
