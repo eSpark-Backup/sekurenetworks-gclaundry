@@ -229,6 +229,7 @@ const AddEditUser = () => {
                         label="ID *"
                         formik={formik}
                         accessorName="studentId"
+                        type="number"
                       />
                     </Grid>
                     <Grid item xs={12} sm={6}>

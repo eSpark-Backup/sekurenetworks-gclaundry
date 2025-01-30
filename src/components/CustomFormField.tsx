@@ -79,6 +79,7 @@ const CustomFormField: React.FC<CustomFormFieldProps> = ({
       multiline={isMultiLine}
       fullWidth
       disabled={disabled}
+      type={type}
       {...props}
     />
   );
