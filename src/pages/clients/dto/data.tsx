@@ -1,3 +1,4 @@
+import Mailto from "@/components/Mailto";
 import { Customer } from "@/types/customer";
 import { User } from "@/types/IUser";
 import {
@@ -11,6 +12,12 @@ import { useNavigate } from "react-router-dom";
 
 export const columns: ColumnDef<User>[] = [
   {
+    header: "Student ID",
+    cell: ({ row }) => (
+      <Typography variant="subtitle2">{row.original.studentId}</Typography>
+    ),
+  },
+  {
     header: "Name",
     cell: ({ row }) => (
       <Typography variant="subtitle2">{row.original.firstName} {row.original.lastName}</Typography>
@@ -18,9 +25,16 @@ export const columns: ColumnDef<User>[] = [
   },
   {
     accessorKey: "email",
-    header: "Email",
-    cell: ({ getValue }) => (
-      <Typography variant="subtitle2">{getValue<string>()}</Typography>
+    header: "Contact",
+    cell: ({ row }) => (
+      <Stack spacing={0}>
+        <Typography variant="subtitle1">
+          {`+${row.original.phone.slice(0, 1)} (${row.original.phone?.slice(1, 4)}) ${row.original.phone?.slice(4, 7)}-${row.original.phone?.slice(7, 11)}`}
+          </Typography>
+        <Typography variant="subtitle1" color="textSecondary">
+          <Mailto email={row.original.email} />
+        </Typography>
+      </Stack>
     ),
   },
   {

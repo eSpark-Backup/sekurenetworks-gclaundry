@@ -7,4 +7,6 @@ export interface User {
     firstName: string;
     lastName: string;
     email: string;
+    studentId: string;
+    phone: string;
 }
