@@ -40,6 +40,7 @@ class Seeder:
 
         for survey in data:
             Survey_V4.create(question=survey["question"], options=survey["options"])
+            Survey_V4.create(question2=survey["question2"], options2=survey["options2"])
         logger.log("Seeding performed for survey")
 
     @classmethod

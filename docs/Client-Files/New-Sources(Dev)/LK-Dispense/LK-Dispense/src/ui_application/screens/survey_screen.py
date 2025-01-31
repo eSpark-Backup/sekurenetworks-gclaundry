@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QPushButton
 
 from src.ctrl import ctrl
 
-from src.database.retrieval import get_survey, is_answer_required
+from src.database.retrieval import get_survey, is_answer_required, get_surveys_flag
 from src.logger import getLogger
 logger = getLogger(__name__)
 
@@ -93,23 +93,8 @@ class SurveyScreen(BaseScreen):
             logger.warning("Answer is not required Going to next screen")
             self.container.to_next_screen()
     
-    # this function only gets called if is survey is answered and answer was required
-    def on_answer_go_to_next_screen(self):
+    # # this function only gets called if is survey is answered and answer was required
 
-        # for (A) => 1 ,  (B) => 1 , (C) => 0
-        # for (A) => 1 ,  (B) => 1 , (C) => 1
-        if is_answer_required():
-            ctrl().trigger_dispense()
-
-        if self.container.is_last_screen(self):
-            self.screen_time.hold_screen_for_timeout(config().last_screen_timeout, self.container.to_next_screen)
-            return
-
-        if self.selected_option not in self.correct_answers:
-            self.screen_time.hold_screen_for_timeout(5000, self.container.to_next_screen)
-            return
-        # for (A) => 0 ,  (B) => 0 , (C) => 1
-        self.container.to_next_screen()
 
     def check_answer(self):
         logger.debug("checking answer")
@@ -134,3 +119,26 @@ class SurveyScreen(BaseScreen):
                     btn.setStyleSheet(ButtonStyles.correct())
 
         self.on_answer_go_to_next_screen()
+        # this function only gets called if is survey is answered and answer was required
+    
+    def on_answer_go_to_next_screen(self):
+
+        # for (A) => 1 ,  (B) => 1 , (C) => 0
+        # for (A) => 1 ,  (B) => 1 , (C) => 1
+        # if is_answer_required():
+        #     ctrl().trigger_dispense()
+
+        if not get_surveys_flag():
+            if is_answer_required():
+                ctrl().trigger_dispense()
+
+        if self.container.is_last_screen(self):
+            self.screen_time.hold_screen_for_timeout(config().last_screen_timeout, self.container.to_next_screen)
+            return
+
+        if self.selected_option not in self.correct_answers:
+            self.screen_time.hold_screen_for_timeout(5000, self.container.to_next_screen)
+            return
+        # for (A) => 0 ,  (B) => 0 , (C) => 1
+        self.screen_time.hold_screen_for_timeout(config().last_screen_timeout, self.container.to_next_screen)
+        # self.container.to_next_screen()

@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QPushButton
 
 from src.ctrl import ctrl
 
-from src.database.retrieval import get_survey, is_answer_required
+from src.database.retrieval import get_survey2, is_answer_required
 from src.logger import getLogger
 logger = getLogger(__name__)
 
@@ -33,11 +33,11 @@ class SurveyScreen_1(BaseScreen):
 
     def load_question_from_database(self):
         logger.log("Showing Survey_1 Screen")
-        survey = get_survey()
+        survey = get_survey2()
         question_text = survey[0]
         options = survey[1]
 
-        ctrl().question_id = survey[2]
+        ctrl().question_id2 = survey[2]
 
         self.screen.question.setText(question_text)
         # Remove existing options
@@ -65,7 +65,8 @@ class SurveyScreen_1(BaseScreen):
         sender = self.sender()
         self.selected_option = sender.text()  # Store the selected option
 
-        ctrl().answer=self.selected_option
+        ctrl().answer2=self.selected_option
+        
 
         for btn in self.answer_buttons:
             if btn == sender:
@@ -98,6 +99,7 @@ class SurveyScreen_1(BaseScreen):
 
         # for (A) => 1 ,  (B) => 1 , (C) => 0
         # for (A) => 1 ,  (B) => 1 , (C) => 1
+        # if get_survey
         if is_answer_required():
             ctrl().trigger_dispense()
 

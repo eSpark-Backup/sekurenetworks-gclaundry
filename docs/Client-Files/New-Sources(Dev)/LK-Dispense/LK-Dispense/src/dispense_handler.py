@@ -3,7 +3,7 @@ import time
 
 from src import board_controller
 from src.database.enums.transaction_type import Status
-from src.database.retrieval import add_transaction_telemetry, get_sheets_per_transaction
+from src.database.retrieval import add_transaction_telemetry, get_sheets_per_transaction, get_quotes_flag, get_qoute,get_surveys_flag
 from src.logger import getLogger
 logger = getLogger(__name__)
 
@@ -26,7 +26,7 @@ class DispenseRoutine(threading.Thread):
         self.last_pac : bytes
         self.error_message = None
         self.status = Status.FAILED
-
+        # self.status = Status.SUCCESS
     def run(self) -> None:
         ctrl().is_dispensing = True
         self.start_new_precuationary_thread()
@@ -66,6 +66,11 @@ class DispenseRoutine(threading.Thread):
 
             time.sleep(.1)
         # Send transaction telemetry to cloud
+        
+        if get_quotes_flag():
+            ctrl().qoute_id , qoute = get_qoute()
+        
+
         add_transaction_telemetry(
             qty=self.DISPENSE_SHEETS_COUNT,
             tissue_type=ctrl().selected_sheet,
@@ -73,7 +78,9 @@ class DispenseRoutine(threading.Thread):
             user_id=ctrl().user_id,
             error=self.error_message,
             questionid=ctrl().question_id,
+            questionid2 = ctrl().question_id2,
             answer=ctrl().answer,
+            answer2=ctrl().answer2,
             qoute_id=ctrl().qoute_id
         )
         ctrl().is_dispensing = False

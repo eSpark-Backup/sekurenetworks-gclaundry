@@ -33,7 +33,6 @@ class CheckInService(Thread):
 
     def update_tables(self, data):
         # When user is interacting with kiosk, delay table update, to avoid unexpected behaviour from kiosk.
-
         # time.sleep(3)
         if ctrl().is_active:
             logger.log("Kiosk is busy delaying table update")

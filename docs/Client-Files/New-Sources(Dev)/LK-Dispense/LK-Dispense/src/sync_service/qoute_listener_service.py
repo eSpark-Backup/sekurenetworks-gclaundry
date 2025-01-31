@@ -21,7 +21,7 @@ class QuoteListenerService(BaseListenerService):
             f"Received payload :{userdata=}, {msg=}, {msg.info=}, {msg.payload=}, {msg.properties=}"
         )
         try:
-            data = json.loads(msg.payload.decode())
+            json.loads(msg.payload.decode())
             # replace_quotes(data)
             CheckInService().get_data()
         except Exception as e:

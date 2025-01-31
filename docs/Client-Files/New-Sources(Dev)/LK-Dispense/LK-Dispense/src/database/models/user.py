@@ -9,4 +9,4 @@ class User(BaseModel):
     password = TextField()
     student_id = TextField(null=True)
     phone_number = CharField(null=True)
-    # AUTH = TextField(null=True)
+    

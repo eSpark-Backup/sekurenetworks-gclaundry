@@ -10,6 +10,7 @@ from src.logger import getLogger
 from src.sync_service.enums.topics import Topics
 from src.sync_service.base_sync_service import BaseSyncService
 from src.sync_service.system_info import system_info
+from src.database.retrieval import get_quotes_flag, get_surveys_flag
 
 logger = getLogger(__name__)
 
@@ -27,6 +28,7 @@ class TransactionSyncService(BaseSyncService):
 
     def do_action(self):
         updated_rows = Transaction_v5.select().where(Transaction_v5.updatedToPortal == False)
+        # logger.debug(f"Transaction data to be uploaded: {updated_rows}")
         if not updated_rows:
             return
 
@@ -36,7 +38,10 @@ class TransactionSyncService(BaseSyncService):
                 sheet_type=data.tissue_type,
                 status=data.status,
                 question_id=str(data.questionid),
+                question_id2 = str(data.questionid2),
                 answer=data.answer,
+                answer2=data.answer2,
+                # questions_with_answers=data.questionid,
                 created_at=data.created_at,
                 error=data.error,
                 quote_id=str(data.qouteid),
@@ -45,6 +50,7 @@ class TransactionSyncService(BaseSyncService):
             )
             for data in updated_rows
         ]
+
         try:
             request = self.client.publish(
                 topic=Topics.TRANSACTION_NEW,
@@ -70,7 +76,10 @@ class TransactionSyncService(BaseSyncService):
             sheet_type: TissueType,
             status: Status,
             question_id: int | None,
+            question_id2: int | None,
             answer: str | None,
+            answer2: str | None,
+            # questions_with_answers: list[dict[str, Any]],
             created_at: datetime,
             mac_id: str,
             quote_id: str | None,
@@ -87,16 +96,26 @@ class TransactionSyncService(BaseSyncService):
             "status": status,
             # "questionId": question_id,
             # "selectedAnswer": answer,
-            "quoteId": quote_id,
+            # "quoteId": quote_id,
             "error": error,
             # "userId": user_id,
             "time": time.mktime(created_at.timetuple()),
             "questionsWithAnswers":[],
         }
-        if question_id and answer:
-            payload["questionsWithAnswers"].append({
-                "questionId": question_id,
-                "selectedAnswer": answer,
-            })
+
+        if get_quotes_flag():  # Only add quoteId if get_quotes_flag() returns True
+            payload["quoteId"] = quote_id
+
+        if get_surveys_flag():
+            if question_id and answer:
+                payload["questionsWithAnswers"].extend([
+                    {"questionId": question_id, "answer": answer},
+                    {"questionId": question_id2, "answer": answer2}
+            ])
+        else:
+            payload["questionsWithAnswers"].extend([
+                {"questionId": question_id, "answer": answer},
+                # {"questionId": "", "answer": ""}
+            ])
 
         return payload

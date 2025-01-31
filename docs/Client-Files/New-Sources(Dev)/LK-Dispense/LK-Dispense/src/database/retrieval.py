@@ -22,6 +22,16 @@ def get_survey():
     id = active_data.id
     return [question, json.loads(options), id]
 
+def get_survey2():
+    survey = Survey_V4.select()
+    active_data = random.choice(survey)
+    question2 = active_data.question
+    options2 = active_data.options
+    logger.debug("Survey question: " + str(question2))
+    logger.debug("All Answers: " + str(options2))
+    id = active_data.id
+    return [question2, json.loads(options2), id]
+
 
 def get_qoute():
     qoute = Quotes_V4.select()
@@ -56,6 +66,12 @@ def get_screen_sequence() -> list[str]:
     
     return current_sequence  # Return as-is if no match found
 
+def get_quotes_flag():
+    if get_screen_sequence()[-1] == "QuotesScreen":
+        return True
+def get_surveys_flag():
+    if get_screen_sequence()[-1] == "SurveyScreen_1":
+        return True
 
 def is_answer_required()-> bool:
     return KioskInfo_V4.select().first().answer_required
@@ -72,7 +88,9 @@ def add_transaction_telemetry(
     tissue_type,
     status,
     questionid,
+    questionid2,
     answer,
+    answer2,
     qoute_id,
     user_id=None,
     error=None,
@@ -86,6 +104,9 @@ def add_transaction_telemetry(
         error=error,
         updatedToPortal=updatedToPortal,
         questionid = questionid,
+        questionid2 = questionid2,
         qouteid= qoute_id,
-        answer = answer
+        answer = answer,
+        answer2 = answer2
+
     ).save()

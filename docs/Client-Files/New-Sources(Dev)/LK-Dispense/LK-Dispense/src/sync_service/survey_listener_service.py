@@ -20,7 +20,7 @@ class SurveyListenerService(BaseListenerService):
         logger.debug(f"Received payload :{userdata=}, {msg=}, {msg.info=}, {msg.payload=}, {msg.properties=}")
 
         try:
-            data = json.loads(msg.payload.decode())
+            json.loads(msg.payload.decode())
             # replace_survey(data)
             CheckInService().get_data()
 
