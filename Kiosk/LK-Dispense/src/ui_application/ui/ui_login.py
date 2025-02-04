@@ -194,7 +194,7 @@ class Ui_Login(object):
             placeholder_map = {
                 "Email": "example@gmail.com",
                 "Student ID": "Enter Student ID",
-                "Phone": "+1 (234) 567-8901"
+                "Phone": "1 (234) 567-8901"
             }
 
             # Set placeholder based on auth_type
