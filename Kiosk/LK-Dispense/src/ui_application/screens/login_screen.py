@@ -7,6 +7,7 @@ from src.logger import getLogger
 from src.ui_application.screens.base_screen import BaseScreen
 from src.ui_application.ui.ui_login import Ui_Login
 
+
 from src.ui_application.models.keyboard import hide_keyboard
 from PyQt5 import QtCore, QtGui, QtWidgets
 
@@ -20,12 +21,20 @@ class LoginScreen(BaseScreen):
 
         self.screen_ = Ui_Login()
         self.screen_.setupUi(self)
-
         self.screen_time.next_screen(self.on_timeout)
-
         self.add_hooks()
         self.show_keyboard()
-
+        ctrl().is_active = False
+    
+    def mousePressEvent(self, event):
+        ctrl().is_active = True
+        # Switch to the second screen when the mouse is clicked anywhere
+        if not ctrl().try_connect_board():
+            self.container.to_out_of_order_screen(True)
+        else:
+            logger.log(f"Screen timer reset!")
+            self.reset_timeout
+        
     def add_hooks(self) -> None:
 
         # textChanged clear_error_message

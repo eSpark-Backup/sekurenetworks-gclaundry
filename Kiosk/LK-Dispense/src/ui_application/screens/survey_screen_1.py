@@ -31,6 +31,16 @@ class SurveyScreen_1(BaseScreen):
         self.correct_answers = []
         self.load_question_from_database()
 
+    def mousePressEvent(self, event):
+        ctrl().is_active = True
+        # Switch to the second screen when the mouse is clicked anywhere
+        if not ctrl().try_connect_board():
+            self.container.to_out_of_order_screen(True)
+        else:
+            # self.reset_timeout
+            logger.log(f"Screen timer reset!")
+            self.screen_time.hold_screen_for_timeout()
+
     def load_question_from_database(self):
         logger.log("Showing Survey_1 Screen")
         survey = get_survey2()

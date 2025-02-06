@@ -51,9 +51,10 @@ def verify_email_password(input_value: str, password: str) -> tuple[LoginResults
             "Phone": User.phone_number
         }
 
-        # if kiosk_info.auth_type == "Phone":
+        if kiosk_info.auth_type == "Phone":
         #     # Extract only digits from the phone number
         #     input_value = re.sub(r"\D", "", input_value)
+              input_value = "1" + input_value
 
         if kiosk_info.auth_type in auth_fields:
             try:
