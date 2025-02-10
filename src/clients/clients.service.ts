@@ -5,6 +5,7 @@ import {
 import * as crypto from 'crypto';
 import { PrismaClient } from '@prisma/client';
 import { MqttService } from 'src/mqtt/mqtt.service';
+import { classYearOptions, ethnicityOptions, expectedMajorOptions, genderOptions } from 'src/kiosks/dto/const';
 @Injectable()
 export class ClientsService {
 
@@ -42,6 +43,26 @@ export class ClientsService {
         return { message: errorMessage, statusCode: 400 };
       }
 
+      const { gender, ethnicity, classYear, expectedMajor } = data
+
+      if (gender && !genderOptions.includes(gender)) {
+        return { message: "Gender is invalid", statusCode: 400 }
+      }
+
+      if (ethnicity && !ethnicityOptions.includes(ethnicity)) {
+        return {
+          message: "Ethnicity is invalid", statusCode: 400
+        }
+      }
+
+      if (classYear && !classYearOptions.includes(classYear)) {
+        return { message: "Class year is invalid", statusCode: 400 }
+      }
+
+      if (expectedMajor && !expectedMajorOptions.includes(expectedMajor)) {
+        return { message: "Expected major is invalid", statusCode: 400 }
+      }
+
 
       data.password = crypto.createHash('sha256').update(data.password).digest('hex')
       const client = await this.prisma.users.create({ data });
@@ -63,7 +84,7 @@ export class ClientsService {
   }
 
   async findOne(id) {
-    const client = await this.prisma.users.findFirst({ where: { id }, select: { id: true, customer: true, firstName: true, lastName: true, email: true, customerId: true, phone: true, studentId: true } });
+    const client = await this.prisma.users.findFirst({ where: { id }, include: { customer: true } });
     if (!client) throw new NotFoundException('Client not found!')
     return client;
   }
@@ -105,7 +126,7 @@ export class ClientsService {
         if (existingUser.studentId === data.studentId) errorMessage += 'ID';
         else if (existingUser.phone === data.phone) errorMessage += 'Phone';
         else if (existingUser.email === data.email) errorMessage += 'Email';
-       
+
 
         return { message: errorMessage, statusCode: 400 };
       }

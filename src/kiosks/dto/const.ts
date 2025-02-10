@@ -85,3 +85,50 @@ export const getDefaultMsgs = (macId: string) => {
     }
   ]
 }
+
+
+export const genderOptions = [
+  "Male",
+  "Female",
+  "Trans",
+  "Queer",
+  "Cisgender",
+  "Gender Non-Conforming",
+  "Bigender",
+  "Non-Binary",
+  "Agender",
+  "Two-Spirit",
+  "I Don't Know",
+  "Prefer Not to Answer",
+  "Not in List"
+];
+
+export const ethnicityOptions = [
+  "Indigenous",
+  "Asian/Pacific Islander",
+  "Black or African American",
+  "Hispanic",
+  "Latinx",
+  "White",
+  "I Don't Know",
+  "Prefer Not to Answer",
+  "Not in List",
+];
+
+export const classYearOptions = [
+  "2023",
+  "2024",
+  "2025",
+  "2026",
+  "2027"
+]
+
+export const expectedMajorOptions = [
+  "STEM",
+  "Business",
+  "Marketing",
+  "Law",
+  "Theatre Arts",
+  "English",
+  "Ethnic Studies"
+];
