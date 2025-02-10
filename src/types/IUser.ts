@@ -9,4 +9,14 @@ export interface User {
     email: string;
     studentId: string;
     phone: string;
+    gender: string;
+    ethnicity: string;
+    classYear: string;
+    building: string;
+    floor: string;
+    financialAid: string;
+    lowIncome: string;
+    scent: string;
+    referred: string;
+    expectedMajor: string;
 }
