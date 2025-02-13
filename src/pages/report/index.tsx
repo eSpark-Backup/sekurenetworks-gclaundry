@@ -262,7 +262,6 @@ const ClientsList = () => {
                   getOptionLabel={(option) => option.schoolName}
                   clearIcon={null}
                   onChange={async (_: any, customer) => {
-                    console.log(customer)
                     setFilters((prevFilters) => ({
                       ...prevFilters,
                       customer,

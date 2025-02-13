@@ -38,6 +38,62 @@ const validationSchema = yup.object({
     .required("Phone number is required"),
 });
 
+export const genderOptions = [
+  "Male",
+  "Female",
+  "Trans",
+  "Queer",
+  "Cisgender",
+  "Gender Non-Conforming",
+  "Bigender",
+  "Non-Binary",
+  "Agender",
+  "Two-Spirit",
+  "I Don't Know",
+  "Prefer Not to Answer",
+  "Not in List"
+];
+
+export const ethnicityOptions = [
+  "Indigenous",
+  "Asian/Pacific Islander",
+  "Black or African American",
+  "Hispanic",
+  "Latinx",
+  "White",
+  "I Don't Know",
+  "Prefer Not to Answer",
+  "Not in List",
+];
+
+export const classYearOptions = [
+  "2023",
+  "2024",
+  "2025",
+  "2026",
+  "2027"
+]
+
+export const expectedMajorOptions = [
+  "STEM",
+  "Business",
+  "Marketing",
+  "Law",
+  "Theatre Arts",
+  "English",
+  "Ethnic Studies"
+];
+
+export const YesAndNoOptions = [
+  "YES",
+  "NO"
+]
+
+export const scentOptions = [
+  "scented",
+  "unscented",
+]
+
 const AddEditUser = () => {
   const params = useParams();
   const navigate = useNavigate();
@@ -161,64 +217,11 @@ const AddEditUser = () => {
   }, [params.id]);
 
 
-  const genderOptions = [
-    "Male",
-    "Female",
-    "Trans",
-    "Queer",
-    "Cisgender",
-    "Gender Non-Conforming",
-    "Bigender",
-    "Non-Binary",
-    "Agender",
-    "Two-Spirit",
-    "I Don't Know",
-    "Prefer Not to Answer",
-    "Not in List"
-  ];
 
-  const ethnicityOptions = [
-    "Indigenous",
-    "Asian/Pacific Islander",
-    "Black or African American",
-    "Hispanic",
-    "Latinx",
-    "White",
-    "I Don't Know",
-    "Prefer Not to Answer",
-    "Not in List",
-  ];
-
-  const classYearOptions = [
-    "2023",
-    "2024",
-    "2025",
-    "2026",
-    "2027"
-  ]
-
-  const expectedMajorOptions = [
-    "STEM",
-    "Business",
-    "Marketing",
-    "Law",
-    "Theatre Arts",
-    "English",
-    "Ethnic Studies"
-  ];
-
-  const YesAndNoOptions = [
-    "YES",
-    "NO"
-  ]
-
-  const scentOptions = [
-    "scented",
-    "unscented",
-  ]
 
 
   return (
+    <>
     <ApiLoader isLoading={loading}>
       <AlertDialog
         open={updateDialog}
@@ -231,7 +234,6 @@ const AddEditUser = () => {
         handleClose={() => setUpdateDialog(false)}
         handleConfirm={async () => {
           setUpdateDialog(false);
-
           return formik.submitForm();
         }}
       />
@@ -585,6 +587,8 @@ const AddEditUser = () => {
         </form>
       </MainCard >
     </ApiLoader >
+
+    </>
   );
 };
 
