@@ -19,6 +19,11 @@ export class ClientsController {
     return this.clientService.create(createClientDto);
   }
 
+  @Post("/createMany")
+  createMany(@Body() createManyClientDto: any) {
+    return this.clientService.createMany(createManyClientDto);
+  }
+
   @Get()
   findAll(@Query() filter: { take: number, skip: number, email: string | null}) {
     return this.clientService.findAll(filter);
