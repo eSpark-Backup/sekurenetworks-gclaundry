@@ -139,8 +139,28 @@ class Ui_Login(object):
         # self.error_message.setText("       Error HERE")
         self.error_message.setObjectName("error_message")
         self.verticalLayout_2.addWidget(self.error_message)
+                #     /*new added */
+        self.error_message_1 = QtWidgets.QLabel(self.frame)
+        QtGui.QFontDatabase.addApplicationFont(
+            f"{BASE_DIR}/assets/OwnersXNarrow-Black.ttf"
+        )
+        font = QtGui.QFont()
+        font.setFamily("Owners XNarrow")
+        font.setPointSize(32)
+        self.error_message_1.setFont(font)
+        self.error_message_1.setStyleSheet(
+            "qproperty-alignment: AlignCenter;\n"
+            "color: red;\n"
+            # "font-size: 42px;\n"
+        )
 
+        # self.error_message.setAlignment(QtCore.Qt.AlignJustify | QtCore.Qt.AlignVCenter)
+        # self.error_message.setText("       Error HERE")
+        self.error_message_1.setObjectName("error_message")
+        # self.verticalLayout_2.addWidget(self.error_message_1)
+                            # /*end of new add*/
         self.btn_login = QtWidgets.QPushButton(self.frame)
+        # self.email_input.setInputMask("9999999999;_")
         self.btn_login.setGeometry(QtCore.QRect(410, 500, 300, 60))
         self.btn_login.setContentsMargins(0, 0, 0, 166)
         font = QtGui.QFont()
@@ -166,6 +186,8 @@ class Ui_Login(object):
         )
         self.btn_login.setObjectName("btn_login")
         self.verticalLayout_2.addWidget(self.btn_login)
+
+        self.verticalLayout_2.addWidget(self.error_message_1)
 
         font = QtGui.QFont()
         font.setPointSize(25)
@@ -194,7 +216,7 @@ class Ui_Login(object):
             placeholder_map = {
                 "Email": "example@gmail.com",
                 "Student ID": "Enter Student ID",
-                "Phone": "(234) 567-8901"
+                "Phone": "1234567890"
             }
 
             # Set placeholder based on auth_type

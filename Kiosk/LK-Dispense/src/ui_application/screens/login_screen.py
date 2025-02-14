@@ -83,6 +83,9 @@ class LoginScreen(BaseScreen):
 
     def show_error_message(self, text):
         return self.screen_.error_message.setText(text)
+    
+    def show_error_message_1(self, text):
+        return self.screen_.error_message_1.setText(text)
 
     def reset_timeout(self):
         self.screen_time.hold_screen_for_timeout()
@@ -139,7 +142,7 @@ class LoginScreen(BaseScreen):
 
         elif result == LoginResults.UserNotFound:
             logger.log("LoginResults.UserNotFound")
-            return self.show_error_message("User NOT Found")
+            return self.show_error_message_1("User NOT Found")
 
         elif result == LoginResults.Error:
             logger.error("Error during Email password verification")
