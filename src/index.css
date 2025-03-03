@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+.css-y86dah-MuiInputBase-input-MuiInput-input {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    border-bottom: none !important;
+}
+
+.css-100xm87-MuiInputBase-root-MuiInput-root::before {
+    border-bottom: none !important;
+    transition: none !important;
+}
+
+.css-100xm87-MuiInputBase-root-MuiInput-root::after{
+    border-bottom: none !important;
+    transition: none !important;    
+}

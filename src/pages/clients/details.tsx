@@ -89,12 +89,22 @@ const ClientDetail = () => {
                     <Typography variant="h4">Client</Typography>
                     
                     <Stack spacing={0.5} paddingTop={2} alignItems="start">
-                    <Typography variant="h5">{`${client.firstName} ${client.lastName}`}</Typography>
                     <Typography variant="h5">{`${client.studentId}`}</Typography>
+                    <Typography variant="h5">{`${client.firstName} ${client.lastName}`}</Typography>
                     <Typography variant="h5">{client.email}</Typography>
                     <Typography variant="h5">
                     {`+${client.phone?.slice(0, 1)} (${client.phone?.slice(1, 4)}) ${client.phone?.slice(4, 7)}-${client.phone?.slice(7, 11)}`}
                     </Typography>
+                    <Typography variant="h5">{client.gender}</Typography>
+                    <Typography variant="h5">{client.ethnicity}</Typography>
+                    <Typography variant="h5">{client.classYear}</Typography>
+                    <Typography variant="h5">{client.expectedMajor}</Typography>
+                    <Typography variant="h5">{client.scent}</Typography>
+                    <Typography variant="h5">Building: {client?.building}</Typography>
+                    <Typography variant="h5">Floor: {client?.floor}</Typography>
+                    <Typography variant="h5">Financial Aid: {client?.financialAid}</Typography>
+                    <Typography variant="h5">Low Income: {client?.lowIncome}</Typography>
+                    <Typography variant="h5">Referred: {client?.referred}</Typography>
                     </Stack>
                   </Stack>
                 </Grid>
@@ -107,6 +117,15 @@ const ClientDetail = () => {
                       <Typography variant="h5">{`${client.customer.firstName} ${client.customer.lastName}`}</Typography>
                       <Typography variant="h5">
                         {client.customer.email}
+                      </Typography>
+                      <Typography variant="h5">
+                        {client.customer.phone}
+                      </Typography>
+                      <Typography variant="h5">
+                        {client.customer?.address}    {client.customer?.city}   {client.customer?.state}    {client.customer?.zip}
+                      </Typography>
+                      <Typography variant="h5">
+                        {client.customer?.country}  
                       </Typography>
                     </Stack>
                   ) : (

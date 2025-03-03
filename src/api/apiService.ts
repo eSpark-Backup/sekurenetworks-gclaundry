@@ -32,6 +32,7 @@ export class ApiService {
 
     user = {
         create: (body:any) => axiosService.post(`/clients`,body),
+        createMany: (body:any) => axiosService.post(`/clients/createMany`,body),
         get: (query: Object) => axiosService.get(`/clients?${encodeQueryData(query)}`),
         update: (id: string,body:any) => axiosService.patch(`/clients/${id}`,body),
         getById: (id: string) => axiosService.get(`/clients/${id}`),
