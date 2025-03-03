@@ -145,17 +145,27 @@ model Customer {
 }
 
 model Users {
-  id         String   @id @default(uuid())
-  email      String   @unique
-  firstName  String
-  lastName   String
-  password   String   @db.Text
-  phone      String?
-  studentId  Int?   @unique
-  customerId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id            String   @id @default(uuid())
+  email         String   @unique
+  firstName     String
+  lastName      String
+  password      String   @db.Text
+  phone         String?
+  studentId     Int?     @unique
+  customerId    String
+  gender        String?
+  ethnicity     String?
+  classYear     String?
+  expectedMajor String?
+  building      String?
+  floor         String?
+  financialAid  YesorNo?
+  lowIncome     YesorNo?
+  scent         String?
+  referred      String?
+  customer      Customer @relation(fields: [customerId], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
 
 enum RelationType {
@@ -195,4 +205,13 @@ enum Status {
   FAILED
 }
 
+enum YesorNo {
+  YES
+  NO
+}
+
 // auth_type OPTIONS Student ID | Email | Phone Number
+// gender OPTIONS  Male |  Female | Trans | Queer | Cisgender | Gender Non-Conforming | Bigender | Non-Binary | Agender | Two-Spirit | I Don't Know | Prefer Not to Answer | Not in List
+// ethnicity OPTIONS Indigenous | Asian/Pacific Islander | Black or African American | Hispanic | Latinx | White | I Don't Know | Prefer Not to Answer | Not in List
+// classYear OPTIONS 2023 | 2024 | 2025 | 2026 | 2027
+// expectedMajor OPTIONS STEM | Business | Marketing | Law | Theatre Arts | English
