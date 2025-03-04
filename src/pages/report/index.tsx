@@ -122,7 +122,7 @@ const ClientsList = () => {
         take: filters.pageSize,
       });
     };
-  
+
 
 
     fetchReports();
@@ -143,7 +143,7 @@ const ClientsList = () => {
         take: filters.pageSize,
       });
     };
-  
+
 
 
     fetchReports();
@@ -426,8 +426,8 @@ const ClientsList = () => {
           onPageChange={async (e) => setFilters({ ...filters, ...e })}
           count={reports.count}
           isLoading={loading}
-          enableExpand={true}
-          expandComponent={reportRow}
+          // enableExpand={true}
+          // expandComponent={reportRow}
           data={reports.data}
         />
       </ScrollX>

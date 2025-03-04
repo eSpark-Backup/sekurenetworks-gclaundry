@@ -165,6 +165,9 @@ const Sequence = () => {
           <Autocomplete
             sx={{ width: 300 }}
             options={autocompleteOptions}
+            disableClearable
+            filterOptions={(options) => options}
+            freeSolo={false}
             value={items[3]}
             getOptionLabel={(option) => option.text}
             renderInput={(params) => <TextField {...params} placeholder="Select Screen Sequence" variant="outlined" />}

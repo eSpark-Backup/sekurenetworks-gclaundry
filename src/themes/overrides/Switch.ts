@@ -55,7 +55,8 @@ export default function Switch(theme) {
           '&.Mui-checked': {
             color: '#fff',
             '& + .MuiSwitch-track': {
-              opacity: 1
+              opacity: 1,
+              backgroundColor: "#58D62A",
             },
             '&.Mui-disabled': {
               color: theme.palette.background.paper

@@ -45,7 +45,7 @@ export default () => {
       type: "",
       auth_type: "",
       name: "",
-      sheets_per_transaction: 0,
+      sheets_per_transaction: 5,
       answer_required: false,
       customerId: null,
       location: {
@@ -137,7 +137,7 @@ export default () => {
       } as any);
 
       dispatch(setSelectedKisko({ kisko: { name, customerName: selectedCustomer?.schoolName } }));
-      
+
     })();
 
     // save kisko name and customers name in localStorage
@@ -165,28 +165,33 @@ export default () => {
   };
 
   const states = useMemo(() => {
-    const country = formik.values?.location.country;
+    const country = kiosk?.customer?.country || ""
     const selectedCountry = countries.find((c) => c.value === country);
     if (!selectedCountry) {
       return [];
     }
     return selectedCountry.states;
+    
   }, [formik.values?.location.country]);
 
   const cities = useMemo(() => {
-    const country = formik.values?.location.country;
-    const state = formik.values?.location.state;
+    const country = kiosk?.customer?.country || ""
+    const state = kiosk?.customer?.state || ""
 
     const selectedCountry = countries.find((c) => c.value === country);
+
+
     if (!selectedCountry) {
       return [];
     }
+
     const selectedState = selectedCountry.states.find((s) => s.value === state);
     if (!selectedState) {
       return [];
     }
     return selectedState.cities;
   }, [formik.values?.location.country, formik.values?.location.state]);
+
   return (
     <Box>
       <AlertDialog
@@ -218,6 +223,7 @@ export default () => {
                       formik={formik}
                       accessorName="name"
                     />
+
                     <CustomTextField
                       name="location.location"
                       label="Kiosk Location"
@@ -225,30 +231,7 @@ export default () => {
                       accessorName={"location.location"}
                       value={formik.values?.location.location || ""}
                     />
-                    <CustomAutocomplete
-                      options={countries}
-                      handleChange={handleChangeCountry}
-                      label="Country"
-                      formik={formik}
-                      accessorName="country"
-                      value={formik.values?.location.country || ""}
-                    />
-                    <CustomAutocomplete
-                      options={states}
-                      handleChange={handleChangeState}
-                      label="State"
-                      formik={formik}
-                      accessorName="state"
-                      value={formik.values?.location.state || ""}
-                    />
-                    <CustomAutocomplete
-                      options={cities}
-                      handleChange={handleChangeCity}
-                      label="City"
-                      formik={formik}
-                      accessorName={"location.city"}
-                      value={formik.values?.location.city || ""}
-                    />
+
                     <CustomTextField
                       name="location.tag"
                       label="Kiosk Location Tag"
@@ -256,19 +239,52 @@ export default () => {
                       accessorName={"location.tag"}
                       value={formik.values?.location.tag || ""}
                     />
+
                     <CustomTextField
                       name="location.address"
                       label="Address"
                       formik={formik}
-                      value={formik.values?.location.address || ""}
+                      value={kiosk?.customer?.address || ""}
                       accessorName={"location.address"}
+                      disabled={true}
                     />
+
+                    <CustomAutocomplete
+                      options={countries}
+                      handleChange={handleChangeCountry}
+                      label="Country"
+                      formik={formik}
+                      accessorName="country"
+                      value={kiosk?.customer?.country || ""}
+                      disabled={true}
+                    />
+                    <CustomAutocomplete
+                      options={states}
+                      handleChange={handleChangeState}
+                      label="State"
+                      formik={formik}
+                      accessorName="state"
+                      value={kiosk?.customer?.state || ""}
+                      disabled={true}
+                    />
+                    <CustomAutocomplete
+                      options={cities}
+                      handleChange={handleChangeCity}
+                      label="City"
+                      formik={formik}
+                      accessorName={"location.city"}
+                      value={kiosk?.customer?.city || ""}
+                      disabled={true}
+                    />
+
+
                     <CustomTextField
                       name="location.zip"
                       label="Zip"
                       formik={formik}
-                      value={formik.values?.location.zip || ""}
+                      value={kiosk?.customer?.zip || ""}
                       accessorName={"location.zip"}
+                      disabled={true}
                     />
                   </Stack>
                 </Grid>
@@ -354,7 +370,7 @@ export default () => {
                       <>
                         <Autocomplete
                           fullWidth
-                          disableClearable  
+                          disableClearable
                           options={["Student ID", "Email", "Phone"]}
                           getOptionLabel={(option) => option}
                           autoSelect={true}
@@ -482,6 +498,7 @@ export default () => {
                     variant="contained"
                     sx={{ my: 3, ml: 1 }}
                     type="button"
+                    disabled={!formik.isValid}
                     onClick={() => setUpdateDialog(true)}
                   >
                     Update
