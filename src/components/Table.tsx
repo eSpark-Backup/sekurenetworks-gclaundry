@@ -47,6 +47,32 @@ interface GencoTableProps<TData extends IGencoTable> {
   stickyHeader?: boolean;
 }
 
+const mixedSort = (rowA: any, rowB: any, columnId: string): number => {
+  const valueA = rowA.getValue(columnId)
+  const valueB = rowB.getValue(columnId)
+
+  console.log(valueA, valueB);
+  
+
+  // Handle null or undefined values
+  if (valueA == null) return valueB == null ? 0 : -1
+  if (valueB == null) return 1
+
+  // If both values are numbers, compare them directly
+  if (typeof valueA === "number" && typeof valueB === "number") {
+    return valueA - valueB
+  }
+
+  // If both values are strings, compare them case-insensitively
+  if (typeof valueA === "string" && typeof valueB === "string") {
+    return valueA.localeCompare(valueB, undefined, { sensitivity: "base" })
+  }
+
+  // If types are different, convert to strings and compare
+  return String(valueA).localeCompare(String(valueB), undefined, { numeric: true, sensitivity: "base" })
+}
+
+
 function GencoTable<TData extends IGencoTable>({
   columns,
   data,
@@ -63,14 +89,23 @@ function GencoTable<TData extends IGencoTable>({
   maxHeight,
   stickyHeader = false,
 }: GencoTableProps<TData>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [sorting, setSorting] = React.useState<SortingState>([{ id: columns[0]?.accessorKey, desc: false }]);
   const [expandedRows, setExpandedRows] = React.useState<
     Record<string, boolean>
   >({});
 
+
+    // Apply case-insensitive sorting to string columns
+    const columnsWithSorting = React.useMemo(() => {
+      return columns.map((column) => ({
+        ...column,
+        sortingFn: mixedSort
+      }))
+    }, [columns])
+
   // Initialize table with either standard or expanded columns
   const tableColumns = React.useMemo(() => {
-    if (!enableExpand) return columns;
+    if (!enableExpand) return columnsWithSorting;
 
     const expandColumn: ColumnDef<TData, any> = {
       id: "expander",
@@ -101,7 +136,20 @@ function GencoTable<TData extends IGencoTable>({
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
+    // onSortingChange: setSorting,
+    onSortingChange: (updater) => {
+      const currentSorting = typeof updater === "function" ? updater(sorting) : updater
+
+      // If trying to clear sorting (which would be an empty array), maintain the column but toggle direction
+      if (currentSorting.length === 0 && sorting.length > 0) {
+        const currentSort = sorting[0]
+        console.log("currentSort", currentSort);
+        
+        setSorting([{ id: currentSort.id, desc: !currentSort.desc }])
+      } else {
+        setSorting(currentSorting)
+      }
+    },
     state: {
       sorting,
       pagination,

@@ -41,20 +41,15 @@ const DashboardDefault = () => {
   return (
     <ApiLoader isLoading={loading}>
       <Grid container rowSpacing={4.5} columnSpacing={2.75}>
-        <Grid item xs={12} sm={6} md={4} lg={4}>
+
+      <Grid item xs={12} sm={6} md={4} lg={4}>
           <AnalyticEcommerce
-            title="Total Kiosks"
-            to="/kiosk"
-            count={`${data.kiosk.total}`}
+            title="Low Inventory Kiosks"
+            to="/kiosk?error=LowInventory"
+            count={`${data.totalLowInventoryKiosk}`}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={4}>
-          <AnalyticEcommerce
-            title="Online Kiosks"
-            to="/kiosk?status=online"
-            count={`${data.kiosk.online}`}
-          />
-        </Grid>
+
         <Grid item xs={12} sm={6} md={4} lg={4}>
           <AnalyticEcommerce
             title="Offline Kiosks"
@@ -62,27 +57,15 @@ const DashboardDefault = () => {
             count={`${data.kiosk.offline}`}
           />
         </Grid>
+
         <Grid item xs={12} sm={6} md={4} lg={4}>
           <AnalyticEcommerce
-            title="Low Inventory Kiosks"
-            to="/kiosk?error=LowInventory"
-            count={`${data.totalLowInventoryKiosk}`}
+            title="Online Kiosks"
+            to="/kiosk?status=online"
+            count={`${data.kiosk.online}`}
           />
         </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={4}>
-          <AnalyticEcommerce
-            title="Total Customer"
-            to="/customers"
-            count={`${data.totalCustomers}`}
-          />
-        </Grid>
-        <Grid item xs={12} sm={6} md={4} lg={4}>
-          <AnalyticEcommerce
-            title="Total Clients (Kiosk User)"
-            to="/clients"
-            count={`${data.totalClients}`}
-          />
-        </Grid>
+
         <Grid item xs={12} sm={6} md={4} lg={4}>
           <AnalyticEcommerce
             title="Total Sheets Used (SUCCESS)"
@@ -106,7 +89,7 @@ const DashboardDefault = () => {
         </Grid>
         <Grid item xs={12} sm={6} md={4} lg={4}>
           <AnalyticEcommerce
-            title="Total Plastic Sheets Eliminated"
+            title="Total Plastic Eliminated"
             // to="/clients"
             count={`${data.totalPlasticSheetsEliminated.toFixed(2)}`}
           />

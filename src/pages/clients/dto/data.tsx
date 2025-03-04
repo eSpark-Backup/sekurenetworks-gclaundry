@@ -12,12 +12,14 @@ import { useNavigate } from "react-router-dom";
 
 export const columns: ColumnDef<User>[] = [
   {
+    accessorKey: "studentId",
     header: "Student ID",
     cell: ({ row }) => (
       <Typography variant="subtitle2">{row.original.studentId}</Typography>
     ),
   },
-  {
+  { 
+    accessorKey: "firstName",
     header: "Name",
     cell: ({ row }) => (
       <Typography variant="subtitle2">{row.original.firstName} {row.original.lastName}</Typography>
