@@ -230,13 +230,21 @@ export class KioskService {
         macId,
         isDeleted: false,
       },
-      include: { customer: { select: { firstName: true, id: true } }, onSiteContact: true },
+      include: { customer: { select: { firstName: true, id: true,  address: true, country: true, city: true, state: true, zip: true} }, onSiteContact: true },
     });
+
+
+   const lastTransaction = await this.prisma.transaction.findFirst({
+    where: { kioskId: macId },
+    orderBy: { time: 'desc' } 
+  });
+  
     if (!kiosk) throw new NotFoundException('Kiosk not found!');
     const mins = differenceInMinutes(new Date(), kiosk.lastSeen);
     return {
       ...kiosk,
       status: mins <= 6 ? "ONLINE" : "OFFLINE",
+      lastDispense : lastTransaction?.time || null
     };
   }
 
@@ -305,14 +313,14 @@ export class KioskService {
           { condition: unscented < 0 || unscented > 100, error: "Sensor Error in unscented" }
         ]
       },
-      {
-        name: "Door Open",
-        value: is_door_open,
-        rules: [
-          { condition: is_door_open == null, error: "Error reading door status" },
-          { condition: is_door_open, error: "DOOR IS LEFT OPEN" }
-        ]
-      },
+      // {
+      //   name: "Door Open",
+      //   value: is_door_open,
+      //   rules: [
+      //     { condition: is_door_open == null, error: "Error reading door status" },
+      //     { condition: is_door_open, error: "DOOR IS LEFT OPEN" }
+      //   ]
+      // },
       {
         name: "Scented motor",
         value: scented_motor_stuck,
