@@ -22,6 +22,7 @@ export default function CustomAutocomplete(props) {
         inputValue={inputValue}
         id="controllable-states-demo"
         options={props.options}
+        disabled={props.disabled}
         getOptionLabel={(option)=>{
             return option.label
         }}

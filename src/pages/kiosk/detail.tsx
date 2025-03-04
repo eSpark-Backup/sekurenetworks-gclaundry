@@ -188,6 +188,16 @@ const Detail = () => {
                         : "No check-in yet"}
                     </Typography>
                   </Stack>
+                  <Stack spacing={0.5} alignItems="center">
+                    <Typography variant={"caption"} align={"center"}>
+                      {kiosk?.lastDispense
+                        ? `Last dispense: ${format(
+                            new Date(Date.parse(kiosk?.lastDispense)),
+                            config.dateFormat
+                          )?.toLocaleString()}`
+                        : "No dispense yet"}
+                    </Typography>
+                  </Stack>
                 </Grid>
                 <Grid item xs={12}>
                   <Divider />

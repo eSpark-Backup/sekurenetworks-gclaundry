@@ -51,9 +51,6 @@ const mixedSort = (rowA: any, rowB: any, columnId: string): number => {
   const valueA = rowA.getValue(columnId)
   const valueB = rowB.getValue(columnId)
 
-  console.log(valueA, valueB);
-  
-
   // Handle null or undefined values
   if (valueA == null) return valueB == null ? 0 : -1
   if (valueB == null) return 1

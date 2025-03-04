@@ -46,4 +46,5 @@ export interface KIOSK {
     customer: Customer | null;
     onSiteContact: onSiteContact | null;
     status: string;
+    lastDispense: string;
 }
