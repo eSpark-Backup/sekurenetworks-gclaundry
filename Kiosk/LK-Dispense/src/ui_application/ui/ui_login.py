@@ -14,8 +14,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from constants import BASE_DIR
 from src.database.models.kiosk_info import KioskInfo_V4
 from src.logger import getLogger
+from src.ui_application.models.keyboard import  show_keyboard
 
 logger = getLogger(__name__)
+def mousePressEvent2(event):
+    show_keyboard()
 
 class Ui_Login(object):
     def setupUi(self, SurveyScreen):
@@ -95,6 +98,7 @@ class Ui_Login(object):
         self.email_input.setObjectName("email_input")
         self.email_input.setFocus()
         self.verticalLayout_2.addWidget(self.email_input)
+        self.email_input.mousePressEvent = mousePressEvent2
 
         
         # self.password_input = QtWidgets.QLineEdit(self.frame)

@@ -37,13 +37,9 @@ class SelectScreen(BaseScreen):
 
     def mousePressEvent(self, event):
         ctrl().is_active = True
-        # Switch to the second screen when the mouse is clicked anywhere
-        if not ctrl().try_connect_board():
-            self.container.to_out_of_order_screen(True)
-        else:
             # self.reset_timeout
-            logger.log(f"Screen timer reset!")
-            self.screen_time.hold_screen_for_timeout()
+        logger.log(f"Screen timer reset!")
+        self.screen_time.hold_screen_for_timeout()
 
     def may_be_dispense(self):
         self.screen.btn_dispense.setDisabled(True)

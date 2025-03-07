@@ -23,17 +23,16 @@ class LoginScreen(BaseScreen):
         self.screen_.setupUi(self)
         self.screen_time.next_screen(self.on_timeout)
         self.add_hooks()
-        self.show_keyboard()
+        # self.show_keyboard()
         ctrl().is_active = False
     
     def mousePressEvent(self, event):
         ctrl().is_active = True
         # Switch to the second screen when the mouse is clicked anywhere
-        if not ctrl().try_connect_board():
-            self.container.to_out_of_order_screen(True)
-        else:
-            logger.log(f"Screen timer reset!")
-            self.reset_timeout
+        # if not ctrl().try_connect_board():
+        #     self.container.to_out_of_order_screen(True)
+        logger.log(f"Screen timer reset!")
+        self.reset_timeout
         
     def add_hooks(self) -> None:
 
@@ -55,19 +54,19 @@ class LoginScreen(BaseScreen):
         self.screen_.btn_login.clicked.connect(self.reset_timeout)
         self.screen_.btn_login.clicked.connect(self.login)
 
-    def show_keyboard(self) -> None:
-        """
-        Simulates the click in email input to make keyboard apear
-        """
-        button_center = self.screen_.email_input.rect().center()
-        mouse_event = QtGui.QMouseEvent(
-            QtCore.QEvent.MouseButtonPress,
-            button_center,
-            QtCore.Qt.LeftButton,
-            QtCore.Qt.LeftButton,
-            QtCore.Qt.NoModifier,
-        )
-        QtWidgets.QApplication.postEvent(self.screen_.email_input, mouse_event)
+    # def show_keyboard(self) -> None:
+    #     """
+    #     Simulates the click in email input to make keyboard apear
+    #     """
+    #     button_center = self.screen_.email_input.rect().center()
+    #     mouse_event = QtGui.QMouseEvent(
+    #         QtCore.QEvent.MouseButtonPress,
+    #         button_center,
+    #         QtCore.Qt.LeftButton,
+    #         QtCore.Qt.LeftButton,
+    #         QtCore.Qt.NoModifier,
+    #     )
+    #     QtWidgets.QApplication.postEvent(self.screen_.email_input, mouse_event)
 
     @property
     def password(self) -> str:
