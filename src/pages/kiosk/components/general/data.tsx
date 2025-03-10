@@ -10,7 +10,7 @@ export const kioskSchema = yup.object({
     .max(10, 'Must be at most 10')
     .required('This field is required'),
   answer_required: yup.boolean(),
-  customerId: yup.string().optional(),
+  customerId: yup.string().optional().nullable(),
   location: yup.object({
     location: yup.string().optional(),
     tag: yup.string().optional(),
