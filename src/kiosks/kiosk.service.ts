@@ -30,7 +30,7 @@ export class KioskService {
 
 
   async getKioskData(macId: string) {
-
+   
     let kiosk = await this.prisma.kiosk.findFirst({
       where: { macId },
     });
@@ -95,7 +95,7 @@ export class KioskService {
 
 
     let users = []
-    if (type === 'AUTH') users = await this.prisma.users.findMany({ where: { customerId } })
+    if (type === 'AUTH' && customerId) users = await this.prisma.users.findMany({ where: { customerId } })
     return { config, survey, environmental_messages, users }
   }
 
