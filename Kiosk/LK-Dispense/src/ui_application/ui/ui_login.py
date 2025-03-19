@@ -17,10 +17,21 @@ from src.logger import getLogger
 from src.ui_application.models.keyboard import  show_keyboard
 
 logger = getLogger(__name__)
-def mousePressEvent2(event):
-    show_keyboard()
 
+global_container = None
+
+
+def mousePressEvent2(event):     
+        from src.ui_application.screens.login_screen import LoginScreen
+        login_screen_instance = LoginScreen(global_container)  # Pass an instance, not a class
+        login_screen_instance.mousePressEvent(event)
+        show_keyboard()
+
+# def keyPressEvent2(event):
+#     print("key Press Event")
+  
 class Ui_Login(object):
+    
     def setupUi(self, SurveyScreen):
         SurveyScreen.setObjectName("SurveyScreen")
         SurveyScreen.resize(1280, 980)
@@ -94,11 +105,13 @@ class Ui_Login(object):
                                         """
         )
         # self.email_input.setPlaceholderText("Email / Student ID / Phone No.")
+        self.email_input.setMaxLength(25)
         self.update_placeholder_text()
         self.email_input.setObjectName("email_input")
         self.email_input.setFocus()
         self.verticalLayout_2.addWidget(self.email_input)
         self.email_input.mousePressEvent = mousePressEvent2
+        
 
         
         # self.password_input = QtWidgets.QLineEdit(self.frame)
