@@ -10,6 +10,7 @@ import os
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5.QtWidgets import QLineEdit
 
 from constants import BASE_DIR
 from src.database.models.kiosk_info import KioskInfo_V4
@@ -20,16 +21,12 @@ logger = getLogger(__name__)
 
 global_container = None
 
-
 def mousePressEvent2(event):     
         from src.ui_application.screens.login_screen import LoginScreen
         login_screen_instance = LoginScreen(global_container)  # Pass an instance, not a class
         login_screen_instance.mousePressEvent(event)
         show_keyboard()
 
-# def keyPressEvent2(event):
-#     print("key Press Event")
-  
 class Ui_Login(object):
     
     def setupUi(self, SurveyScreen):
@@ -111,7 +108,7 @@ class Ui_Login(object):
         self.email_input.setFocus()
         self.verticalLayout_2.addWidget(self.email_input)
         self.email_input.mousePressEvent = mousePressEvent2
-        
+        self.email_input.keyPressEvent = lambda event: self.keyPressEvent2(event)
 
         
         # self.password_input = QtWidgets.QLineEdit(self.frame)
@@ -215,6 +212,13 @@ class Ui_Login(object):
 
         self.retranslateUi(SurveyScreen)
         QtCore.QMetaObject.connectSlotsByName(SurveyScreen)
+
+    def keyPressEvent2(self, event):
+        from src.ui_application.screens.login_screen import LoginScreen
+        print("Key Press Event:", event.text())  # Debugging
+        QLineEdit.keyPressEvent(self.email_input, event)  # Allow normal typing
+        login_screen_instance = LoginScreen(global_container)  # Pass an instance, not a class
+        login_screen_instance.mousePressEvent(event)
 
     def retranslateUi(self, SurveyScreen):
         _translate = QtCore.QCoreApplication.translate

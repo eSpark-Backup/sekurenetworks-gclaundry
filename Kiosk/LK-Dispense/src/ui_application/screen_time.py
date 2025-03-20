@@ -19,7 +19,7 @@ class ScreenTime:
         self.__screen_time.start()
         # self.__screen_time.start(timeout)
 
-    def hold_screen_for_timeout(self, time=5000, new_func : Callable | None = None):
+    def hold_screen_for_timeout(self, time=30000, new_func : Callable | None = None):
         if new_func is not None:
             self.__screen_time.timeout.disconnect(self.connection)
             self.connection = self.__screen_time.timeout.connect(new_func)
