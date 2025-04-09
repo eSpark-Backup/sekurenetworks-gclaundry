@@ -3,12 +3,13 @@ from config import config
 from src.ctrl import ctrl
 from src.ui_application.models.auth import  LoginResults, verify_email_password
 from src.logger import getLogger
+from PyQt5.QtCore import QTimer
 
 from src.ui_application.screens.base_screen import BaseScreen
 from src.ui_application.ui.ui_login import Ui_Login
 
 
-from src.ui_application.models.keyboard import hide_keyboard
+from src.ui_application.models.keyboard import hide_keyboard, show_keyboard
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 logger = getLogger(__name__)
@@ -31,6 +32,13 @@ class LoginScreen(BaseScreen):
         # Switch to the second screen when the mouse is clicked anywhere
         # if not ctrl().try_connect_board():
         #     self.container.to_out_of_order_screen(True)
+        hide_keyboard()
+        # logger.log(f"Screen timer reset!")
+        # self.reset_timeout
+        self.keyPressEvent(event)
+    
+    def keyPressEvent(self, event):
+        ctrl().is_active = True
         logger.log(f"Screen timer reset!")
         self.reset_timeout
         
@@ -83,8 +91,20 @@ class LoginScreen(BaseScreen):
     def show_error_message(self, text):
         return self.screen_.error_message.setText(text)
     
-    def show_error_message_1(self, text):
-        return self.screen_.error_message_1.setText(text)
+    # def show_error_message_1(self, text):
+    #     return self.screen_.error_message_1.setText(text)
+    def show_error_message_temp(self, label, text, timeout_ms=5000):
+        label.setText(text)
+        timer = QTimer(self)
+        timer.setSingleShot(True)
+        self.screen_.email_input.setFocus()
+        def after_timeout():
+            label.setText("")           # 1. Clear the error message
+            show_keyboard()        # 2. Show the keyboard immediately after clearing
+        
+        timer.timeout.connect(after_timeout)
+        timer.start(timeout_ms)
+        self._error_timer = timer  # Save a reference so timer doesn't get deleted
 
     def reset_timeout(self):
         self.screen_time.hold_screen_for_timeout()
@@ -139,9 +159,12 @@ class LoginScreen(BaseScreen):
             logger.log("Invalid credentials.")
             return self.show_error_message("Wrong Password")
 
+        # elif result == LoginResults.UserNotFound:
+        #     logger.log("LoginResults.UserNotFound")
+        #     return self.show_error_message_1("User NOT Found")
         elif result == LoginResults.UserNotFound:
             logger.log("LoginResults.UserNotFound")
-            return self.show_error_message_1("User NOT Found")
+            return self.show_error_message_temp(self.screen_.error_message_1, "User NOT Found", 5000)
 
         elif result == LoginResults.Error:
             logger.error("Error during Email password verification")

@@ -20,6 +20,7 @@ from src.ui_application.models.keyboard import  show_keyboard
 logger = getLogger(__name__)
 
 global_container = None
+global_container_1 = None
 
 def mousePressEvent2(event):     
         from src.ui_application.screens.login_screen import LoginScreen
@@ -217,8 +218,8 @@ class Ui_Login(object):
         from src.ui_application.screens.login_screen import LoginScreen
         print("Key Press Event:", event.text())  # Debugging
         QLineEdit.keyPressEvent(self.email_input, event)  # Allow normal typing
-        login_screen_instance = LoginScreen(global_container)  # Pass an instance, not a class
-        login_screen_instance.mousePressEvent(event)
+        login_screen_instance = LoginScreen(global_container_1)  # Pass an instance, not a class
+        login_screen_instance.keyPressEvent(event)
 
     def retranslateUi(self, SurveyScreen):
         _translate = QtCore.QCoreApplication.translate
