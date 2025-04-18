@@ -33,18 +33,33 @@ def get_keyboard_dbus():
 
 
 def show_keyboard():  # slow
-    try:
-        get_keyboard_dbus().Show()
-        logger.log("Showing the keyboard")
+    logger.log("Showing the keyboard")
+    # try:
+    #     get_keyboard_dbus().Show()
+    #     logger.log("Showing the keyboard")
 
-    except DbusNotAvailableErorr as e:
-        logger.error(e)
+    # except DbusNotAvailableErorr as e:
+    #     logger.error(e)
 
-    except Exception as e:
-        logger.error(e)
+    # except Exception as e:
+    #     logger.error(e)
 
 
 def hide_keyboard():
+    logger.log("stating Hidding the keyboard")
+    # try:
+    #     logger.log("stating Hidding the keyboard")
+    #     get_keyboard_dbus().Hide()
+    #     logger.log("Hidded the keyboard")
+
+    # except DbusNotAvailableErorr as e:
+    #     logger.warning(e)
+
+    # except Exception as e:
+    #     logger.error(e)
+
+def hide_keyboard_pv():
+    logger.log("stating Hidding the keyboard private")
     try:
         logger.log("stating Hidding the keyboard")
         get_keyboard_dbus().Hide()
@@ -60,11 +75,11 @@ def hide_keyboard():
 def spawn_keyboard():
     if DBUS_AVAILBLE:
         logger.error(
-            subprocess.run(["onboard -s 1280x300 -x 0 -y 500 -l Phone &"],shell=True).returncode
+            subprocess.run(["onboard -s 1280x300 -x 0 -y 500 -l Phone -a -m &"],shell=True).returncode
         )
         return 
     logger.warning("onbaord not available")
 
 
-# spawn_keyboard()
-hide_keyboard() # makes keyboard appear faster after startup
+spawn_keyboard()
+hide_keyboard_pv() # makes keyboard appear faster after startup

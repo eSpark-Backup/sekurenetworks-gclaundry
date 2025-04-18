@@ -38,7 +38,7 @@ class SelectScreen(BaseScreen):
     def mousePressEvent(self, event):
         ctrl().is_active = True
             # self.reset_timeout
-        logger.log(f"Screen timer reset!")
+        logger.log(f"select Screen timer reset!")
         self.screen_time.hold_screen_for_timeout()
 
     def may_be_dispense(self):

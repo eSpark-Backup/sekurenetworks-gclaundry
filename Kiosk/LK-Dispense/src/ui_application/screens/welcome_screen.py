@@ -3,6 +3,7 @@ from src.ctrl import ctrl
 from src.ui_application.screens.base_screen import BaseScreen
 from src.ui_application.ui.ui_welcome import UI_welcome
 
+from src.ui_application.models.keyboard import  hide_keyboard
 
 class WelcomeScreen(BaseScreen):
 
@@ -11,6 +12,7 @@ class WelcomeScreen(BaseScreen):
         ui_dispense = UI_welcome()
         ui_dispense.setupUi(self)
         ctrl().is_active = False
+        hide_keyboard()
   
     def mousePressEvent(self, event):
         ctrl().is_active = True

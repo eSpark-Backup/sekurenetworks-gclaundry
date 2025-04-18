@@ -38,7 +38,7 @@ class SurveyScreen(BaseScreen):
             self.container.to_out_of_order_screen(True)
         else:
             # self.reset_timeout
-            logger.log(f"Screen timer reset!")
+            logger.log(f"survey Screen timer reset!")
             self.screen_time.hold_screen_for_timeout()
 
     def load_question_from_database(self):

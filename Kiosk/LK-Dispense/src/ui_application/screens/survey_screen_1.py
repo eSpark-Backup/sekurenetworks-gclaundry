@@ -35,7 +35,7 @@ class SurveyScreen_1(BaseScreen):
         ctrl().is_active = True
         # Switch to the second screen when the mouse is clicked anywhere
             # self.reset_timeout
-        logger.log(f"Screen timer reset!")
+        logger.log(f"survey 1 Screen timer reset!")
         self.screen_time.hold_screen_for_timeout()
 
     def load_question_from_database(self):

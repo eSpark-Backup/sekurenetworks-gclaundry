@@ -22,3 +22,27 @@ The splash screen is a PNG file at /usr/share/plymouth/themes/pix/splash.png –
 
 # useful
 https://forums.x-plane.org/index.php?/forums/topic/231555-webfmc-raspberry-pi-touch-screen/
+
+## These are the crude steps to setup a fresh device from scratch
+pi OS setup
+sudo apt install dos2unix
+copy src
+
+convert dos2unix 
+sudo find /home/sekure/LK-Dispense -type f -exec dos2unix {} +
+
+use chmod on .sh
+sekure@raspberrypi:~ $ sudo chmod +x LK-Dispense/*.sh
+sekure@raspberrypi:~ $ sudo chmod +x LK-Dispense/scripts/*.sh
+sekure@raspberrypi:~ $ sudo chmod +x LK-Dispense/bookworm_rpi4_cm_lcd_ts/*.sh
+sekure@raspberrypi:~ $ sudo chmod +x LK-Dispense/scripts/touch/*.sh
+sekure@raspberrypi:~ $ sudo chmod +x LK-Dispense/scripts/wayland_x11_conversions/*.sh
+
+run lcd_touch script
+sudo ./install_lcd_touch_bookworm.sh 8 sekure
+
+./setup
+./onborad_setup
+./setup_enviroment.sh
+sudo apt install at-spi2-core
+convert wayland to x11 using raspi-config manually	

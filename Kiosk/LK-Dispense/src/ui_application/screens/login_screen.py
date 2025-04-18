@@ -19,6 +19,8 @@ class LoginScreen(BaseScreen):
 
     def __init__(self, container):
         super().__init__(container)
+        self.error_timer = QTimer()
+        self.error_timer.setSingleShot(True)
 
         self.screen_ = Ui_Login()
         self.screen_.setupUi(self)
@@ -32,14 +34,15 @@ class LoginScreen(BaseScreen):
         # Switch to the second screen when the mouse is clicked anywhere
         # if not ctrl().try_connect_board():
         #     self.container.to_out_of_order_screen(True)
+        # self.screen_.email_input.clearFocus()
         hide_keyboard()
-        # logger.log(f"Screen timer reset!")
-        # self.reset_timeout
-        self.keyPressEvent(event)
+        logger.log(f"Screen timer reset! mousePressEvent")
+        self.reset_timeout
+        # self.keyPressEvent(event)
     
     def keyPressEvent(self, event):
         ctrl().is_active = True
-        logger.log(f"Screen timer reset!")
+        logger.log(f"login Screen timer reset!")
         self.reset_timeout
         
     def add_hooks(self) -> None:
@@ -93,24 +96,27 @@ class LoginScreen(BaseScreen):
     
     # def show_error_message_1(self, text):
     #     return self.screen_.error_message_1.setText(text)
+    
     def show_error_message_temp(self, label, text, timeout_ms=5000):
+        if self.error_timer.isActive():
+            self.error_timer.stop()
+        # self.screen_.email_input.clearFocus()
         label.setText(text)
-        timer = QTimer(self)
-        timer.setSingleShot(True)
-        self.screen_.email_input.setFocus()
         def after_timeout():
             label.setText("")           # 1. Clear the error message
+            self.screen_.email_input.setFocus()
             show_keyboard()        # 2. Show the keyboard immediately after clearing
         
-        timer.timeout.connect(after_timeout)
-        timer.start(timeout_ms)
-        self._error_timer = timer  # Save a reference so timer doesn't get deleted
+        self.error_timer.timeout.connect(after_timeout)
+        self.error_timer.start(timeout_ms)
+        # self._error_timer = self.error_timer  # Save a reference so timer doesn't get deleted
 
     def reset_timeout(self):
         self.screen_time.hold_screen_for_timeout()
 
     def on_timeout(self):
         hide_keyboard()
+        self.screen_.email_input.clearFocus()
         self.container.to_welcome_screen()
 
     def valitdate_email_password(self)  -> None | Literal[True]:
@@ -153,6 +159,7 @@ class LoginScreen(BaseScreen):
         if result == LoginResults.SuccessFullLogin:
             logger.log(f"Login successful !")
             hide_keyboard()
+            self.screen_.email_input.clearFocus()
             return self.container.to_next_screen()
 
         elif result == LoginResults.IncorrectPassword:
@@ -164,6 +171,8 @@ class LoginScreen(BaseScreen):
         #     return self.show_error_message_1("User NOT Found")
         elif result == LoginResults.UserNotFound:
             logger.log("LoginResults.UserNotFound")
+            self.screen_.email_input.clearFocus()
+            hide_keyboard()
             return self.show_error_message_temp(self.screen_.error_message_1, "User NOT Found", 5000)
 
         elif result == LoginResults.Error:

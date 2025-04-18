@@ -30,6 +30,10 @@ from src.sync_service.user_listener_service import UserListenerService
 from src.sync_service.version_info_sync import VersionInfoSync
 from src.ui_application.container import Container
 
+from src.ui_application.models.keyboard import  show_keyboard
+from src.ui_application.models.keyboard import  hide_keyboard
+
+
 logger = getLogger(__name__)
 
 
@@ -70,6 +74,10 @@ class Kiosk:
         # thread.start()
         # verify_service.start()
 
+        # get_keyboard_dbus()
+        # show_keyboard()
+        hide_keyboard()
+
         # try to connect at the time of application start
         ctrl().try_connect_board()
 
@@ -84,6 +92,7 @@ class Kiosk:
         # window.show()
         window.showMaximized()
         logger.log("QT application started successfully")
+        hide_keyboard()
         qt_app.exec_()
 
 

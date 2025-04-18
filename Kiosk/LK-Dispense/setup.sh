@@ -16,31 +16,31 @@ sudo apt-get install -y python3-pyqt5.qtsvg
 # sudo sed -i -- "s/#! \/usr\/bin\/python2/#! \/usr\/bin\/python3/g" /usr/bin/pyside2-uic
 
 # sudo pip3 install -U pip setuptools wheel
-sudo pip3 install -r ${cur_dir}/LK-Dispense/requirements.txt --break-system-packages
+sudo pip3 install -r ${cur_dir}/requirements.txt --break-system-packages
 
-# Install watchdog
-echo "dtparam=watchdog=on" | sudo tee -a /boot/firmware/config.txt
-sudo apt-get install -y watchdog
+# # Install watchdog
+# echo "dtparam=watchdog=on" | sudo tee -a /boot/firmware/config.txt
+# sudo apt-get install -y watchdog
 
-# Remove everything after and including the line that contains 'watchdog-device'
-sudo sed -i '/watchdog-device/,$d' /etc/watchdog.conf
+# # Remove everything after and including the line that contains 'watchdog-device'
+# sudo sed -i '/watchdog-device/,$d' /etc/watchdog.conf
 
-echo "watchdog-device = /dev/watchdog" | sudo tee -a /etc/watchdog.conf
-echo "watchdog-timeout = 15" | sudo tee -a /etc/watchdog.conf
-echo "max-load-1 = 400" | sudo tee -a /etc/watchdog.conf
-echo "max-load-5 = 300" | sudo tee -a /etc/watchdog.conf
-echo "max-load-15 = 200" | sudo tee -a /etc/watchdog.conf
-echo "min-memory = 1" | sudo tee -a /etc/watchdog.conf
-echo "allocatable-memory = 1" | sudo tee -a /etc/watchdog.conf
-# File to monitor (Ensure your application touches this file periodically)
-echo "file = /home/$USER/genco.log" | sudo tee -a /etc/watchdog.conf
-# Time in seconds that a file must be changed (default 60)
-echo "change = 300" | sudo tee -a /etc/watchdog.conf
-# Reboot the machine if a problem occurs
-echo "reboot = yes" | sudo tee -a /etc/watchdog.conf
+# echo "watchdog-device = /dev/watchdog" | sudo tee -a /etc/watchdog.conf
+# echo "watchdog-timeout = 15" | sudo tee -a /etc/watchdog.conf
+# echo "max-load-1 = 400" | sudo tee -a /etc/watchdog.conf
+# echo "max-load-5 = 300" | sudo tee -a /etc/watchdog.conf
+# echo "max-load-15 = 200" | sudo tee -a /etc/watchdog.conf
+# echo "min-memory = 1" | sudo tee -a /etc/watchdog.conf
+# echo "allocatable-memory = 1" | sudo tee -a /etc/watchdog.conf
+# # File to monitor (Ensure your application touches this file periodically)
+# echo "file = /home/$USER/genco.log" | sudo tee -a /etc/watchdog.conf
+# # Time in seconds that a file must be changed (default 60)
+# echo "change = 300" | sudo tee -a /etc/watchdog.conf
+# # Reboot the machine if a problem occurs
+# echo "reboot = yes" | sudo tee -a /etc/watchdog.conf
 
-# Increase GPU memory size
-sudo echo "gpu_mem=256" | sudo tee -a /boot/firmware/config.txt
+# # Increase GPU memory size
+# sudo echo "gpu_mem=256" | sudo tee -a /boot/firmware/config.txt
 
 # Configure UDEV rule for the controller board.
 # for now disabling setting of UDEV rules, will do it later
@@ -55,11 +55,11 @@ EOF
 sudo service udev restart
 
 # Clear desktop and install splash service
-bash ${cur_dir}/LK-Dispense/scripts/setup_touch_v2.sh
-bash ${cur_dir}/LK-Dispense/scripts/clear_desktop.sh
-bash ${cur_dir}/LK-Dispense/scripts/install_splash.sh
-bash ${cur_dir}/LK-Dispense/scripts/start.sh
-bash ${cur_dir}/LK-Dispense/scripts/clear_boot.sh
+bash ${cur_dir}/scripts/setup_touch_v2.sh
+bash ${cur_dir}/scripts/clear_desktop.sh
+bash ${cur_dir}/scripts/install_splash.sh
+bash ${cur_dir}/scripts/start.sh
+bash ${cur_dir}/scripts/clear_boot.sh
 # Allow port 80 to pi
 # don't know use of it, so disabling it for now as well. 
 # sudo touch /etc/sysctl.d/50-unprivileged-ports.conf
