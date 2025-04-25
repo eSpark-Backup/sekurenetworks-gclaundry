@@ -80,6 +80,8 @@ bash ${cur_dir}/scripts/onboard-setup.sh
 # copy .prod to .env
 #sudo cp  ${cur_dir}/LK-Dispense/.env.prod ${cur_dir}/LK-Dispense/.env
 
+gsettings set org.gnome.desktop.interface toolkit-accessibility true
+
 sudo systemctl enable watchdog
 sudo systemctl restart watchdog
 
