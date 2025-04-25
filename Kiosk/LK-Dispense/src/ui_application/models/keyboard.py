@@ -74,9 +74,9 @@ def hide_keyboard_pv():
 
 def spawn_keyboard():
     if DBUS_AVAILBLE:
-        logger.error(
-            subprocess.run(["onboard -s 1280x300 -x 0 -y 500 -l Phone -a -m &"],shell=True).returncode
-        )
+        # logger.error(
+        #     subprocess.run(["onboard -s 1280x300 -x 0 -y 500 -l Compact -a -m &"],shell=True).returncode
+        # )
         return 
     logger.warning("onbaord not available")
 

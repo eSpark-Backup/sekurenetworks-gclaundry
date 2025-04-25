@@ -24,39 +24,49 @@ The splash screen is a PNG file at /usr/share/plymouth/themes/pix/splash.png –
 https://forums.x-plane.org/index.php?/forums/topic/231555-webfmc-raspberry-pi-touch-screen/
 
 ## These are the crude steps to setup a fresh device from scratch
+=================================================================================================================================================================
+=================================================================================================================================================================
 pi OS setup raspi-imager 64 bit bookworm OS
 
 sudo apt install dos2unix
 
 copy src
-scp -r .\LK-Dispense  sekure@raspberrypi.local:/home/sekure/
+scp -r LK-Dispense  sekure@raspberrypi.local:/home/sekure/LK-Dispense
 
+=================================================================================================================================================================
+================> conversion from dos2unix is only needed when trasnferring files from a windows system which contains windows default EOL <=====================
+=================================================================================================================================================================
 convert dos2unix 
 sudo find /home/sekure/LK-Dispense -type f -exec dos2unix {} +
 
 use chmod on .sh
-sudo chmod +x LK-Dispense/*.sh
-sudo chmod +x LK-Dispense/scripts/*.sh
-sudo chmod +x LK-Dispense/bookworm_rpi4_cm_lcd_ts/*.sh
-sudo chmod +x LK-Dispense/scripts/touch/*.sh
-sudo chmod +x LK-Dispense/scripts/wayland_x11_conversions/*.sh
+sudo find /home/sekure/LK-Dispense -type f -name "*.sh" -exec dos2unix {} +
+
+=================================================================================================================================================================
+=================================================================================================================================================================
 
 run lcd_touch script
-cd /LK-Dispense/bookworm_rpi4_cm_lcd_ts
+cd LK-Dispense/bookworm_rpi4_cm_lcd_ts
 sudo ./install_lcd_touch_bookworm.sh 8 sekure
 
-skip	convert wayland to x11 using raspi-config manually	
-
-run project script in order
-cd /home/sekure/LK-Dispense
-./setup.sh
-./onboard_setup.sh
-skip	sudo apt install at-spi2-core
-./setup_enviroment.sh
-sudo apt install at-spi2-core
+=================================================================================================================================================================
+=================================================================================================================================================================
 
 convert wayland to x11 using raspi-config manually
 sudo raspi-config
 
+=================================================================================================================================================================
+=================================================================================================================================================================
+
+run project script in order
+cd /home/sekure/LK-Dispense
+./setup.sh
+
+=================================================================================================================================================================
+=================================================================================================================================================================
+
 reboot the system
 sudo reboot
+
+=================================================================================================================================================================
+=================================================================================================================================================================

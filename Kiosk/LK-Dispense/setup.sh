@@ -11,6 +11,7 @@ git -c credential.helper='!f() { echo "username=github_pat_11AKRJ43A0eneP5UBNtN7
 # Install PySide2 and some dependencies
 sudo apt install -y python3-pyside2.qt3dcore python3-pyside2.qt3dinput python3-pyside2.qt3dlogic python3-pyside2.qt3drender python3-pyside2.qtcharts python3-pyside2.qtconcurrent python3-pyside2.qtcore python3-pyside2.qtgui python3-pyside2.qthelp python3-pyside2.qtlocation python3-pyside2.qtmultimedia python3-pyside2.qtmultimediawidgets python3-pyside2.qtnetwork python3-pyside2.qtopengl python3-pyside2.qtpositioning python3-pyside2.qtprintsupport python3-pyside2.qtqml python3-pyside2.qtquick python3-pyside2.qtquickwidgets python3-pyside2.qtscript python3-pyside2.qtscripttools python3-pyside2.qtsensors python3-pyside2.qtsql python3-pyside2.qtsvg python3-pyside2.qttest python3-pyside2.qttexttospeech python3-pyside2.qtuitools python3-pyside2.qtwebchannel python3-pyside2.qtwebsockets python3-pyside2.qtwidgets python3-pyside2.qtx11extras python3-pyside2.qtxml python3-pyside2.qtxmlpatterns
 sudo apt install -y $(apt-cache pkgnames python3-pyside2.) pyside2-tools python-pyside2-doc
+sudo apt install -y at-spi2-core
 sudo apt-get install -y python3-pyqt5.qtsvg
 
 # sudo sed -i -- "s/#! \/usr\/bin\/python2/#! \/usr\/bin\/python3/g" /usr/bin/pyside2-uic
@@ -60,6 +61,7 @@ bash ${cur_dir}/scripts/clear_desktop.sh
 bash ${cur_dir}/scripts/install_splash.sh
 bash ${cur_dir}/scripts/start.sh
 bash ${cur_dir}/scripts/clear_boot.sh
+bash ${cur_dir}/scripts/onboard-setup.sh
 # Allow port 80 to pi
 # don't know use of it, so disabling it for now as well. 
 # sudo touch /etc/sysctl.d/50-unprivileged-ports.conf

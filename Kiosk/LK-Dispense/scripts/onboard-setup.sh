@@ -18,7 +18,8 @@ gsettings set org.onboard.window window-handles ''
 
 
 # layout to phone for alpha numeric and no ctrl and window etc
-gsettings set org.onboard layout 'Phone'
+# gsettings set org.onboard layout 'Phone'
+gsettings set org.onboard layout 'Compact'
 
 # disable some buttom 
 gsettings set org.onboard.lockdown disable-preferences true
@@ -39,3 +40,6 @@ gsettings set org.onboard.theme-settings color-scheme '/usr/share/onboard/themes
 gsettings set org.onboard.theme-settings key-label-font '~/LK-Dispense/assets/OwnersXNarrow-Black.ttf'
 
 
+gsettings set org.onboard.keyboard touch-input single
+gsettings set org.onboard.lockdown disable-touch-handles true
+gsettings set org.onboard theme Droid

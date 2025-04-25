@@ -248,3 +248,29 @@ class Ui_Login(object):
 
         except Exception as e:
             logger.log(f"Error updating placeholder: {str(e)}")
+
+    def get_auth_type(self):
+        try:
+            kiosk_info = KioskInfo_V4.select().limit(1).first()
+
+            if not kiosk_info:
+                logger.log("No KioskInfo found")
+                return 0  # default if no info
+
+            # Map auth_type strings to numbers
+            auth_type_map = {
+                "Email": 1,
+                "Student ID": 2,
+                "Phone": 3
+            }
+
+            # Get the mapped number, default to 0 if not found
+            auth_type_number = auth_type_map.get(kiosk_info.auth_type, 0)
+            logger.log(f"KioskInfo Auth found: {auth_type_number}")
+
+            return auth_type_number
+
+        except Exception as e:
+            logger.log(f"Error retrieving auth_type: {str(e)}")
+            return 0
+
