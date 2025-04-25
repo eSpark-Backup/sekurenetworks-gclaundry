@@ -39,6 +39,9 @@ scp -r LK-Dispense  sekure@raspberrypi.local:/home/sekure/LK-Dispense
 convert dos2unix 
 sudo find /home/sekure/LK-Dispense -type f -exec dos2unix {} +
 
+=================================================================================================================================================================
+=================================================================================================================================================================
+
 use chmod on .sh
 sudo find /home/sekure/LK-Dispense -type f -name "*.sh" -exec dos2unix {} +
 
